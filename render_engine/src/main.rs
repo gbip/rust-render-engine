@@ -1,8 +1,7 @@
 use std::vec::Vec;
+
 // Implementation of the Indexed Face Set data structure for representing a mesh
-
 mod math {
-
     pub struct Vector3<T> {
         pub x : T,
         pub y : T,
@@ -12,7 +11,6 @@ mod math {
 
 mod obj_3d {
     use math;
-
     struct Triangle<'a>{
         vertex : [&'a math::Vector3<f32>; 3]
     }
