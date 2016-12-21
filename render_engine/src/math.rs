@@ -123,7 +123,7 @@ impl<T> VectorialOperations<T> for Vector3<T>
 {
     // What about f64 ?
     fn norm(self) -> f32 {
-        ((self.x * self.x) + (self.y * self.y) + (self.z * self.z)).into()
+        ((self.x * self.x) + (self.y * self.y) + (self.z * self.z)).into().sqrt()
     }
 
     fn norm_ref(&self) -> f32 {
@@ -140,5 +140,48 @@ impl<T> VectorialOperations<T> for Vector3<T>
             y: self.z * other.x - self.x * other.z,
             z: self.x * other.y - self.y * other.x,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use math::*;
+    
+    #[test]
+    fn test_norm() {
+        let v1 = Vector3{x:1_f32,
+                         y:2_f32,
+                         z:3_f32};
+        assert_eq!(v1.norm(),14_f32.sqrt());
+        
+        let v2 = Vector3{x:-70_f32,
+                         y:35_f32,
+                         z:0_f32};
+        assert_eq!(v2.norm(),35.0*(5.0_f32.sqrt()));
+        
+        let v3 = Vector3{x:0_f32,
+                         y:0_f32,
+                         z:0_f32};
+        assert_eq!(v3.norm(),0_f32.sqrt());
+        
+        let v4 = Vector3{x:-1_f32,
+                         y:0_f32,
+                         z:1_f32};
+        assert_eq!(v4.norm(),2_f32.sqrt());
+        
+        let v5 = Vector3{x:0_f32,
+                         y:0_f32,
+                         z:1_f32};
+        assert_eq!(v5.norm(),1_f32.sqrt());
+         
+        let v6 = Vector3{x:127.18_f32,
+                         y:55.456_f32,
+                         z:33.333_f32};
+        assert_eq!(v6.norm(),142.69272);
+        
+        let v7 = Vector3{x:2_f32,
+                         y:0_f32,
+                         z:2_f32};
+        assert_eq!(v7.norm(),2_f32*2_f32.sqrt());
     }
 }
