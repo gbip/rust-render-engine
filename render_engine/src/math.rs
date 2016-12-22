@@ -4,7 +4,7 @@ use std::cmp::PartialEq;
 use std::fmt::Debug;
 
 // A basic module that implements some usefull mathematics tools
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Vector3<T> {
     pub x: T,
     pub y: T,
@@ -169,13 +169,15 @@ impl<'a,T> Sub<&'a Vector3<T>> for &'a Vector3<T> where
 pub trait VectorialOperations<T> {
     fn norm(self) -> f32;
     fn norm_ref(&self) -> f32;
-    fn cross_product(self, other: Vector3<T>) -> Vector3<T>;
+    fn cross_product(self, other: &Vector3<T>) -> Vector3<T>;
+    fn cross_product_ref(&self, other: &Vector3<T>) -> Vector3<T>;
 }
 
 // The implementation is pretty straight forward
 impl<T> VectorialOperations<T> for Vector3<T>
     where T: Copy + Mul<Output = T> + Add<Output = T> + Into<f32> + Sub<Output = T>
 {
+    
     // What about f64 ?
     fn norm(self) -> f32 {
         ((self.x * self.x) + (self.y * self.y) + (self.z * self.z)).into().sqrt()
@@ -189,14 +191,19 @@ impl<T> VectorialOperations<T> for Vector3<T>
         })
     }
     // The formula comes from https://fr.wikipedia.org/wiki/Produit_vectoriel
-    fn cross_product(self, other: Vector3<T>) -> Vector3<T> {
+    fn cross_product(self, other: &Vector3<T>) -> Vector3<T> where
+        T : Copy { 
         Vector3 {
             x: self.y * other.z - self.z * other.y,
             y: self.z * other.x - self.x * other.z,
             z: self.x * other.y - self.y * other.x,
         }
     }
+    fn cross_product_ref(&self, other : &Vector3<T>) -> Vector3<T> {
+        Self::cross_product(self.clone(), other)
+    }
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -257,6 +264,7 @@ mod tests {
         let v2 = Vector3{x:0_f32,y:0_f32,z:0_f32};
         assert_eq!(&v2*2_f32,v2);
     }
+
     #[test]
     fn test_vec_arithmetic() {
         let v1 = Vector3{x:1_f32,y:1_f32,z:1_f32};
@@ -268,13 +276,32 @@ mod tests {
         assert_eq!(&v1+&zero,v1);
         assert_eq!(&v1-&zero,v1);
         assert_eq!(&v3-&v1,Vector3{x:54_f32,y:-4_f32,z:8_f32});
+    }
+
+    #[test] 
+    fn test_vec_div() {
+        let v1 = Vector3{x:1_f32,y:1_f32,z:1_f32};
+        let v2 = Vector3{x:0_f32,y:0_f32,z:1_f32};
+        let v3 = Vector3{x:55_f32,y:-3_f32,z:9_f32};
+        let zero = Vector3{x:0_f32,y:0_f32,z:0_f32};
+        assert_eq!(&zero/4_f32, zero); 
+        assert_eq!(&v1/1_f32,v1);
+        assert_eq!(&v1/2_f32,Vector3{x:0.5_f32,y:0.5_f32,z:0.5_f32});
+        assert_eq!(v3/12_f32,Vector3{x:(55_f32/12_f32),y:(-3_f32/12_f32),z:(9_f32/12_f32)});
+    }
+    
+    #[test]
+    fn test_cross_product() {
+        let v1 = Vector3{x:1_f32,y:1_f32,z:1_f32};
+        let v2 = Vector3{x:0_f32,y:0_f32,z:1_f32};
+        let v3 = Vector3{x:55_f32,y:-3_f32,z:9_f32};
+        let zero = Vector3{x:0_f32,y:0_f32,z:0_f32};
+        
+        assert_eq!(v1.cross_product(&zero),zero);
 
 
 
     }
-
-
-
 
 
 
