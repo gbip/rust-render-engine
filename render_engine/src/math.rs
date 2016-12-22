@@ -11,7 +11,7 @@ pub struct Vector3<T> {
     pub z: T,
 }
 
-// Implementaation of the operator '=='
+// Implementation of the operator '=='
 impl<T> PartialEq<Vector3<T>> for Vector3<T> where
     T : PartialEq {
     fn eq(&self, other : &Vector3<T>) -> bool {
@@ -154,7 +154,16 @@ impl<T> Sub<Vector3<T>> for Vector3<T>
         }
     }
 }
-
+// Same implementation but for reference
+impl<'a,T> Sub<&'a Vector3<T>> for &'a Vector3<T> where
+    T : Sub<Output=T> + Copy {
+        type Output = Vector3<T>;
+        fn sub(self, other: &'a Vector3<T>) -> Vector3<T> {
+            Vector3{x:self.x-other.x,
+                    y:self.y-other.y,
+                    z:self.z-other.z}
+        }
+}
 
 // A trait for basic vectorial arithmetic
 pub trait VectorialOperations<T> {
@@ -194,7 +203,7 @@ mod tests {
     use math::*;
     
     #[test]
-    fn test_norm() {
+    fn test_vec_norm() {
         let v1 = Vector3{x:1_f32,
                          y:2_f32,
                          z:3_f32};
@@ -232,10 +241,43 @@ mod tests {
     }
     
     #[test]
-    fn test_mul() {
+    fn test_vec_eq() { 
         let v1 = Vector3{x:1_f32,y:1_f32,z:1_f32};
-        //assert_eq!(&v1*2_f32,Vector3{x:2_f32,y:2_f32,z:2_f32});
-        assert_eq!(2_f32*v1,Vector3{x:2_f32,y:2_f32,z:2_f32});
+        let v2 = Vector3{x:0_f32,y:0_f32,z:1_f32};
+        let v3 = Vector3{x:0_f32,y:0_f32,z:0_f32};
+        assert_eq!(v1,Vector3{x:1_f32,y:1_f32,z:1_f32});
+        assert!(v2 != v3 && v3 != v2 && v1 != v3);
     }
+    
+    #[test]
+    fn test_vec_mul() {
+        let v1 = Vector3{x:1_f32,y:1_f32,z:1_f32};
+        assert_eq!(&v1*2_f32,Vector3{x:2_f32,y:2_f32,z:2_f32});
+        assert_eq!(2_f32*v1,Vector3{x:2_f32,y:2_f32,z:2_f32});
+        let v2 = Vector3{x:0_f32,y:0_f32,z:0_f32};
+        assert_eq!(&v2*2_f32,v2);
+    }
+    #[test]
+    fn test_vec_arithmetic() {
+        let v1 = Vector3{x:1_f32,y:1_f32,z:1_f32};
+        let v2 = Vector3{x:0_f32,y:0_f32,z:1_f32};
+        let v3 = Vector3{x:55_f32,y:-3_f32,z:9_f32};
+        let zero = Vector3{x:0_f32,y:0_f32,z:0_f32};
+        assert_eq!(&v1-&v2,Vector3{x:1_f32,y:1_f32,z:0_f32});
+        assert_eq!(&v1+&v2,Vector3{x:1_f32,y:1_f32,z:2_f32});
+        assert_eq!(&v1+&zero,v1);
+        assert_eq!(&v1-&zero,v1);
+        assert_eq!(&v3-&v1,Vector3{x:54_f32,y:-4_f32,z:8_f32});
+
+
+
+    }
+
+
+
+
+
+
+
 
 }
