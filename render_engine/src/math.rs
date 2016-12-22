@@ -171,6 +171,9 @@ pub trait VectorialOperations<T> {
     fn norm_ref(&self) -> f32;
     fn cross_product(self, other: &Vector3<T>) -> Vector3<T>;
     fn cross_product_ref(&self, other: &Vector3<T>) -> Vector3<T>;
+    fn dot_product(self, other : &Vector3<T>) -> f32;
+    fn dot_product_ref(&self, other : &Vector3<T>) -> f32;
+
 }
 
 // The implementation is pretty straight forward
@@ -201,6 +204,13 @@ impl<T> VectorialOperations<T> for Vector3<T>
     }
     fn cross_product_ref(&self, other : &Vector3<T>) -> Vector3<T> {
         Self::cross_product(self.clone(), other)
+    }
+
+    fn dot_product(self, other : &Vector3<T>) -> f32 {
+        (self.x*other.x + self.y*other.y + self.z*other.z).into()
+    }
+    fn dot_product_ref(&self, other : &Vector3<T>) -> f32 {
+        Self::dot_product(self.clone(), other)
     }
 }
 
@@ -291,20 +301,27 @@ mod tests {
     }
     
     #[test]
-    fn test_cross_product() {
+    fn test_vec_cross_product() {
         let v1 = Vector3{x:1_f32,y:1_f32,z:1_f32};
         let v2 = Vector3{x:0_f32,y:0_f32,z:1_f32};
         let v3 = Vector3{x:55_f32,y:-3_f32,z:9_f32};
         let zero = Vector3{x:0_f32,y:0_f32,z:0_f32};
         
-        assert_eq!(v1.cross_product(&zero),zero);
-
-
-
+        assert_eq!(v1.cross_product_ref(&zero),zero);
+        assert_eq!(v1.cross_product_ref(&v2),Vector3{x:1_f32,y:-1_f32 ,z:0_f32})
     }
-
-
-
-
-
+    
+    #[test]
+    fn test_vec_dot_product() {
+        let v1 = Vector3{x:1_f32,y:1_f32,z:1_f32};
+        let v2 = Vector3{x:0_f32,y:0_f32,z:-1_f32};
+        let v3 = Vector3{x:55_f32,y:-3_f32,z:9_f32};
+        let zero = Vector3{x:0_f32,y:0_f32,z:0_f32};
+       
+        assert_eq!(v1.dot_product_ref(&zero),0_f32);
+        assert_eq!(v1.dot_product_ref(&v2),-1_f32);
+        assert_eq!(v1.dot_product_ref(&v3),61_f32);
+        assert_eq!(v2.dot_product_ref(&v3),-9_f32);
+        assert_eq!(v1.dot_product_ref(&v1),3_f32);
+    }
 }
