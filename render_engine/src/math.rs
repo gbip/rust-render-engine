@@ -2,6 +2,7 @@ use std::vec::Vec;
 use std::ops::{Add, Sub, Mul, Div};
 use std::cmp::PartialEq;
 use std::fmt::Debug;
+
 // A basic module that implements some usefull mathematics tools
 #[derive(Debug)]
 pub struct Vector3<T> {
@@ -17,7 +18,6 @@ impl<T> PartialEq<Vector3<T>> for Vector3<T> where
         (self.x == other.x) && (self.y == other.y) && (self.z == other.z)
         }
     }
-
 
 // Macro helper to implement for us basic arithmetic operations for all types that can
 // represent a real number (f32, f64, u8, etc.)
@@ -44,7 +44,31 @@ macro_rules! impl_operations {
                             z: self.z*other}
                     }
                 }
- 
+
+            // Since the trait std::ops::Mul is not reflexive, we have to implement the k*v(x,y,z)
+            // and v(x,y,z)*k
+            impl<T> Mul<Vector3<T>> for $K where
+            T : Mul<$K, Output=T> {
+                type Output = Vector3<T>;
+                fn mul(self, other : Vector3<T>) -> Self::Output {
+                    Vector3{x: other.x*self,
+                            y: other.y*self,
+                            z: other.z*self}
+                    }
+                }
+            
+            impl<'a,T> Mul<&'a Vector3<T>> for $K where 
+            T : Mul<$K, Output=T> + Copy {
+                type Output = Vector3<T>;
+            fn mul(self, other : &'a Vector3<T>) -> Self::Output {
+                    Vector3{x: other.x*self,
+                            y: other.y*self,
+                            z: other.z*self}
+                    }
+                }
+
+
+            
             // Implementation of the division of a vector by a real number
             impl<T> Div<$K> for Vector3<T> where
                 T : Div<$K, Output=T> {
@@ -210,7 +234,8 @@ mod tests {
     #[test]
     fn test_mul() {
         let v1 = Vector3{x:1_f32,y:1_f32,z:1_f32};
-        assert_eq!(v1*2_f32,Vector3{x:2_f32,y:2_f32,z:2_f32});
+        //assert_eq!(&v1*2_f32,Vector3{x:2_f32,y:2_f32,z:2_f32});
+        assert_eq!(2_f32*v1,Vector3{x:2_f32,y:2_f32,z:2_f32});
     }
 
 }
