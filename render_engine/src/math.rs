@@ -1,11 +1,23 @@
 use std::vec::Vec;
 use std::ops::{Add, Sub, Mul, Div};
+use std::cmp::PartialEq;
+use std::fmt::Debug;
 // A basic module that implements some usefull mathematics tools
+#[derive(Debug)]
 pub struct Vector3<T> {
     pub x: T,
     pub y: T,
     pub z: T,
 }
+
+// Implementaation of the operator '=='
+impl<T> PartialEq<Vector3<T>> for Vector3<T> where
+    T : PartialEq {
+    fn eq(&self, other : &Vector3<T>) -> bool {
+        (self.x == other.x) && (self.y == other.y) && (self.z == other.z)
+        }
+    }
+
 
 // Macro helper to implement for us basic arithmetic operations for all types that can
 // represent a real number (f32, f64, u8, etc.)
@@ -59,10 +71,20 @@ macro_rules! impl_operations {
 // Generating the implementation
 impl_operations!(f32);
 impl_operations!(f64);
+
 impl_operations!(u8);
 impl_operations!(u16);
 impl_operations!(u32);
 impl_operations!(u64);
+
+impl_operations!(i8);
+impl_operations!(i16);
+impl_operations!(i32);
+impl_operations!(i64);
+
+
+impl_operations!(isize);
+impl_operations!(usize);
 
 // Implementation of the addition of two vectors
 impl<T> Add<Vector3<T>> for Vector3<T>
@@ -184,4 +206,11 @@ mod tests {
                          z:2_f32};
         assert_eq!(v7.norm(),2_f32*2_f32.sqrt());
     }
+    
+    #[test]
+    fn test_mul() {
+        let v1 = Vector3{x:1_f32,y:1_f32,z:1_f32};
+        assert_eq!(v1*2_f32,Vector3{x:2_f32,y:2_f32,z:2_f32});
+    }
+
 }
