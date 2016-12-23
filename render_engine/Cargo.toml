@@ -4,3 +4,5 @@ version = "0.1.0"
 authors = ["Paul Florence <florencepaul@hotmail.fr>"]
 
 [dependencies]
+serde_json = "0.8"
+nalgebra = "0.10.*"
