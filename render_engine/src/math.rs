@@ -11,6 +11,15 @@ pub struct Vector3<T> {
     pub z: T,
 }
 
+
+impl<T> Vector3<T> {
+    pub fn make_vec3(x:T,y:T,z:T) -> Vector3<T> {
+        Vector3{x:x,
+                y:y,
+                z:z}
+    }
+}
+
 // Implementation of the operator '=='
 impl<T> PartialEq<Vector3<T>> for Vector3<T>
     where T: PartialEq
