@@ -11,6 +11,11 @@ pub struct Vector3<T> {
     pub z: T,
 }
 
+// A bery basic structure for handling 2D stuff(projection, etc.)
+pub struct Vector2<T> {
+    pub x : T,
+    pub y : T}
+
 
 impl<T> Vector3<T> {
     pub fn make_vec3(x:T,y:T,z:T) -> Vector3<T> {

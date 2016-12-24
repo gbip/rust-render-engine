@@ -5,11 +5,26 @@ mod math;
 type Vector3f = math::Vector3<f32>;
 /// A tuple that represents a color in a RGB value on 8 bits
 type Color8=(u8,u8,u8);
+
 mod obj_3d {
     use math;
+   
+    /// This structs only hold references to the vertex that are stocked in the mesh.
     struct Triangle<'a>{
         vertex : [&'a math::Vector3<f32>; 3]
     }
+    
+    impl<'a> Triangle<'a> {
+        /// Usefull for utilizing a Z_buffer
+        fn find_points_in_triangle(&'a self, sizeX : u64, sizeY: u64) -> Vec<math::Vector2<u16>> {
+        
+        vec!(math::Vector2{x:0_u16,
+                     y:0_u16})
+
+        }
+
+    }
+    
     /// The standard Indexed Face Set data structure for mesh.
     pub struct Mesh<'a> {
         vertex_list : Vec<math::Vector3<f32>>,
