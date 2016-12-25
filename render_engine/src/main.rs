@@ -14,16 +14,28 @@ mod obj_3d {
         vertex : [&'a math::Vector3<f32>; 3]
     }
     
-    impl<'a> Triangle<'a> {
-        /// Usefull for utilizing a Z_buffer
-        fn find_points_in_triangle(&'a self, sizeX : u64, sizeY: u64) -> Vec<math::Vector2<u16>> {
-        
-        vec!(math::Vector2{x:0_u16,
-                     y:0_u16})
-
-        }
-
+    struct Polygon<'a> {
+    vertex : Vec<&'a math::Vector3<f32>>
     }
+
+    trait IsPolygon<'a> {
+        fn find_points_in_polygon(&'a self, sizeX : u64, sizeY : u64) -> Vec<math::Vector2<u16>>;
+    }
+
+    impl<'a> IsPolygon<'a> for Polygon<'a> {
+        fn find_points_in_polygon(&'a self, sizeX : u64, sizeY : u64) -> Vec<math::Vector2<u16>>
+        {
+        vec!()
+        }
+    }
+
+    
+    impl<'a> Triangle<'a> {
+        fn trim_to_window(self, sizeX : u64, sizeY : u64) -> Polygon<'a> {
+        Polygon{vertex: vec!()}
+        }
+    }
+
     
     /// The standard Indexed Face Set data structure for mesh.
     pub struct Mesh<'a> {
@@ -47,6 +59,13 @@ mod renderer {
     trait Render {
         fn generate_image(world: scene::World) -> Image;
     }
+
+    // TODO : To implement
+    fn z_buffer_renderer(world :& scene::World) -> Image {
+        
+        vec!(vec!((0_u8,0_u8,0_u8)))
+
+    }
 }
 
 mod scene {
@@ -68,6 +87,15 @@ mod scene {
         /// world_position-target_position).
         ///     - k2 and k3 are choosen randomly.
         base_vector : R3Base, 
+    }
+
+    impl Camera {
+
+        fn project_into_camera_base(vector :Vector3f) -> Vector3f {
+
+            Vector3::make_vec3(0_f32,0_f32,0_f32)
+        }
+
     }
     
     pub struct R3Base{
