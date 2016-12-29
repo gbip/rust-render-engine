@@ -1,6 +1,8 @@
 use std::ops::{Add, Sub, Mul, Div};
 use std::cmp::PartialEq;
-
+use std::fmt::Debug;
+use std::fmt;
+use std;
 // A basic module that implements some usefull mathematics tools
 #[derive(Debug, Copy, Clone)]
 pub struct Vector3<T> {
@@ -18,6 +20,7 @@ pub struct Matrix3<T>
 }
 
 // A bery basic structure for handling 2D stuff(projection, etc.)
+#[derive(Debug, Eq, Clone, PartialEq, Copy)]
 pub struct Vector2<T> {
     pub x: T,
     pub y: T,
@@ -30,9 +33,23 @@ impl<T> Vector3<T> {
     }
 }
 
+impl<T> Vector2<T> {
+    pub fn new(x:T,y:T) -> Vector2<T> {
+        Vector2{x:x,y:y}
+    }
+}
+
 // Two basic aliases for implementation convenience in other module.
 pub type Vector2f = Vector2<f32>;
 pub type Vector3f = Vector3<f32>;
+
+impl<T> std::fmt::Display for Vector2<T> where 
+T : std::fmt::Display {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
+}
+
 
 // Implementation of the operator '=='
 impl<T> PartialEq<Vector3<T>> for Vector3<T>

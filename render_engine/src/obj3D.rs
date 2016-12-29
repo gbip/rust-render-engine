@@ -43,47 +43,47 @@ mod cohen_sutherland {
     /// Compute the outcode of vec for the canvas given in argument.
     fn computeOutcode(vec: &Vector2f, canvas: &render::Canvas) -> u8 {
         let mut result = IN;
-        if vec.x < canvas.u.x {
+        if vec.y < canvas.u.y {
             result |= BOTTOM;
-        } else if vec.x > canvas.v.x {
+        } else if vec.y > canvas.v.y {
             result |= TOP;
         }
-        if vec.y < canvas.u.y {
+        if vec.x < canvas.u.x {
             result |= LEFT;
-        } else if vec.y > canvas.u.y {
+        } else if vec.x > canvas.v.x {
             result |= RIGHT;
         }
         result
     }
 
-    // Returns a new line if the line described by p1 and p2 is clippable. If the line is not
+    /// Returns a new line if the line described by p1 and p2 is clippable. If the line is not
     /// intersecting the box, return Some.
-    fn clip_line(p1: Vector2f, p2: Vector2f, canvas: &render::Canvas) -> Option<[Vector2f; 2]> {
-
+    pub fn clip_line(p1: Vector2f, p2: Vector2f, canvas: &render::Canvas) -> Option<(Vector2f,Vector2f)> {
+        
+        println!("call with :{} and {}",p1,p2);
         let outcode1 = computeOutcode(&p1, canvas);
         let outcode2 = computeOutcode(&p2, canvas);
         if !(outcode1 | outcode2) == 0b1111_1111 {
-            return Some([p1, p2]);
-        } else if (outcode1 & outcode2) == 0b1111_1111 {
+            return Some((p1, p2));
+        } else if (outcode1 & outcode2) != 0b0000_0000 {
             return None;
         }
-
-        let outcode_out: u8 = if outcode1 == IN { outcode2 } else { outcode1 };
+        let outcode_out: u8 = if outcode1 == IN { outcode2 } else {outcode1 };
+        println!("outcode is : {:#b}", outcode_out);
         let mut x: f32 = 0_f32;
         let mut y: f32 = 0_f32;
-
-        if (outcode_out & TOP) == 0b1111_1111 {
-            let x = p1.x + (p2.x - p1.x) * (canvas.v.y - p1.y) / (p2.y - p1.y);
-            let y = canvas.v.y;
-        } else if (outcode_out & BOTTOM) == 0b1111_1111 {
-            let x = p1.x + (p2.x - p1.x) * (canvas.u.y - p1.y) / (p2.y - p1.y);
-            let y = canvas.u.y;
-        } else if (outcode_out & RIGHT) == 0b1111_1111 {
-            let y = p1.y + (p2.y - p1.y) * (canvas.v.x - p1.x) / (p2.x - p1.x);
-            let x = canvas.v.x;
-        } else if (outcode_out & LEFT) == 0b1111_1111 {
-            let y = p1.y + (p2.y - p1.y) * (canvas.u.x - p1.x) / (p2.x - p1.x);
-            let x = canvas.u.x;
+        if (outcode_out & TOP) == TOP {
+            x = p1.x + (p2.x - p1.x) * (canvas.v.y - p1.y) / (p2.y - p1.y);
+            y = canvas.v.y;
+        } else if (outcode_out & BOTTOM) == BOTTOM {
+            x = p1.x + (p2.x - p1.x) * (canvas.u.y - p1.y) / (p2.y - p1.y);
+            y = canvas.u.y;
+        } else if (outcode_out & RIGHT) == RIGHT {
+            y = p1.y + (p2.y - p1.y) * (canvas.v.x - p1.x) / (p2.x - p1.x);
+            x = canvas.v.x;
+        } else if (outcode_out & LEFT) == LEFT {
+            y = p1.y + (p2.y - p1.y) * (canvas.u.x - p1.x) / (p2.x - p1.x);
+            x = canvas.u.x;
         }
 
         // Now that we have processed one point, we do an other pass, in case of we need to
@@ -102,8 +102,7 @@ impl Triangle2D {
         let result = Polygon2D::new();
         let vertex_to_process = vec![self.vertex];
 
-        for vertex in vertex_to_process.windows(2) {
-
+        for elem in vertex_to_process.windows(2) {
 
 
         }
@@ -146,5 +145,81 @@ impl<'a> Object<'a> {
             result.push(triangles.clone());
         }
         return result;
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use render;
+    use math::*;
+    use super::cohen_sutherland::clip_line;
+
+    const BOX : render::Canvas = render::Canvas{u:Vector2f{x:-2_f32,y:-2_f32},v:Vector2f{x:2_f32,y:2_f32}};
+    const P1 : Vector2f = Vector2f{x:0_f32,y:0_f32};
+    const P2 : Vector2f = Vector2f{x:4_f32,y:4_f32};
+    const P3 : Vector2f = Vector2f{x:-8_f32,y:-8_f32};
+    const P4 : Vector2f = Vector2f{x:-4_f32,y:1_f32};
+    const P5 : Vector2f = Vector2f{x:4_f32,y:1_f32};
+    const P6 : Vector2f = Vector2f{x:1_f32,y:6_f32};
+    const P7 : Vector2f = Vector2f{x:1_f32,y:-7_f32};
+    const P8 : Vector2f = Vector2f{x:1_f32,y:1_f32};
+    const P9 : Vector2f = Vector2f{x:-1_f32,y:1_f32};
+    const P10 : Vector2f = Vector2f{x:0_f32,y:3_f32};
+    const P11 : Vector2f = Vector2f{x:6_f32,y:0_f32};
+    const P12 : Vector2f = Vector2f{x:1_f32,y:4_f32};
+    const P13 : Vector2f = Vector2f{x:2_f32,y:0_f32};
+    #[test]
+    fn test_line_clipping() {
+        
+        let (mut x,mut y) = match clip_line(P1,P2,&BOX) {
+            None => (Vector2f::new(0_f32,0_f32),Vector2f::new(0_f32,0_f32)),
+            Some(k) => k,
+        };
+        assert!(x==P1 && y == Vector2f{x:2_f32,y:2_f32});
+
+        let (x,y) = match clip_line(P3,P2,&BOX) {
+            None => (Vector2f::new(0_f32,0_f32),Vector2f::new(0_f32,0_f32)),
+            Some(k)=> k,
+        };
+        assert!(x==BOX.u && y==BOX.v);
+
+        let (x,y) = match clip_line(P4,P5,&BOX) {
+            None => (Vector2f::new(0_f32,0_f32),Vector2f::new(0_f32,0_f32)),
+            Some(k)=> k,
+        };
+        assert!(x==Vector2f::new(-2_f32,1_f32) && y==Vector2f::new(2_f32,1_f32));
+
+        let (x,y) = match clip_line(P6,P7,&BOX) {
+            None => (Vector2f::new(0_f32,0_f32),Vector2f::new(0_f32,0_f32)),
+            Some(k)=> k,
+        };
+        assert!(x==Vector2f::new(1_f32,2_f32) && y==Vector2f::new(1_f32,-2_f32));
+       
+        let (x,y) = match clip_line(P8,P9,&BOX) {
+            None => (Vector2f::new(0_f32,0_f32),Vector2f::new(0_f32,0_f32)),
+            Some(k)=> k,
+        };
+        assert!(x==P8 && y==P9);
+       
+        let (x,y) = match clip_line(P2,P6,&BOX) {
+            None => (Vector2f::new(0_f32,0_f32),Vector2f::new(0_f32,0_f32)),
+            Some(k)=> k,
+        };
+        assert!(x==Vector2f::new(0_f32,0_f32) && y==Vector2f::new(0_f32,0_f32));
+        
+        let (x,y) = match clip_line(P10,P11,&BOX) {
+            None => (Vector2f::new(0_f32,0_f32),Vector2f::new(0_f32,0_f32)),
+            Some(k)=> k,
+        };
+        let k = Vector2f::new(2_f32,2_f32);
+        assert!(x==k && y==k);
+        
+        let (x,y) = match clip_line(P12,P13,&BOX) {
+            None => (Vector2f::new(0_f32,0_f32),Vector2f::new(0_f32,0_f32)),
+            Some(k)=> k,
+        };
+        let k = Vector2f::new(1.5_f32,2_f32);
+        assert!(x==k && y==P13);
+        
     }
 }

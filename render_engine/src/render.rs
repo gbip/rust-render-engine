@@ -26,7 +26,7 @@ pub type Color8=(u8,u8,u8);
         /// This method will panic if the canvas is a line or a dot: u1.x = u2.x or u1.y = u2.y . It
         /// will also panic if u1.x > u2.x or u1.y > u2.y
         
-        fn new(u1: Vector2<f32>, u2: Vector2<f32>) -> Canvas {
+        pub fn new(u1: Vector2<f32>, u2: Vector2<f32>) -> Canvas {
            assert!(u1.x != u2.x && u1.y != u2.y);
            assert!(u1.x < u2.x && u1.y < u2.y);
            Canvas{u:u1,v:u2}
@@ -34,7 +34,7 @@ pub type Color8=(u8,u8,u8);
         
         /// Returns the 4 corner of the rendering rectangle, in a clockwise order, starting by the
         /// top left corner.
-        fn get_corners(&self) -> [Vector2<f32>;4] {
+        pub fn get_corners(&self) -> [Vector2<f32>;4] {
             let u1 = Vector2{x: self.u.x,y: self.v.y};
             let u2 = Vector2{x: self.v.x,y: self.v.y};
             let u3 = Vector2{x: self.v.x,y: self.u.x};
