@@ -1,7 +1,5 @@
-use std::vec::Vec;
 use std::ops::{Add, Sub, Mul, Div};
 use std::cmp::PartialEq;
-use std::fmt::Debug;
 
 // A basic module that implements some usefull mathematics tools
 #[derive(Debug, Copy, Clone)]
@@ -11,19 +9,30 @@ pub struct Vector3<T> {
     pub z: T,
 }
 
+// A square matrix of size 3.
+#[derive(Debug,Clone,Copy,PartialEq,Eq)]
+pub struct Matrix3<T>
+    where T: Copy + PartialEq
+{
+    data: [[T; 3]; 3],
+}
+
 // A bery basic structure for handling 2D stuff(projection, etc.)
 pub struct Vector2<T> {
-    pub x : T,
-    pub y : T}
+    pub x: T,
+    pub y: T,
+}
 
 
 impl<T> Vector3<T> {
-    pub fn make_vec3(x:T,y:T,z:T) -> Vector3<T> {
-        Vector3{x:x,
-                y:y,
-                z:z}
+    pub fn make_vec3(x: T, y: T, z: T) -> Vector3<T> {
+        Vector3 { x: x, y: y, z: z }
     }
 }
+
+// Two basic aliases for implementation convenience in other module.
+pub type Vector2f = Vector2<f32>;
+pub type Vector3f = Vector3<f32>;
 
 // Implementation of the operator '=='
 impl<T> PartialEq<Vector3<T>> for Vector3<T>
@@ -236,6 +245,7 @@ macro_rules! impl_vec_operations {
         }
     }
 }
+
 impl_vec_operations!(f32);
 
 
