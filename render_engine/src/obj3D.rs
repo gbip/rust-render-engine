@@ -1,5 +1,5 @@
 use std::vec::Vec;
-use math::{Vector2, Vector3, Vector3f};
+use math::{Vector2,Vector2f, Vector3, Vector3f};
 use std::clone::Clone;
 use render::{Color8};
 use render;
@@ -24,8 +24,9 @@ impl<'a> IsPolygon<'a> for Polygon<'a> {
     }
 }
 
+#[derive(PartialEq)]
 struct Triangle2D {
-    vertex: [Vector2<f32>; 2],
+    vertex: [Vector2<f32>; 3],
 }
 
 /// Cohen-Sutherland line clipping algorithm.
@@ -99,26 +100,31 @@ mod cohen_sutherland {
 impl Triangle2D {
     /// Implementation of the Sutherland-Hodgman algorithm for clipping triangles
     fn trim_to_canvas(self, canvas: &render::Canvas) -> Polygon2D {
-        let result = Polygon2D::new();
+        let result = Polygon2D::new(vec!());
         let vertex_to_process = vec![self.vertex];
 
         for elem in vertex_to_process.windows(2) {
             println!("{:?}",elem);
             //let line = cohen_sutherland::clip_line(elem[0],elem[1],canvas);
-
         }
-
         result
+    }
+    fn to_polygon(self) -> Polygon2D {
+        let mut vertices =vec!();
+        self.vertex.iter().map(|a| vertices.push(*a));
+        Polygon2D::new(vertices)
+
     }
 }
 
+#[derive(PartialEq)]
 struct Polygon2D {
     pub vertex: Vec<Vector2<f32>>,
 }
 
 impl Polygon2D {
-    fn new() -> Polygon2D {
-        Polygon2D { vertex: vec![] }
+    fn new(vertex : Vec<Vector2f>)-> Polygon2D {
+        Polygon2D { vertex: vertex }
     }
     fn add_new_vertex(&mut self, vertex: Vector2<f32>) {
         self.vertex.push(vertex);
@@ -165,6 +171,7 @@ mod test {
     use render;
     use math::*;
     use super::cohen_sutherland::clip_line;
+    use super::{Polygon2D,Triangle2D};
 
     const BOX : render::Canvas = render::Canvas{u:Vector2f{x:-2_f32,y:-2_f32},v:Vector2f{x:2_f32,y:2_f32}};
     const P1 : Vector2f = Vector2f{x:0_f32,y:0_f32};
@@ -180,6 +187,7 @@ mod test {
     const P11 : Vector2f = Vector2f{x:6_f32,y:0_f32};
     const P12 : Vector2f = Vector2f{x:1_f32,y:4_f32};
     const P13 : Vector2f = Vector2f{x:2_f32,y:0_f32};
+
     #[test]
     fn test_line_clipping() {
         
@@ -236,11 +244,9 @@ mod test {
 
     #[test]
     fn test_triangle_clipping() {
-        use render;
-        use math::*;
-        
-        
-        
-
+        let mut T1 : Triangle2D = Triangle2D{vertex:[Vector2f{x:0_f32,y:0_f32},Vector2f{x:1_f32,y:4_f32},Vector2f{x:2_f32,y:2_f32}]};
+        let R1 : Polygon2D = Polygon2D{vertex:vec!(Vector2f{x:0_f32,y:0_f32},Vector2f{x:0.5_f32,y:2_f32},Vector2f{x:1.5_f32,y:2_f32},Vector2f{x:2_f32,y:0_f32})};
+        let K1 = T1.trim_to_canvas(&BOX);
+        assert!(K1==R1);
     }
 }
