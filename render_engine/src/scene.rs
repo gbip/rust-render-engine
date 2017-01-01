@@ -53,7 +53,7 @@ use obj3D;
         }
     }
 
-    pub struct World<'a> {
+    pub struct World {
         /// The base vector of the world :
         /// the 3rd one is UP (aka we are in XYZ configuration)
         base_vector : [Vector3<f32>; 3],
@@ -61,12 +61,12 @@ use obj3D;
         /// A Vec containing all the cameras in the world
         pub cameras : Vec<Camera>,
     
-        pub objects : Vec<obj3D::Object<'a>>,
+        pub objects : Vec<obj3D::Object>,
     }
 
-    impl<'a> World<'a> {
+    impl World {
         /// This method create a camera at <position>, aiming at <target>
-        fn add_camera(self : &mut World<'a>, position : Vector3f, target : Vector3f) {
+        fn add_camera(self : &mut World, position : Vector3f, target : Vector3f) {
             let mut cam_base = R3Base{u: Vector3::make_vec3(0_f32,0_f32,0_f32),
                                       v: Vector3::make_vec3(0_f32,0_f32,0_f32),
                                       w: Vector3::make_vec3(0_f32,0_f32,0_f32)};

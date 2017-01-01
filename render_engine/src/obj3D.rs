@@ -6,8 +6,8 @@ use render;
 
 /// This structs only hold references to the vertex that are stocked in the mesh.
 #[derive(Clone)]
-pub struct Triangle<'a> {
-    pub vertex: [&'a Vector3<f32>; 3],
+pub struct Triangle {
+    pub vertex: [Vector3<f32>; 3],
 }
 
 pub struct Polygon<'a> {
@@ -103,7 +103,8 @@ impl Triangle2D {
         let vertex_to_process = vec![self.vertex];
 
         for elem in vertex_to_process.windows(2) {
-
+            println!("{:?}",elem);
+            //let line = cohen_sutherland::clip_line(elem[0],elem[1],canvas);
 
         }
 
@@ -124,20 +125,31 @@ impl Polygon2D {
     }
 }
 
-/// The standard INdexed Face Set data structure for mesh.
-struct Mesh<'a> {
-    vertex_list: Vec<Vector3<f32>>,
-    triangle_list: Vec<Triangle<'a>>,
+/// The standard Indexed Face Set data structure for mesh.
+struct Mesh {
+    triangle_list: Vec<Triangle>,
 }
 
-pub struct Object<'a> {
+impl Mesh {
+
+    fn new(vertex: Vec<Vector3f>,face_indices: Vec<(usize,usize,usize)>) -> Mesh {
+        let mut mesh_triangles : Vec<Triangle> = vec!();
+        for triangle in face_indices {
+            let (v1,v2,v3) = triangle;
+            mesh_triangles.push(Triangle{vertex:[vertex[v1],vertex[v2],vertex[v3]]});
+        }
+        Mesh{triangle_list:mesh_triangles}
+    }
+}
+
+pub struct Object {
     // Maybe add a position field wich would acts as a global offset ?
-    mesh: Mesh<'a>,
+    mesh: Mesh,
     color: Color8,
     position: Vector3f,
 }
 
-impl<'a> Object<'a> {
+impl Object {
     pub fn get_triangles(&self) -> Vec<Triangle> {
 
         let mut result: Vec<Triangle> = vec![];
@@ -220,6 +232,15 @@ mod test {
         };
         let k = Vector2f::new(1.5_f32,2_f32);
         assert!(x==k && y==P13);
+    }
+
+    #[test]
+    fn test_triangle_clipping() {
+        use render;
+        use math::*;
         
+        
+        
+
     }
 }
