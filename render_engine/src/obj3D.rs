@@ -34,7 +34,10 @@ mod cohen_sutherland {
     use math::{Vector2f};
     use render::{Color8};
     use render;
-    
+   
+    /// The outcodes represents the position of a point in the 2D plan which has been divided in 9
+    /// region, with the rendering canvas as the central region. You can combine outcodes to access
+    /// all 9 regions.
     const IN: u8 = 0b0000_0000;
     const LEFT: u8 = 0b0000_0001;
     const RIGHT: u8 = 0b0000_0010;
@@ -61,18 +64,20 @@ mod cohen_sutherland {
     /// intersecting the box, return Some.
     pub fn clip_line(p1: Vector2f, p2: Vector2f, canvas: &render::Canvas) -> Option<(Vector2f,Vector2f)> {
         
-        println!("call with :{} and {}",p1,p2);
         let outcode1 = computeOutcode(&p1, canvas);
         let outcode2 = computeOutcode(&p2, canvas);
+        
         if !(outcode1 | outcode2) == 0b1111_1111 {
             return Some((p1, p2));
         } else if (outcode1 & outcode2) != 0b0000_0000 {
             return None;
         }
+        
         let outcode_out: u8 = if outcode1 == IN { outcode2 } else {outcode1 };
-        println!("outcode is : {:#b}", outcode_out);
+        
         let mut x: f32 = 0_f32;
         let mut y: f32 = 0_f32;
+        
         if (outcode_out & TOP) == TOP {
             x = p1.x + (p2.x - p1.x) * (canvas.v.y - p1.y) / (p2.y - p1.y);
             y = canvas.v.y;
@@ -88,7 +93,7 @@ mod cohen_sutherland {
         }
 
         // Now that we have processed one point, we do an other pass, in case of we need to
-        // process the points again.
+        // process the other side of the line.
         if outcode_out == outcode1 {
             return clip_line(Vector2f { x: x, y: y }, p2, canvas);
         } else {
@@ -100,15 +105,39 @@ mod cohen_sutherland {
 impl Triangle2D {
     /// Implementation of the Sutherland-Hodgman algorithm for clipping triangles
     fn trim_to_canvas(self, canvas: &render::Canvas) -> Polygon2D {
-        let result = Polygon2D::new(vec!());
-        let vertex_to_process = vec![self.vertex];
-
-        for elem in vertex_to_process.windows(2) {
-            println!("{:?}",elem);
-            //let line = cohen_sutherland::clip_line(elem[0],elem[1],canvas);
+        use self::cohen_sutherland::clip_line;
+        let (v1,v2,v3) = (self.vertex[0],self.vertex[1],self.vertex[2]);
+        let uv = match clip_line(v1,v2,canvas) {
+            Some(t) => t,
+            None => (v1,v2),   
+        };
+        let vw = match clip_line(v2,v3,canvas){
+            Some(t) => t,
+            None => (v2,v3),
+        };
+        let wu = match clip_line(v3,v1,canvas) {
+            Some(t) => t,
+            None => (v3,v1),
+        };
+        
+        let mut vertices : Vec<Vector2f> = vec!();
+        
+        vertices.push(uv.0);
+        if uv.1 != vw.0 {
+        vertices.push(uv.1)
         }
-        result
+        vertices.push(vw.0);
+        if vw.1 != wu.0 {
+        vertices.push(vw.1);
+        }
+        vertices.push(wu.0);
+        if wu.1 != uv.0 {
+        vertices.push(wu.1);
+        }
+        Polygon2D::new(vertices)
+        
     }
+
     fn to_polygon(self) -> Polygon2D {
         let mut vertices =vec!();
         self.vertex.iter().map(|a| vertices.push(*a));
@@ -193,7 +222,7 @@ mod test {
         
         let (mut x,mut y) = match clip_line(P1,P2,&BOX) {
             None => (Vector2f::new(0_f32,0_f32),Vector2f::new(0_f32,0_f32)),
-            Some(k) => k,
+            Some(k)=>k,
         };
         assert!(x==P1 && y == Vector2f{x:2_f32,y:2_f32});
 
