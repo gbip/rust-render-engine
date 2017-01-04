@@ -3,6 +3,7 @@ use math::{Vector2,Vector2f, Vector3, Vector3f};
 use std::clone::Clone;
 use render::{Color8};
 use render;
+use serde::de::{Deserialize,Deserializer};
 
 /// This structs only hold references to the vertex that are stocked in the mesh.
 #[derive(Clone)]
@@ -175,13 +176,72 @@ impl Mesh {
         }
         Mesh{triangle_list:mesh_triangles}
     }
+    fn new_from_obj(path:String) -> Mesh {
+        let (vertex, face_indices) = obj::generate_vec_from_obj(path);
+        Mesh::new(vertex,face_indices)
+
+    }
+    fn empty() -> Mesh {
+        
+        Mesh{triangle_list:vec!()}
+
+    }
 }
 
+mod obj {
+    use std::io::BufReader;
+    use std::io::BufRead;
+    use std::fs::File;
+    use std::path::Path;
+    use math::Vector3f;
+
+    enum LineType {
+    Ignore,
+    Vertex(Vector3f),
+    Face((usize,usize,usize)),
+    }
+    
+    pub fn generate_vec_from_obj(path : String) -> (Vec<Vector3f>, Vec<(usize,usize,usize)>) {
+        let mut vertex : Vec<Vector3f> = vec!();
+        let mut vertices_id : Vec<(usize,usize,usize)> = vec!();
+        let f = match File::open(&path) {
+            Ok(t) => t,
+            Err(e) => panic!("Error can not open file : {} .The error is {}",path,e),
+        };
+        let mut file = BufReader::new(&f);
+        for mut line in file.lines() {
+            let line = match line {
+                Ok(l) => l,
+                Err(e) => panic!("{}",e),
+            };
+            match parse_line(&line) {
+                LineType::Ignore => continue,
+                LineType::Vertex(u) => vertex.push(u),
+                LineType::Face(y) => vertices_id.push(y),
+                }
+            }
+        (vertex,vertices_id)
+        }
+    fn parse_line(line: &str) -> LineType {
+        let v : Vec<&str> = line.split(' ').collect();
+        LineType::Ignore
+    }
+}
+
+#[derive(Serialize,Deserialize)]
 pub struct Object {
-    // Maybe add a position field wich would acts as a global offset ?
+    #[serde(skip_serializing,skip_deserializing,default = "Mesh::empty")]    
+    ///The internal geometry data
     mesh: Mesh,
+    
+    ///The color of each triangles.
     color: Color8,
+    
+    ///The position of the object.
     position: Vector3f,
+    
+    ///The path to a .obj file that will be used to build the mesh.
+    obj_path: String,    
 }
 
 impl Object {
@@ -194,6 +254,47 @@ impl Object {
         return result;
     }
 }
+/*
+impl Deserialize for Object {
+    enum Fields {Position,Color,Obj};
+    impl Deserialize for Field {
+        fn deserialize<D>(deserializer: &mut D) -> Result<Field, D::Error>
+        where D: Deserializer,
+            {
+            struct FieldVisitor;
+            impl Visitor for FieldVisitor {
+            type Value=Fields;
+            fn visit_str<E>(&mut self, value : &str) -> Result<Field,E> 
+                where E: Error,
+                    {
+                    match value {
+                        "position" => Fields::Position,
+                        "color" => Fields::Color,
+                        "obj" => Fields::Obj,
+                        _ => Err(Error::unkown_field(value)),
+                        }
+
+                    }
+            }
+            
+
+
+
+            }
+    }
+}
+    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
+    where D: Deserializer,
+          {
+        }
+
+
+
+        }
+}
+*/
+
+
 
 #[cfg(test)]
 mod test {

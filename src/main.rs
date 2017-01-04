@@ -7,9 +7,12 @@ mod render;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
+extern crate serde;
 
-
+use scene::World;
 
 fn main() {
-    println!("Hello, world!");
+    let world = World::new();
+    world.save_world_to_file("world1.json");    
+
 }

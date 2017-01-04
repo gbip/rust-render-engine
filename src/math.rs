@@ -4,7 +4,7 @@ use std::fmt::Debug;
 use std::fmt;
 use std;
 // A basic module that implements some usefull mathematics tools
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone,Serialize,Deserialize)]
 pub struct Vector3<T> {
     pub x: T,
     pub y: T,
@@ -20,7 +20,7 @@ pub struct Matrix3<T>
 }
 
 // A bery basic structure for handling 2D stuff(projection, etc.)
-#[derive(Debug, Eq, Clone, PartialEq, Copy)]
+#[derive(Debug, Eq, Clone, PartialEq, Copy,Serialize,Deserialize)]
 pub struct Vector2<T> {
     pub x: T,
     pub y: T,
@@ -28,7 +28,7 @@ pub struct Vector2<T> {
 
 
 impl<T> Vector3<T> {
-    pub fn make_vec3(x: T, y: T, z: T) -> Vector3<T> {
+    pub fn new(x: T, y: T, z: T) -> Vector3<T> {
         Vector3 { x: x, y: y, z: z }
     }
 }

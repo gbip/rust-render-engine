@@ -1,7 +1,18 @@
 use std::vec::Vec;
 use math::{Vector3,VectorialOperations, Vector3f};
 use obj3D;
-    
+use std::{result,error};
+use std::fs::File;
+use std::io::{Write,Result};
+use std;
+use serde_json;
+
+fn write_string_to_file(j:&str,file_name:String) -> std::io::Result<()> {
+        let mut file = File::create(file_name).unwrap();
+            file.write_all(j.as_bytes()) 
+}
+
+    #[derive(Serialize,Deserialize)]
     pub struct Camera {
    
         /// The position fo the camera exprimed in the standard word space coordinates (where {0,0,0} is the
@@ -21,12 +32,14 @@ use obj3D;
     impl Camera {
 
         fn project_into_camera_base(vector :Vector3f) -> Vector3f {
-
-            Vector3::make_vec3(0_f32,0_f32,0_f32)
+            
+            unimplemented!()
+            //Vector3::make_vec3(0_f32,0_f32,0_f32)
         }
 
     }
 
+    #[derive(Serialize,Deserialize)]
     pub struct R3Base{
         u: Vector3f, 
         v: Vector3f,
@@ -53,11 +66,11 @@ use obj3D;
         }
     }
     
+    #[derive(Serialize,Deserialize)]
     pub struct World {
         /// The base vector of the world :
         /// the 3rd one is UP (aka we are in XYZ configuration)
         base_vector : [Vector3<f32>; 3],
-       
         /// A Vec containing all the cameras in the world
         pub cameras : Vec<Camera>,
     
@@ -67,13 +80,33 @@ use obj3D;
     impl World {
         /// This method create a camera at <position>, aiming at <target>
         fn add_camera(self : &mut World, position : Vector3f, target : Vector3f) {
-            let mut cam_base = R3Base{u: Vector3::make_vec3(0_f32,0_f32,0_f32),
-                                      v: Vector3::make_vec3(0_f32,0_f32,0_f32),
-                                      w: Vector3::make_vec3(0_f32,0_f32,0_f32)};
+            let mut cam_base = R3Base{u: Vector3::new(0_f32,0_f32,0_f32),
+                                      v: Vector3::new(0_f32,0_f32,0_f32),
+                                      w: Vector3::new(0_f32,0_f32,0_f32)};
             cam_base.make_camera_base(&position,&target,&self.base_vector[2]);
             let new_cam = Camera{world_position: position,
                                  target_position: target,
                                  base_vector: cam_base};
             self.cameras.push(new_cam);
+        }
+        pub fn new() -> World {
+            let base_vector = [Vector3::new(1_f32,0_f32,0_f32),Vector3::new(0_f32,1_f32,0_f32),Vector3::new(0_f32,0_f32,1_f32)];
+            World{base_vector:base_vector,
+                  cameras:vec!(),
+                  objects:vec!()}
+        }
+
+        /// This function already prints some error handling, so the result type is only there in
+        /// case of.
+        pub fn save_world_to_file(self,file:&str) {
+            match write_string_to_file(&serde_json::to_string(&self).unwrap() ,file.to_string()) {
+
+                Err(e) =>println!("Could not save world. Error : {}",e),
+                
+                Ok(_) =>println!("World sucessfully saved"),
+
+            }
+
+
         }
     }
