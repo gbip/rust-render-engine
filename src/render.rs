@@ -3,11 +3,61 @@ use math;
 use scene;
 use std;
 use obj3D::IsPolygon;
+use std::fmt::Debug;
 
 /// A tuple that represents a color in a RGB value on 8 bits
-pub type Color8=(u8,u8,u8);
+#[derive(Clone,Debug,Serialize,Deserialize)]
+pub struct Color8 {
+    r : u8,
+    g : u8,
+    b : u8,
+}
 
-    type Image = Vec<Vec<Color8>> ;//[Box<[Color8]>]; 
+impl Color8 {
+    fn is_black(&self) -> bool {
+        self.r==0 && self.g == 0 && self.b == 0
+    }
+    pub fn new_black() -> Self {
+        Color8{r:0,g:0,b:0}
+    }
+    pub fn new(r:u8,g:u8,b:u8) -> Self {
+        Color8{r:r,g:g,b:b}
+    }
+}
+
+    pub struct ImageData<T> {
+        pub pixels : Vec<Vec<T>>
+    }
+
+    pub type Image = ImageData<Color8>;
+    
+impl ImageData<Color8> {
+    fn display(&self) {
+        let mut result : String = "".to_string();
+            for line in self.pixels.iter() {
+                for pixel in line.iter() {
+                    if !pixel.is_black() {
+                        result.push('#');
+                    }
+                    else {
+                        result.push('*');
+                    }
+                }
+                result.push('\n');
+            }
+            println!("{}",result);
+    }
+    pub fn draw_horizontal_line(&mut self,a:usize,b:usize,y:usize, color:Color8) {
+        for i in a..b {
+            self.pixels[y][i] = color.clone();
+        }
+    }
+    pub fn new(sizex:usize,sizey:usize) -> Self {
+        let px : Vec<Vec<Color8>> = vec!(vec!(Color8::new_black()));
+        Image{pixels:px}
+    }
+}
+    
     use math::Vector2; 
     /// Represent a Surface on which you can draw a picture (a screen, a file, etc.)
     trait Surface {
@@ -25,7 +75,7 @@ pub type Color8=(u8,u8,u8);
 
         /// This method will panic if the canvas is a line or a dot: u1.x = u2.x or u1.y = u2.y . It
         /// will also panic if u1.x > u2.x or u1.y > u2.y
-        
+        /// TODO : Make this return a result and not panic!()...
         pub fn new(u1: Vector2<f32>, u2: Vector2<f32>) -> Canvas {
            assert!(u1.x != u2.x && u1.y != u2.y);
            assert!(u1.x < u2.x && u1.y < u2.y);
@@ -56,7 +106,6 @@ pub type Color8=(u8,u8,u8);
     fn z_buffer_renderer(world :& scene::World, sizeX : usize, sizeY : usize) -> Image {
         let z_array = vec![vec![ std::f64::INFINITY; sizeY]; sizeX];
         let result =  vec![vec![ (0_u8,0_u8,0_u8); sizeY]; sizeX];
-        
         for object in &world.objects {
             for triangle in object.get_triangles() {
                 /*let polygon = triangle.trim_to_window(sizeX as u64, sizeY as u64);
@@ -66,6 +115,5 @@ pub type Color8=(u8,u8,u8);
                 //}
             }
         }
-
-        result
+        unimplemented!();
     }

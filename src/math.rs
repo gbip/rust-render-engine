@@ -33,23 +33,28 @@ impl<T> Vector3<T> {
     }
 }
 
+impl<T> fmt::Display for Vector3<T> where
+    T : fmt::Display {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f,"({} , {} , {})",self.x,self.y,self.z)
+    }
+}
+
 impl<T> Vector2<T> {
     pub fn new(x:T,y:T) -> Vector2<T> {
         Vector2{x:x,y:y}
     }
 }
 
+impl<T> fmt::Display for Vector2<T> where
+    T : fmt::Display {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f,"({} , {})",self.x,self.y)
+    }
+}
 // Two basic aliases for implementation convenience in other module.
 pub type Vector2f = Vector2<f32>;
 pub type Vector3f = Vector3<f32>;
-
-impl<T> std::fmt::Display for Vector2<T> where 
-T : std::fmt::Display {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({}, {})", self.x, self.y)
-    }
-}
-
 
 // Implementation of the operator '=='
 impl<T> PartialEq<Vector3<T>> for Vector3<T>

@@ -4,6 +4,8 @@ use std::clone::Clone;
 use render::{Color8};
 use render;
 use serde::de::{Deserialize,Deserializer};
+use std::fmt::Display;
+use std::fmt;
 
 /// This structs only hold references to the vertex that are stocked in the mesh.
 #[derive(Clone)]
@@ -25,10 +27,18 @@ impl<'a> IsPolygon<'a> for Polygon<'a> {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq,Clone)]
 struct Triangle2D {
     vertex: [Vector2<f32>; 3],
 }
+
+impl fmt::Display for Triangle2D {
+    fn fmt(&self, f :&mut fmt::Formatter) -> fmt::Result {
+        write!(f,"Triangle [ {} , {} , {} ]",self.vertex[0],self.vertex[1],self.vertex[2])
+    }
+
+}
+
 
 /// Cohen-Sutherland line clipping algorithm.
 mod cohen_sutherland {
@@ -103,8 +113,16 @@ mod cohen_sutherland {
     }
 }
 
+fn point_is_in_box(point:Vector2f,canvas:&render::Canvas) -> bool{
+
+   point.x>canvas.u.x && point.x < canvas.v.x && point.y>canvas.u.y && point.y<canvas.v.y
+
+}
+
 impl Triangle2D {
+    
     /// Implementation of the Sutherland-Hodgman algorithm for clipping triangles
+    /// Do not use !
     fn trim_to_canvas(self, canvas: &render::Canvas) -> Polygon2D {
         use self::cohen_sutherland::clip_line;
         let (v1,v2,v3) = (self.vertex[0],self.vertex[1],self.vertex[2]);
@@ -122,7 +140,7 @@ impl Triangle2D {
         };
         
         let mut vertices : Vec<Vector2f> = vec!();
-        
+
         vertices.push(uv.0);
         if uv.1 != vw.0 {
         vertices.push(uv.1)
@@ -135,15 +153,94 @@ impl Triangle2D {
         if wu.1 != uv.0 {
         vertices.push(wu.1);
         }
-        Polygon2D::new(vertices)
+        unimplemented!();
+        //Polygon2D::new(vertices)
         
     }
 
     fn to_polygon(self) -> Polygon2D {
-        let mut vertices =vec!();
-        self.vertex.iter().map(|a| vertices.push(*a));
-        Polygon2D::new(vertices)
+        Polygon2D::new(self.vertex.to_vec())
+    }
+    
+    /// Return a Canvas that represents the box that holds the triangle
+    fn compute_box() -> render::Canvas {
+    unimplemented!();
+    }
+    
+    /// After calling this function, self.vertex[0].y < self.vertex[1].y < self.vertex[2].y
+    fn sort_in_ascending_order(&mut self) {
+    unimplemented!();
+    }
+    
+    fn transform_into_grid(&self,canvas : &render::Canvas, xstep: u32, ystep: u32) -> (Vector2<u32>,Vector2<u32>,Vector2<u32>) {
+        
+        let yrange = (canvas.v.y - canvas.u.y)/(ystep as f32);
+        let xrange = (canvas.v.x - canvas.u.x)/(xstep as f32);
+        let A = Vector2::new(((self.vertex[0].x - canvas.u.x)*xrange) as u32, ((self.vertex[0].y - canvas.u.y) * yrange) as u32);
+        let B = Vector2::new(((self.vertex[1].x - canvas.u.x)*xrange) as u32, ((self.vertex[1].y - canvas.u.y) * yrange) as u32);
+        let C = Vector2::new(((self.vertex[2].x - canvas.u.x)*xrange) as u32, ((self.vertex[2].y - canvas.u.y) * yrange) as u32);
+        (A,B,C)
+    }
 
+    /// This function calls self.sort_in_ascending_order so that it can assume that vertex of the
+    /// triangles are sorted in ascending order.
+    fn fill(&mut self,canvas : &render::Canvas, color : Color8, image : &mut render::Image, z_buffer : render::ImageData<f32>) {
+        
+        self.sort_in_ascending_order();
+        let (A,B,C) = self.transform_into_grid(canvas,image.pixels[0].len() as u32,image.pixels.len() as u32);
+        
+        let (mut dx1,mut dx2,mut dx3) = (0_u32,0_u32,0_u32);
+        if B.y - A.y > 0_u32 {
+            dx1 = (B.x-A.x)/(B.y-A.y)    
+        }
+        if C.y - A.y > 0_u32 {
+            dx2 = (C.x-A.x)/(C.y-A.y)    
+        }
+        if C.y - B.y > 0_u32 {
+            dx3 = (C.x-B.x)/(C.y-B.y)    
+        }
+        
+        let mut done = false;
+        let mut S = A;
+        let mut E = A;
+        if dx1 > dx2 {
+            while !done {
+                done=S.y>A.y;
+                image.draw_horizontal_line(S.x as usize ,E.x as usize ,S.y as usize,color.clone());
+                S.y+=1;
+                E.y+=1;
+                S.x+=dx2;
+                E.x+=dx1;
+            }
+            E = B;
+            while !done {
+                done=S.y>C.y;
+                image.draw_horizontal_line(S.x as usize ,E.x as usize ,S.y as usize,color.clone());
+                S.y+=1;
+                E.y+=1;
+                S.x+=dx2;
+                E.x+=dx3;
+            }
+        }
+        else {
+             while !done {
+                done=S.y>A.y;
+                image.draw_horizontal_line(S.x as usize ,E.x as usize ,S.y as usize,color.clone());
+                S.y+=1;
+                E.y+=1;
+                S.x+=dx1;
+                E.x+=dx2;
+            }
+            E = B;
+            while !done {
+                done=S.y>C.y;
+                image.draw_horizontal_line(S.x as usize ,E.x as usize ,S.y as usize,color.clone());
+                S.y+=1;
+                E.y+=1;
+                S.x+=dx3;
+                E.x+=dx2;
+            }
+        }
     }
 }
 
@@ -158,6 +255,15 @@ impl Polygon2D {
     }
     fn add_new_vertex(&mut self, vertex: Vector2<f32>) {
         self.vertex.push(vertex);
+    }
+}
+
+impl fmt::Display for Polygon2D {
+
+    fn fmt(&self, f : &mut fmt::Formatter) -> fmt::Result {
+    
+        write!(f,"Polygon {:?}",self.vertex)
+
     }
 }
 
@@ -254,47 +360,6 @@ impl Object {
         return result;
     }
 }
-/*
-impl Deserialize for Object {
-    enum Fields {Position,Color,Obj};
-    impl Deserialize for Field {
-        fn deserialize<D>(deserializer: &mut D) -> Result<Field, D::Error>
-        where D: Deserializer,
-            {
-            struct FieldVisitor;
-            impl Visitor for FieldVisitor {
-            type Value=Fields;
-            fn visit_str<E>(&mut self, value : &str) -> Result<Field,E> 
-                where E: Error,
-                    {
-                    match value {
-                        "position" => Fields::Position,
-                        "color" => Fields::Color,
-                        "obj" => Fields::Obj,
-                        _ => Err(Error::unkown_field(value)),
-                        }
-
-                    }
-            }
-            
-
-
-
-            }
-    }
-}
-    fn deserialize<D>(deserializer: &mut D) -> Result<Self, D::Error>
-    where D: Deserializer,
-          {
-        }
-
-
-
-        }
-}
-*/
-
-
 
 #[cfg(test)]
 mod test {
@@ -375,8 +440,28 @@ mod test {
     #[test]
     fn test_triangle_clipping() {
         let mut T1 : Triangle2D = Triangle2D{vertex:[Vector2f{x:0_f32,y:0_f32},Vector2f{x:1_f32,y:4_f32},Vector2f{x:2_f32,y:2_f32}]};
-        let R1 : Polygon2D = Polygon2D{vertex:vec!(Vector2f{x:0_f32,y:0_f32},Vector2f{x:0.5_f32,y:2_f32},Vector2f{x:1.5_f32,y:2_f32},Vector2f{x:2_f32,y:0_f32})};
+        let R1 : Polygon2D = Polygon2D{vertex:vec!(Vector2f{x:0_f32,y:0_f32},Vector2f{x:0.5_f32,y:2_f32},Vector2f{x:2_f32,y:2_f32})};
         let K1 = T1.trim_to_canvas(&BOX);
+        let mut T2 : Triangle2D = Triangle2D{vertex:[Vector2f{x:1_f32,y:1_f32},Vector2f{x:-1_f32,y:-1_f32},Vector2f{x:1_f32,y:-1_f32}]}; 
+        let K2 = T2.clone().trim_to_canvas(&BOX);
+        let mut T3 : Triangle2D = Triangle2D{vertex:[Vector2f{x:0_f32,y:-2_f32},Vector2f{x:-2_f32,y:2_f32},Vector2f{x:2_f32,y:2_f32}]};
+        let K3 = T3.clone().trim_to_canvas(&BOX);
+        println!("K1 : {}",K1);
+        println!("R1 : {}",R1);
+        assert!(K2==T2.to_polygon());
+        assert!(K3==T3.to_polygon());
         assert!(K1==R1);
     }
+
+    #[test]
+    fn test_triangle_filling() {
+        let mut T1 : Triangle2D = Triangle2D{vertex:[Vector2f{x:0_f32,y:0_f32},Vector2f{x:1_f32,y:4_f32},Vector2f{x:2_f32,y:2_f32}]};
+        T1.fill().display()
+
+
+
+
+    }
+
+
 }
