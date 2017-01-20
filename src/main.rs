@@ -1,5 +1,6 @@
 #![feature(proc_macro)]
 mod math;
+#[allow(non_snake_case)] 
 mod obj3D;
 mod scene;
 mod render;

@@ -1,9 +1,8 @@
 use std::vec::Vec;
 use math::{Vector3,VectorialOperations, Vector3f};
 use obj3D;
-use std::{result,error};
 use std::fs::File;
-use std::io::{Write,Result};
+use std::io::{Write};
 use std;
 use serde_json;
 
@@ -109,4 +108,4 @@ fn write_string_to_file(j:&str,file_name:String) -> std::io::Result<()> {
 
 
         }
-    }
+}

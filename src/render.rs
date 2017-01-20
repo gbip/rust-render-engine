@@ -1,9 +1,5 @@
 use std::vec::Vec;
-use math;
 use scene;
-use std;
-use obj3D::IsPolygon;
-use std::fmt::Debug;
 
 /// A tuple that represents a color in a RGB value on 8 bits
 #[derive(Clone,Debug,Serialize,Deserialize)]
@@ -32,7 +28,7 @@ impl Color8 {
     pub type Image = ImageData<Color8>;
     
 impl ImageData<Color8> {
-    fn display(&self) {
+    fn display_black(&self) {
         let mut result : String = "".to_string();
             for line in self.pixels.iter() {
                 for pixel in line.iter() {
@@ -40,7 +36,7 @@ impl ImageData<Color8> {
                         result.push('#');
                     }
                     else {
-                        result.push('*');
+                            result.push('*');
                     }
                 }
                 result.push('\n');
@@ -70,7 +66,10 @@ impl ImageData<Color8> {
         pub u : Vector2<f32>,
         pub v : Vector2<f32>,
     }
-
+    
+    /// Represents a window through which the camera is seeing the world. It depends mainly of the
+    /// FOV of the camera, and the clipping distance between the virtual point of the camera and
+    /// this window
     impl Canvas {
 
         /// This method will panic if the canvas is a line or a dot: u1.x = u2.x or u1.y = u2.y . It
@@ -91,29 +90,4 @@ impl ImageData<Color8> {
             let u4 = Vector2{x: self.u.x,y: self.u.y};
             [u1,u2,u3,u4]
         }
-    }
-        
-    
-    
-
-    
-    /// Represent a rendering algorithm
-    trait Render {
-        fn generate_image(world: scene::World) -> Image;
-    }
-
-    // TODO : To implement
-    fn z_buffer_renderer(world :& scene::World, sizeX : usize, sizeY : usize) -> Image {
-        let z_array = vec![vec![ std::f64::INFINITY; sizeY]; sizeX];
-        let result =  vec![vec![ (0_u8,0_u8,0_u8); sizeY]; sizeX];
-        for object in &world.objects {
-            for triangle in object.get_triangles() {
-                /*let polygon = triangle.trim_to_window(sizeX as u64, sizeY as u64);
-                let pixels = polygon.find_points_in_polygon(sizeX as u64, sizeY as u64);
-                for pixel in pixels {
-                */
-                //}
-            }
-        }
-        unimplemented!();
     }

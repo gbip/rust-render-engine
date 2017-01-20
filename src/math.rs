@@ -1,8 +1,6 @@
 use std::ops::{Add, Sub, Mul, Div};
 use std::cmp::PartialEq;
-use std::fmt::Debug;
 use std::fmt;
-use std;
 // A basic module that implements some usefull mathematics tools
 #[derive(Debug, Copy, Clone,Serialize,Deserialize)]
 pub struct Vector3<T> {
@@ -52,8 +50,7 @@ impl<T> fmt::Display for Vector2<T> where
             write!(f,"({} , {})",self.x,self.y)
     }
 }
-// Two basic aliases for implementation convenience in other module.
-pub type Vector2f = Vector2<f32>;
+// One basic aliases for implementation convenience in other module.
 pub type Vector3f = Vector3<f32>;
 
 // Implementation of the operator '=='
