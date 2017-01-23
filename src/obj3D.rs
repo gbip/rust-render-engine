@@ -13,14 +13,12 @@ pub struct Triangle {
 }
 
 impl Triangle {
-    
     // Basic constructor
     pub fn new(tex: Vec<Vector3f>, norm: Vec<Vector3f> , pos:Vec<Vector3f>) -> Triangle {
         Triangle{texture: tex,
                 normals: norm,
                 pos: pos}
     }
-
 }
 
 /// The standard Indexed Face Set data structure for mesh.
@@ -80,17 +78,33 @@ mod obj_parser {
 
     //Split a given line and parse each float value inside.
     fn get_floats(line : String) -> Vec<f32> {
-        ///TODO FIX THE BROKEC EXPECT §§§
-        line.split_whitespace().map(|val : &str| (val).parse::<f32>().expect("Invalid float value.")).collect()
+        //We split the string by the whitespaces | parse each substring as a f32 | throw away
+        //things that doesn't parse to f32
+        line.split_whitespace().filter_map(|val : &str| val.parse::<f32>().ok())
+            .collect()
+    }
+
+    fn get_face(str : String) -> Vec<Vec<String>> {
+        let r : Vec<Vec<String>> = str.split(' ').map(|x| x.split('/')
+                                                            .map(|x| x.to_string())
+                                                            .collect())
+                                                .collect();
+        r
+    }
+
+    fn parse_indexes(line : String) -> Vec<u32> {
+        unimplemented!()
+
     }
     
     fn parse_normal(line : String) -> Result<LineType,String> {
-        let floats = get_floats(line);
+        //We clone the line, to use line after for debugging.
+        let floats = get_floats(line.clone());
         if floats.len() == 3 {
             Ok(LineType::Normal(floats[0],floats[1],floats[2]))
         }
         else {
-            Err(format!("Invalide number of float value : {} ",floats.len()))
+            Err(format!("Invalide number of float value, expected 3, found : {} | Line parsed : {} ",floats.len(),line))
         }
     }
 
@@ -107,7 +121,13 @@ mod obj_parser {
     }
 
     fn parse_tex_coord(line: String) -> Result<LineType,String> {
-        unimplemented!()
+        let floats = get_floats(line.clone());
+        if floats.len() == 2 {
+            Ok(LineType::TexCoord(floats[0],floats[1]))
+        }
+        else {
+            Err(format!("Invalide number of float value, expected 3, found : {} | Line parsed : {} ",floats.len(),line))
+        }
     }
 
 
