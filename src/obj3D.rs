@@ -67,15 +67,14 @@ mod obj_parser {
     use std::fs::File;
     use super::Mesh;
     use std::io::{BufRead, BufReader};
-    
+   
     enum LineType {
         Ignore,
-        Face(u32,u32,u32),
+        Face(u32,u32,Option<u32>),
         Vertex(f32,f32,f32),
         Normal(f32,f32,f32),
         TexCoord(f32,f32),
     }
-
     //Split a given line and parse each float value inside.
     fn get_floats(line : String) -> Vec<f32> {
         //We split the string by the whitespaces | parse each substring as a f32 | throw away
@@ -85,16 +84,49 @@ mod obj_parser {
     }
 
     fn get_face(str : String) -> Vec<Vec<String>> {
-        let r : Vec<Vec<String>> = str.split(' ').map(|x| x.split('/')
-                                                            .map(|x| x.to_string())
+        let r : Vec<Vec<String>> = str.split(' ').map(|x| x.split('/') // we split the line by the '/' character
+                                                            .map(|x| x.to_string()) // we convert the char to a string
                                                             .collect())
+                                                .filter(|x| x[0]!="f") // we remove useless junk
                                                 .collect();
         r
     }
+    
+    fn convert_to_u32(string: &str) -> u32 {
+        str::parse::<u32>(string).expect("Error while parsing integer indices")
+    }
 
-    fn parse_indexes(line : String) -> Vec<u32> {
-        unimplemented!()
+    // We know two things : either there is position + normal, or there is position + normal +
+    // textures. Plus, we only have vertex per triangle.
+    fn extract_indexes(line : String) -> Result<(Vec<u32>,Vec<u32>,Option<Vec<u32>>),String> {
+        let data = get_face(line.clone());
+        let mut id_pos : Vec<u32> = vec!();
+        let mut id_norm : Vec<u32> = vec!();
+        let mut id_tex : Vec<u32> = vec!();
+        let mut error = false;
+        let parsed_data : Vec<Vec<u32>> = data.iter().map(|u|
+                        u.iter()
+                        .map(|val| convert_to_u32(val))
+                        .collect())
+                                                    .collect();
 
+
+            //_ => Err(format!("Incorrect number of indices : {} | line : {}", u.len(), line)),
+        parsed_data.iter().map(|u| match u.len() {
+            //TODO : check that the first indice is pos, the second is normal and the third is
+            //texture.
+            3 => {id_pos.push(u[0]); id_norm.push(u[1]); id_tex.push(u[2])},
+            2 => {id_pos.push(u[0]);id_norm.push(u[1]);},
+            _ => {error = true;},
+        });
+        match error {
+
+        true => Err(format!("Incorrect number of indices, line : {}", line)),
+        false => Ok((id_pos,id_norm, match id_tex.len() {
+                    3 => Some(id_tex),
+                    _ => None,
+        })),
+        }
     }
     
     fn parse_normal(line : String) -> Result<LineType,String> {
@@ -117,7 +149,8 @@ mod obj_parser {
     }
 
     fn parse_face(line: String ) -> Result<LineType,String> {
-        unimplemented!()
+    
+        unimplemented!() 
     }
 
     fn parse_tex_coord(line: String) -> Result<LineType,String> {
@@ -152,4 +185,4 @@ mod obj_parser {
             Err(e) => panic!("Error while trying to open the file: {} - {}", path,e),
         }
     }
-} 
+}
