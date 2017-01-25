@@ -5,53 +5,60 @@ use render::{Color8};
 
 
 #[derive(Clone)]
-pub struct Triangle {
-    //Using a vector for easy allocation
-    texture: Vec<Vector3f>,
-    normals: Vec<Vector3f>,
-    pos: Vec<Vector3f>,
+pub struct GeoPoint {
+    norm : Vector3f,
+    tex: Option<Vector3f>,
+    pos: Vector3f,
 }
 
-impl Triangle {
-    // Basic constructor
-    pub fn new(tex: Vec<Vector3f>, norm: Vec<Vector3f> , pos:Vec<Vector3f>) -> Triangle {
-        Triangle{texture: tex,
-                normals: norm,
-                pos: pos}
+impl GeoPoint {
+    pub fn new(norm: Vector3f, tex: Option<Vector3f>, pos:Vector3f) -> GeoPoint {
+        GeoPoint{norm:norm,
+                tex:tex,
+                pos:pos}
+    }
+}
+
+#[derive(Clone)]
+pub struct Triangle<'a> {
+    u : &'a GeoPoint,
+    v : &'a GeoPoint,
+    w : &'a GeoPoint,
+}
+
+impl<'a> Triangle<'a> {
+    pub fn new(u : &'a GeoPoint, v : &'a GeoPoint, w: &'a GeoPoint) -> Triangle<'a> {
+        Triangle{u:u,v:v,w:w}
     }
 }
 
 /// The standard Indexed Face Set data structure for mesh.
-pub struct Mesh {
-
-    triangles : Vec<Triangle>,
+pub struct Mesh<'a> {
+    points: Vec<GeoPoint>,
+    triangles : Vec<Triangle<'a>>,
 }
 
-impl Mesh {
-    
+impl<'a> Mesh<'a> {
    
-    pub fn add_triangle(&mut self, tri : Triangle) {
-        self.triangles.push(tri);
+    pub fn add_triangle(&'a mut self,ind1:usize,ind2:usize,ind3:usize) {
+        // It is safe to call .unwrap() because we know that the indice is in bound : we only
+        // creates mesh through .obj file and and out of range index could only come from the file
+        let triangle : Triangle<'a> = Triangle::new(self.points.get(ind1).unwrap(),self.points.get(ind2).unwrap(),self.points.get(ind3).unwrap());
+        
+        //self.triangles.push(Triangle::new(&self.points[ind1],self.points.get_unchecked(ind2),self.points.get_unchecked(ind3)));
     }
 
     // Creates a new empty mesh
-    pub fn new_empty() -> Mesh {
-        Mesh{triangles: vec!()}
+    pub fn new_empty() -> Mesh<'a> {
+        Mesh{points: vec!(), triangles: vec!()}
     }
-
-    // Returns the triangle-ith triangle of the mesh (where triangle is it's coordinate in the
-    // vector. Clone the value
-    pub fn get_triangle(&self, triangle : usize) -> Triangle {
-        self.triangles[triangle].clone()    
-    }
-
 }
 
 #[derive(Serialize,Deserialize)]
-pub struct Object {
+pub struct Object<'a> {
     #[serde(skip_serializing,skip_deserializing,default = "Mesh::new_empty")]    
     ///The internal geometry data
-    mesh: Mesh,
+    mesh: Mesh<'a>,
     
     ///The color of each triangles.
     color: Color8,

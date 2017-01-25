@@ -66,19 +66,19 @@ fn write_string_to_file(j:&str,file_name:String) -> std::io::Result<()> {
     }
     
     #[derive(Serialize,Deserialize)]
-    pub struct World {
+    pub struct World<'a> {
         /// The base vector of the world :
         /// the 3rd one is UP (aka we are in XYZ configuration)
         base_vector : [Vector3<f32>; 3],
         /// A Vec containing all the cameras in the world
         pub cameras : Vec<Camera>,
     
-        pub objects : Vec<obj3D::Object>,
+        pub objects : Vec<obj3D::Object<'a>>,
     }
 
-    impl World {
+    impl<'a> World<'a> {
         /// This method create a camera at <position>, aiming at <target>
-        fn add_camera(self : &mut World, position : Vector3f, target : Vector3f) {
+        fn add_camera(self : &mut World<'a>, position : Vector3f, target : Vector3f) {
             let mut cam_base = R3Base{u: Vector3::new(0_f32,0_f32,0_f32),
                                       v: Vector3::new(0_f32,0_f32,0_f32),
                                       w: Vector3::new(0_f32,0_f32,0_f32)};
@@ -88,7 +88,7 @@ fn write_string_to_file(j:&str,file_name:String) -> std::io::Result<()> {
                                  base_vector: cam_base};
             self.cameras.push(new_cam);
         }
-        pub fn new() -> World {
+        pub fn new() -> World<'a> {
             let base_vector = [Vector3::new(1_f32,0_f32,0_f32),Vector3::new(0_f32,1_f32,0_f32),Vector3::new(0_f32,0_f32,1_f32)];
             World{base_vector:base_vector,
                   cameras:vec!(),
