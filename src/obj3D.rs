@@ -70,6 +70,12 @@ pub struct Object<'a> {
     obj_path: String,    
 }
 
+impl<'a> Object<'a> {
+     pub fn load_mesh(&mut self) {
+        self.mesh = obj_parser::open_obj(&self.obj_path); 
+    }
+}
+
 mod obj_parser {
     use std::fs::File;
     use super::Mesh;
@@ -82,6 +88,21 @@ mod obj_parser {
         Normal(f32,f32,f32),
         TexCoord(f32,f32),
     }
+    
+
+    pub fn open_obj<'a>(file: &String) -> Mesh<'a> {
+        let result = Mesh::new_empty();
+        let reader = BufReader::new(open_obj_file(file.as_str()));
+        
+        // We clean the reader of all useless lines before iterating over it.
+        for line in reader.lines().map(|l| l.expect("Error while reading line")).collect::<Vec<String>>() {
+            println!("{}",line);
+        }
+        result
+    }
+
+
+
 
     //Split a given line and parse each float value inside.
     fn get_floats(line : String) -> Vec<f32> {

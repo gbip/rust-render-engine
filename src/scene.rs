@@ -28,16 +28,6 @@ fn write_string_to_file(j:&str,file_name:String) -> std::io::Result<()> {
         base_vector : R3Base, 
     }
 
-    impl Camera {
-
-        fn project_into_camera_base(vector :Vector3f) -> Vector3f {
-            
-            unimplemented!()
-            //Vector3::make_vec3(0_f32,0_f32,0_f32)
-        }
-
-    }
-
     #[derive(Serialize,Deserialize)]
     pub struct R3Base{
         u: Vector3f, 
@@ -71,9 +61,9 @@ fn write_string_to_file(j:&str,file_name:String) -> std::io::Result<()> {
         /// the 3rd one is UP (aka we are in XYZ configuration)
         base_vector : [Vector3<f32>; 3],
         /// A Vec containing all the cameras in the world
-        pub cameras : Vec<Camera>,
+        cameras : Vec<Camera>,
     
-        pub objects : Vec<obj3D::Object<'a>>,
+        objects : Vec<obj3D::Object<'a>>,
     }
 
     impl<'a> World<'a> {
@@ -88,7 +78,13 @@ fn write_string_to_file(j:&str,file_name:String) -> std::io::Result<()> {
                                  base_vector: cam_base};
             self.cameras.push(new_cam);
         }
-        pub fn new() -> World<'a> {
+
+        /// Load all objects meshes
+        pub fn load_objects(&mut self) {
+            self.objects.iter_mut().map(|obj| obj.load_mesh());
+        }
+
+        pub fn new_empty() -> World<'a> {
             let base_vector = [Vector3::new(1_f32,0_f32,0_f32),Vector3::new(0_f32,1_f32,0_f32),Vector3::new(0_f32,0_f32,1_f32)];
             World{base_vector:base_vector,
                   cameras:vec!(),
@@ -105,7 +101,9 @@ fn write_string_to_file(j:&str,file_name:String) -> std::io::Result<()> {
                 Ok(_) =>println!("World sucessfully saved"),
 
             }
-
-
+        }
+        pub fn load_world_from_file<'b>(file: String) -> World<'b> {
+           let world : World = serde_json::from_str(file.as_str()).unwrap();
+            world
         }
 }

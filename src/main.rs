@@ -13,7 +13,7 @@ extern crate serde;
 use scene::World;
 
 fn main() {
-    let world = World::new();
+    let world = World::new_empty();
     world.save_world_to_file("world1.json");    
 
 }
