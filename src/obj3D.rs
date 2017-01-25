@@ -70,11 +70,12 @@ mod obj_parser {
    
     enum LineType {
         Ignore,
-        Face(u32,u32,Option<u32>),
+        Face((u32,u32,u32),(u32,u32,u32),Option<(u32,u32,u32)>),
         Vertex(f32,f32,f32),
         Normal(f32,f32,f32),
         TexCoord(f32,f32),
     }
+
     //Split a given line and parse each float value inside.
     fn get_floats(line : String) -> Vec<f32> {
         //We split the string by the whitespaces | parse each substring as a f32 | throw away
@@ -98,6 +99,7 @@ mod obj_parser {
 
     // We know two things : either there is position + normal, or there is position + normal +
     // textures. Plus, we only have vertex per triangle.
+    //TODO: Maybe this function should return a tuple, because it checks that there is only 3 value.
     fn extract_indexes(line : String) -> Result<(Vec<u32>,Vec<u32>,Option<Vec<u32>>),String> {
         let data = get_face(line.clone());
         let mut id_pos : Vec<u32> = vec!();
@@ -148,9 +150,25 @@ mod obj_parser {
         }
     }
 
+    // Get the first 3 elements from a vector and returns them in a tuple
+    fn vec_to_tuple3(vec:Vec<u32>) -> (u32,u32,u32) {
+        (vec[0],vec[1],vec[2])
+    }
+
     fn parse_face(line: String ) -> Result<LineType,String> {
-    
-        unimplemented!() 
+        let indices = extract_indexes(line);
+        match indices {
+            // Transform the vector into a tuple3
+            Ok(i) => { let pos = vec_to_tuple3(i.0);
+                    let norm = vec_to_tuple3(i.1);
+                    match i.2 {
+                        Some(tex_vec) => Ok(LineType::Face(pos,norm,Some(vec_to_tuple3(tex_vec)))),
+                        None => Ok(LineType::Face(pos,norm,None)),
+                    }
+            },
+            //In cas of an error, we just propagate it one level further
+            Err(e) => Err(e), 
+        }
     }
 
     fn parse_tex_coord(line: String) -> Result<LineType,String> {
