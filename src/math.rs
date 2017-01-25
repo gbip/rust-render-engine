@@ -52,6 +52,8 @@ impl<T> fmt::Display for Vector2<T> where
 }
 // One basic aliases for implementation convenience in other module.
 pub type Vector3f = Vector3<f32>;
+pub type Vector2f = Vector2<f32>;
+
 
 // Implementation of the operator '=='
 impl<T> PartialEq<Vector3<T>> for Vector3<T>

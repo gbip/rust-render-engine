@@ -1,57 +1,108 @@
 use std::vec::Vec;
-use math::{Vector3, Vector3f};
+use math::{Vector3, Vector3f,Vector2f};
 use std::clone::Clone;
 use render::{Color8};
 
 
 #[derive(Clone)]
-pub struct Triangle {
-    //Using a vector for easy allocation
-    texture: Vec<Vector3f>,
-    normals: Vec<Vector3f>,
-    pos: Vec<Vector3f>,
+pub struct GeoPoint<'a> {
+    norm : &'a Vector3f,
+    tex: Option<&'a Vector2f>,
+    pos: &'a Vector3f,
 }
 
-impl Triangle {
-    // Basic constructor
-    pub fn new(tex: Vec<Vector3f>, norm: Vec<Vector3f> , pos:Vec<Vector3f>) -> Triangle {
-        Triangle{texture: tex,
-                normals: norm,
-                pos: pos}
+impl<'a> GeoPoint<'a> {
+    pub fn new(pos: &'a Vector3f, norm: &'a Vector3f, tex: Option<&'a Vector2f>) -> GeoPoint<'a> {
+        GeoPoint{norm:norm,
+                tex:tex,
+                pos:pos}
+    }
+}
+
+#[derive(Clone)]
+pub struct Triangle<'a> {
+    u : GeoPoint<'a>,
+    v : GeoPoint<'a>,
+    w : GeoPoint<'a>,
+}
+
+impl<'a> Triangle<'a> {
+    pub fn new(u : GeoPoint<'a>, v : GeoPoint<'a>, w: GeoPoint<'a>) -> Triangle<'a> {
+        Triangle{u:u,v:v,w:w}
     }
 }
 
 /// The standard Indexed Face Set data structure for mesh.
-pub struct Mesh {
-
-    triangles : Vec<Triangle>,
+pub struct Mesh<'a> {
+    
+    //points: Vec<GeoPoint<'a>>,
+    
+    list_norm : Vec<Vector3f>,
+    list_pos: Vec<Vector3f>,
+    list_tex : Option<Vec<Vector2f>>,
+    triangles : Vec<Triangle<'a>>,
 }
 
-impl Mesh {
-    
+impl<'a> Mesh<'a> {
    
-    pub fn add_triangle(&mut self, tri : Triangle) {
-        self.triangles.push(tri);
+    pub fn set_list_norm(&mut self, new_list:Vec<Vector3f>) {
+        self.list_norm = new_list;
+    }
+    
+    pub fn set_list_pos(&mut self, new_list:Vec<Vector3f>) {
+        self.list_pos = new_list;
+    }
+
+    pub fn set_list_tex(&mut self, new_list: Option<Vec<Vector2f>>) {
+        self.list_tex=new_list;
+    }
+
+    pub fn store_position(&mut self,pos:Vector3f) {
+        self.list_pos.push(pos);
+    }
+
+    pub fn store_norm(&mut self, norm:Vector3f) {
+        self.list_norm.push(norm);
+    }
+
+    pub fn gen_point(&'a self,ind_pos:usize, ind_norm:usize,ind_tex:Option<usize>) -> GeoPoint<'a> {
+        let tex_coord = match ind_tex {
+            //TODO Maybe we should that get(i).unwrap() != None, because this is certainly not a
+            //behavior that we want.
+            Some(i) => match self.list_tex {
+                None => panic!("Error, vertex has a texture coordinate, while mesh is storing no texture coordinate"),
+                Some(ref vec) => vec.get(i),
+            },
+            None => match self.list_tex {
+                None => None,
+                Some(_) => panic!("Error, did not provide texture coordinate for a point will the mesh is explicitelly havin a texture mapping"),
+            },
+        };
+         // It is safe to call .unwrap() because we know that the indice is in bound : we only
+        // creates mesh through .obj file and and out of range index could only come from the file
+        let point : GeoPoint<'a> = GeoPoint::new(self.list_pos.get(ind_pos).unwrap(),self.list_norm.get(ind_norm).unwrap(),tex_coord); 
+        point
+    }
+
+
+    pub fn add_triangle(&'a mut self,(ind_pos1,ind_norm1,ind_tex1):(usize,usize,Option<usize>), (ind_pos2,ind_norm2,ind_tex2) : (usize,usize,Option<usize>), (ind_pos3,ind_norm3,ind_tex3):(usize,usize,Option<usize>)) {
+        unimplemented!()
+        //let triangle : Triangle<'a> = Triangle::new(;
+        
+        //self.triangles.push(Triangle::new(&self.points[ind1],self.points.get_unchecked(ind2),self.points.get_unchecked(ind3)));
     }
 
     // Creates a new empty mesh
-    pub fn new_empty() -> Mesh {
-        Mesh{triangles: vec!()}
+    pub fn new_empty() -> Mesh<'a> {
+        Mesh{triangles: vec!(), list_norm: vec!(), list_pos: vec!(), list_tex:None}
     }
-
-    // Returns the triangle-ith triangle of the mesh (where triangle is it's coordinate in the
-    // vector. Clone the value
-    pub fn get_triangle(&self, triangle : usize) -> Triangle {
-        self.triangles[triangle].clone()    
-    }
-
 }
 
 #[derive(Serialize,Deserialize)]
-pub struct Object {
+pub struct Object<'a> {
     #[serde(skip_serializing,skip_deserializing,default = "Mesh::new_empty")]    
     ///The internal geometry data
-    mesh: Mesh,
+    mesh: Mesh<'a>,
     
     ///The color of each triangles.
     color: Color8,
@@ -63,18 +114,70 @@ pub struct Object {
     obj_path: String,    
 }
 
+impl<'a> Object<'a> {
+     pub fn load_mesh(&mut self) {
+        self.mesh = obj_parser::open_obj(&self.obj_path); 
+    }
+}
+
 mod obj_parser {
     use std::fs::File;
     use super::Mesh;
     use std::io::{BufRead, BufReader};
-   
+    use math::{Vector2f,Vector3f}; 
     enum LineType {
         Ignore,
-        Face(u32,u32,Option<u32>),
+        Face((u32,u32,u32),(u32,u32,u32),Option<(u32,u32,u32)>),
         Vertex(f32,f32,f32),
         Normal(f32,f32,f32),
         TexCoord(f32,f32),
     }
+    
+
+    pub fn open_obj<'a>(file: &String) -> Mesh<'a> {
+        
+        let mut result = Mesh::new_empty();
+        let reader = BufReader::new(open_obj_file(file.as_str()));
+        
+        let mut tris : Vec<((u32,u32,u32),(u32,u32,u32),Option<(u32,u32,u32)>)> = vec!();
+        let mut pos : Vec<Vector3f> = vec!();
+        let mut normals : Vec<Vector3f> = vec!();
+        let mut tex : Option<Vec<Vector2f>> = None;
+
+        // We clean the reader of all useless lines before iterating over it.
+        for line in reader.lines().map(|l| l.expect("Error while reading line")).collect::<Vec<String>>() {
+            let parsed_line = match parse_line(line) {
+                Ok(t) => t,
+                Err(e) => panic!(e),
+            };
+            
+            match parsed_line {
+                LineType::Ignore => continue,
+                LineType::Face(pos,norm,tex) => tris.push((pos,norm,tex)),
+                LineType::Normal(x,y,z) => normals.push(Vector3f::new(x,y,z)),
+                LineType::Vertex(x,y,z) => pos.push(Vector3f::new(x,y,z)),
+                LineType::TexCoord(u,v) => match tex {
+                    Some(ref mut vec) => {vec.push(Vector2f::new(u,v));},
+                    None => { tex = Some(vec!());},
+            },
+        };
+        }
+         
+        result.set_list_pos(pos);
+        result.set_list_norm(normals);
+        result.set_list_tex(tex);
+        
+        for triangle in tris {
+            //do triangle stuff here
+
+        }
+        
+        result
+    }
+
+
+
+
     //Split a given line and parse each float value inside.
     fn get_floats(line : String) -> Vec<f32> {
         //We split the string by the whitespaces | parse each substring as a f32 | throw away
@@ -98,6 +201,7 @@ mod obj_parser {
 
     // We know two things : either there is position + normal, or there is position + normal +
     // textures. Plus, we only have vertex per triangle.
+    //TODO: Maybe this function should return a tuple, because it checks that there is only 3 value.
     fn extract_indexes(line : String) -> Result<(Vec<u32>,Vec<u32>,Option<Vec<u32>>),String> {
         let data = get_face(line.clone());
         let mut id_pos : Vec<u32> = vec!();
@@ -148,9 +252,25 @@ mod obj_parser {
         }
     }
 
+    // Get the first 3 elements from a vector and returns them in a tuple
+    fn vec_to_tuple3(vec:Vec<u32>) -> (u32,u32,u32) {
+        (vec[0],vec[1],vec[2])
+    }
+
     fn parse_face(line: String ) -> Result<LineType,String> {
-    
-        unimplemented!() 
+        let indices = extract_indexes(line);
+        match indices {
+            // Transform the vector into a tuple3
+            Ok(i) => { let pos = vec_to_tuple3(i.0);
+                    let norm = vec_to_tuple3(i.1);
+                    match i.2 {
+                        Some(tex_vec) => Ok(LineType::Face(pos,norm,Some(vec_to_tuple3(tex_vec)))),
+                        None => Ok(LineType::Face(pos,norm,None)),
+                    }
+            },
+            //In cas of an error, we just propagate it one level further
+            Err(e) => Err(e), 
+        }
     }
 
     fn parse_tex_coord(line: String) -> Result<LineType,String> {
