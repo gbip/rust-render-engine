@@ -1,9 +1,10 @@
 #![feature(proc_macro)]
 mod math;
-#[allow(non_snake_case)] 
+#[allow(non_snake_case)]
 mod obj3D;
 mod scene;
 mod render;
+mod ray;
 
 #[macro_use]
 extern crate serde_derive;
@@ -14,6 +15,6 @@ use scene::World;
 
 fn main() {
     let world = World::new();
-    world.save_world_to_file("world1.json");    
+    world.save_world_to_file("world1.json");
 
 }
