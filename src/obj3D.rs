@@ -1,18 +1,18 @@
 use std::vec::Vec;
-use math::{Vector3, Vector3f};
+use math::{Vector3, Vector3f,Vector2f};
 use std::clone::Clone;
 use render::{Color8};
 
 
 #[derive(Clone)]
-pub struct GeoPoint {
-    norm : Vector3f,
-    tex: Option<Vector3f>,
-    pos: Vector3f,
+pub struct GeoPoint<'a> {
+    norm : &'a Vector3f,
+    tex: Option<&'a Vector2f>,
+    pos: &'a Vector3f,
 }
 
-impl GeoPoint {
-    pub fn new(norm: Vector3f, tex: Option<Vector3f>, pos:Vector3f) -> GeoPoint {
+impl<'a> GeoPoint<'a> {
+    pub fn new(pos: &'a Vector3f, norm: &'a Vector3f, tex: Option<&'a Vector2f>) -> GeoPoint<'a> {
         GeoPoint{norm:norm,
                 tex:tex,
                 pos:pos}
@@ -21,36 +21,74 @@ impl GeoPoint {
 
 #[derive(Clone)]
 pub struct Triangle<'a> {
-    u : &'a GeoPoint,
-    v : &'a GeoPoint,
-    w : &'a GeoPoint,
+    u : GeoPoint<'a>,
+    v : GeoPoint<'a>,
+    w : GeoPoint<'a>,
 }
 
 impl<'a> Triangle<'a> {
-    pub fn new(u : &'a GeoPoint, v : &'a GeoPoint, w: &'a GeoPoint) -> Triangle<'a> {
+    pub fn new(u : GeoPoint<'a>, v : GeoPoint<'a>, w: GeoPoint<'a>) -> Triangle<'a> {
         Triangle{u:u,v:v,w:w}
     }
 }
 
 /// The standard Indexed Face Set data structure for mesh.
 pub struct Mesh<'a> {
-    points: Vec<GeoPoint>,
+    
+    //points: Vec<GeoPoint<'a>>,
+    
+    list_norm : Vec<Vector3f>,
+    list_pos: Vec<Vector3f>,
+    list_tex : Option<Vec<Vector2f>>,
     triangles : Vec<Triangle<'a>>,
 }
 
 impl<'a> Mesh<'a> {
    
-    pub fn add_triangle(&'a mut self,ind1:usize,ind2:usize,ind3:usize) {
-        // It is safe to call .unwrap() because we know that the indice is in bound : we only
+    pub fn store_position(&mut self,pos:Vector3f) {
+        self.list_pos.push(pos);
+    }
+
+    pub fn store_norm(&mut self, norm:Vector3f) {
+        self.list_norm.push(norm);
+    }
+
+    pub fn store_tex(&mut self, tex:Vector2f) {
+        
+        unimplemented!()
+        
+    }
+
+    pub fn gen_point(&'a self,ind_pos:usize, ind_norm:usize,ind_tex:Option<usize>) -> GeoPoint<'a> {
+        let tex_coord = match ind_tex {
+            //TODO Maybe we should that get(i).unwrap() != None, because this is certainly not a
+            //behavior that we want.
+            Some(i) => match self.list_tex {
+                None => panic!("Error, vertex has a texture coordinate, while mesh is storing no texture coordinate"),
+                Some(ref vec) => vec.get(i),
+            },
+            None => match self.list_tex {
+                None => None,
+                Some(_) => panic!("Error, did not provide texture coordinate for a point will the mesh is explicitelly havin a texture mapping"),
+            },
+        };
+         // It is safe to call .unwrap() because we know that the indice is in bound : we only
         // creates mesh through .obj file and and out of range index could only come from the file
-        let triangle : Triangle<'a> = Triangle::new(self.points.get(ind1).unwrap(),self.points.get(ind2).unwrap(),self.points.get(ind3).unwrap());
+        let point : GeoPoint<'a> = GeoPoint::new(self.list_pos.get(ind_pos).unwrap(),self.list_norm.get(ind_norm).unwrap(),tex_coord); 
+        point
+    }
+
+
+    pub fn add_triangle(&'a mut self,(ind_pos1,ind_norm1,ind_tex1):(usize,usize,Option<usize>), (ind_pos2,ind_norm2,ind_tex2) : (usize,usize,Option<usize>), (ind_pos3,ind_norm3,ind_tex3):(usize,usize,Option<usize>)) {
+        unimplemented!()
+        //let triangle : Triangle<'a> = Triangle::new(;
         
         //self.triangles.push(Triangle::new(&self.points[ind1],self.points.get_unchecked(ind2),self.points.get_unchecked(ind3)));
     }
 
     // Creates a new empty mesh
     pub fn new_empty() -> Mesh<'a> {
-        Mesh{points: vec!(), triangles: vec!()}
+        Mesh{triangles: vec!(), list_norm: vec!(), list_pos: vec!(), list_tex:None}
     }
 }
 
@@ -80,7 +118,7 @@ mod obj_parser {
     use std::fs::File;
     use super::Mesh;
     use std::io::{BufRead, BufReader};
-   
+    use math::{Vector2f,Vector3f}; 
     enum LineType {
         Ignore,
         Face((u32,u32,u32),(u32,u32,u32),Option<(u32,u32,u32)>),
@@ -91,14 +129,32 @@ mod obj_parser {
     
 
     pub fn open_obj<'a>(file: &String) -> Mesh<'a> {
+        
         let result = Mesh::new_empty();
         let reader = BufReader::new(open_obj_file(file.as_str()));
         
+        let mut tris : Vec<((u32,u32,u32),(u32,u32,u32),Option<(u32,u32,u32)>)> = vec!();
+        let mut pos : Vec<Vector3f> = vec!();
+        let mut normals : Vec<Vector3f> = vec!();
+        let mut tex : Vec<Vector2f> = vec!();
+
         // We clean the reader of all useless lines before iterating over it.
         for line in reader.lines().map(|l| l.expect("Error while reading line")).collect::<Vec<String>>() {
-            println!("{}",line);
+            let parsed_line = match parse_line(line) {
+                Ok(t) => t,
+                Err(e) => panic!(e),
+            };
+            
+            match parsed_line {
+                LineType::Ignore => continue,
+                LineType::Face(pos,norm,tex) => tris.push((pos,norm,tex)),
+                LineType::Normal(x,y,z) => normals.push(Vector3f::new(x,y,z)),
+                LineType::Vertex(x,y,z) => pos.push(Vector3f::new(x,y,z)),
+                LineType::TexCoord(u,v) => tex.push(Vector2f::new(u,v)),
+            };
         }
-        result
+        unimplemented!()
+        //result
     }
 
 
