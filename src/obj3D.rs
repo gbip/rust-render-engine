@@ -45,18 +45,24 @@ pub struct Mesh<'a> {
 
 impl<'a> Mesh<'a> {
    
+    pub fn set_list_norm(&mut self, new_list:Vec<Vector3f>) {
+        self.list_norm = new_list;
+    }
+    
+    pub fn set_list_pos(&mut self, new_list:Vec<Vector3f>) {
+        self.list_pos = new_list;
+    }
+
+    pub fn set_list_tex(&mut self, new_list: Option<Vec<Vector2f>>) {
+        self.list_tex=new_list;
+    }
+
     pub fn store_position(&mut self,pos:Vector3f) {
         self.list_pos.push(pos);
     }
 
     pub fn store_norm(&mut self, norm:Vector3f) {
         self.list_norm.push(norm);
-    }
-
-    pub fn store_tex(&mut self, tex:Vector2f) {
-        
-        unimplemented!()
-        
     }
 
     pub fn gen_point(&'a self,ind_pos:usize, ind_norm:usize,ind_tex:Option<usize>) -> GeoPoint<'a> {
@@ -130,13 +136,13 @@ mod obj_parser {
 
     pub fn open_obj<'a>(file: &String) -> Mesh<'a> {
         
-        let result = Mesh::new_empty();
+        let mut result = Mesh::new_empty();
         let reader = BufReader::new(open_obj_file(file.as_str()));
         
         let mut tris : Vec<((u32,u32,u32),(u32,u32,u32),Option<(u32,u32,u32)>)> = vec!();
         let mut pos : Vec<Vector3f> = vec!();
         let mut normals : Vec<Vector3f> = vec!();
-        let mut tex : Vec<Vector2f> = vec!();
+        let mut tex : Option<Vec<Vector2f>> = None;
 
         // We clean the reader of all useless lines before iterating over it.
         for line in reader.lines().map(|l| l.expect("Error while reading line")).collect::<Vec<String>>() {
@@ -150,11 +156,23 @@ mod obj_parser {
                 LineType::Face(pos,norm,tex) => tris.push((pos,norm,tex)),
                 LineType::Normal(x,y,z) => normals.push(Vector3f::new(x,y,z)),
                 LineType::Vertex(x,y,z) => pos.push(Vector3f::new(x,y,z)),
-                LineType::TexCoord(u,v) => tex.push(Vector2f::new(u,v)),
-            };
+                LineType::TexCoord(u,v) => match tex {
+                    Some(ref mut vec) => {vec.push(Vector2f::new(u,v));},
+                    None => { tex = Some(vec!());},
+            },
+        };
         }
-        unimplemented!()
-        //result
+         
+        result.set_list_pos(pos);
+        result.set_list_norm(normals);
+        result.set_list_tex(tex);
+        
+        for triangle in tris {
+            //do triangle stuff here
+
+        }
+        
+        result
     }
 
 
