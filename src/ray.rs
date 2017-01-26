@@ -3,6 +3,7 @@ use math;
 use math::Vector3f;
 use math::VectorialOperations;
 
+#[derive(Debug, PartialEq)]
 pub struct Ray {
     slope : Vector3f,
     origin : Vector3f,
@@ -18,6 +19,7 @@ pub struct Plane {
 
 /** Cet objet contient la position d'un point et un paramètre
 qui permet de positionner ce point sur le rayon. */
+#[derive(Debug, PartialEq)]
 pub struct IntersectionPoint {
     position : Vector3f,
     param : f32,
@@ -83,8 +85,93 @@ impl Surface for Plane {
 
 #[cfg(test)]
 mod tests {
+    use math::Vector3;
+    use ray::*;
+
     #[test]
     fn test_plane_equation() {
-        unimplemented!()
+        let v1 = Vector3f {
+            x : 5.0 - 8.0,
+            y : 3.0 - 3.0,
+            z : 2.0 - 7.0,
+        };
+
+        let v2 = Vector3f {
+            x : 5.0 - 8.0,
+            y : 9.0 - 3.0,
+            z : 1.0 - 7.0,
+        };
+
+        let origin = Vector3f {
+            x : 8.0,
+            y : 3.0,
+            z : 7.0,
+        };
+
+        let test = Vector3f {
+            x : 3.56,
+            y : 8.21,
+            z : 5.0 * 3.56 / 3.0 - 8.21 / 6.0 - 35.0 / 6.0,
+        };
+
+        let plane = Plane::new(&v1, &v2, &origin);
+        assert!(plane.a * test.x + plane.b * test.y + plane.c * test.z + plane.d < 0.001);
+    }
+
+    #[test]
+    fn test_plane_not_intersects_ray() {
+        let plane = Plane {
+            a : 0.0,
+            b : 1.0,
+            c : 6.0,
+            d : 35.0
+        };
+
+        let ray = Ray {
+            origin : Vector3f {
+                x : 8.0,
+                y : 7.0,
+                z : 5.0
+            },
+            slope : Vector3f {
+                x : 1.0,
+                y : 0.0,
+                z : 0.0,
+            }
+        };
+
+        assert!(match plane.getIntersectionPoint(&ray) {
+            None => true,
+            _ => false,
+        });
+    }
+
+    #[test]
+    fn test_plane_intersects_ray_once() {
+        let plane = Plane {
+            a : 0.0,
+            b : 1.0,
+            c : 6.0,
+            d : 35.0
+        };
+
+        let ray = Ray {
+            origin : Vector3f {
+                x : 0.0,
+                y : 0.0,
+                z : 0.0
+            },
+            slope : Vector3f {
+                x : 0.0,
+                y : 1.0,
+                z : 0.0,
+            }
+        };
+
+        let intersection = plane.getIntersectionPoint(&ray);
+        assert!(match intersection {
+            None => false,
+            Some(point) => (point.position - Vector3f {x : 0.0, y : -35.0, z : 0.0}).norm() < 0.001,
+        })
     }
 }
