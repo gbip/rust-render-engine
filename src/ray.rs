@@ -21,7 +21,7 @@ pub struct Plane {
 qui permet de positionner ce point sur le rayon. */
 #[derive(Debug, PartialEq)]
 pub struct IntersectionPoint {
-    position : Vector3f,
+    pub position : Vector3f,
     param : f32,
     unique : bool,
 }
@@ -36,7 +36,7 @@ pub trait Surface {
 
 
 impl Plane {
-    fn new(vec1 : &Vector3f, vec2 : &Vector3f, origin : &Vector3f) -> Plane {
+    pub fn new(vec1 : &Vector3f, vec2 : &Vector3f, origin : &Vector3f) -> Plane {
         let cross = vec1.cross_product_ref(vec2);
         Plane {a : cross.x, b : cross.y, c : cross.z, d : - origin.dot_product(&cross)}
     }
@@ -82,6 +82,8 @@ impl Surface for Plane {
         result
     }
 }
+
+
 
 #[cfg(test)]
 mod tests {

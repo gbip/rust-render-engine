@@ -1,8 +1,8 @@
 use std::vec::Vec;
-use math::{Vector3, Vector3f,Vector2f};
+use math::{Vector3, Vector3f,Vector2f, VectorialOperations};
 use std::clone::Clone;
 use render::{Color8};
-
+use ray::{Ray, Plane, Surface, IntersectionPoint};
 
 #[derive(Clone)]
 pub struct GeoPoint<'a> {
@@ -32,11 +32,42 @@ impl<'a> Triangle<'a> {
     }
 }
 
+impl<'a> Surface for Triangle<'a> {
+    fn getIntersectionPoint(&self, ray : &Ray) -> Option<IntersectionPoint> {
+        let u = *self.u.pos;
+        let v = *self.v.pos;
+        let w = *self.w.pos;
+
+        let vecA = v - u;
+        let vecB = w - u;
+        let plane = Plane::new(&vecA, &vecB, &u);
+
+        let result = plane.getIntersectionPoint(&ray);
+
+        if let Some(ref point) = result {
+            // On calcule si le point appartient à la face triangle
+            let vecP = point.position - u;
+            let a : f32 = vecA.norm();
+            let b : f32 = vecB.norm();
+            let ap : f32 = vecP.dot_product(&vecA) / a;
+            let bp : f32 = vecP.dot_product(&vecB) / b;
+
+            if !(a >= 0.0 && b >= 0.0 && bp / b < 1.0 - ap / a) {
+                return None;
+            }
+
+            // TODO divers traitements d'interpolation (facilités par le calcul de ap et bp)
+        }
+
+        result
+    }
+}
+
 /// The standard Indexed Face Set data structure for mesh.
 pub struct Mesh<'a> {
-    
+
     //points: Vec<GeoPoint<'a>>,
-    
+
     list_norm : Vec<Vector3f>,
     list_pos: Vec<Vector3f>,
     list_tex : Option<Vec<Vector2f>>,
@@ -44,11 +75,11 @@ pub struct Mesh<'a> {
 }
 
 impl<'a> Mesh<'a> {
-   
+
     pub fn set_list_norm(&mut self, new_list:Vec<Vector3f>) {
         self.list_norm = new_list;
     }
-    
+
     pub fn set_list_pos(&mut self, new_list:Vec<Vector3f>) {
         self.list_pos = new_list;
     }
@@ -80,7 +111,7 @@ impl<'a> Mesh<'a> {
         };
          // It is safe to call .unwrap() because we know that the indice is in bound : we only
         // creates mesh through .obj file and and out of range index could only come from the file
-        let point : GeoPoint<'a> = GeoPoint::new(self.list_pos.get(ind_pos).unwrap(),self.list_norm.get(ind_norm).unwrap(),tex_coord); 
+        let point : GeoPoint<'a> = GeoPoint::new(self.list_pos.get(ind_pos).unwrap(),self.list_norm.get(ind_norm).unwrap(),tex_coord);
         point
     }
 
@@ -88,7 +119,7 @@ impl<'a> Mesh<'a> {
     pub fn add_triangle(&'a mut self,(ind_pos1,ind_norm1,ind_tex1):(usize,usize,Option<usize>), (ind_pos2,ind_norm2,ind_tex2) : (usize,usize,Option<usize>), (ind_pos3,ind_norm3,ind_tex3):(usize,usize,Option<usize>)) {
         unimplemented!()
         //let triangle : Triangle<'a> = Triangle::new(;
-        
+
         //self.triangles.push(Triangle::new(&self.points[ind1],self.points.get_unchecked(ind2),self.points.get_unchecked(ind3)));
     }
 
@@ -100,23 +131,23 @@ impl<'a> Mesh<'a> {
 
 #[derive(Serialize,Deserialize)]
 pub struct Object<'a> {
-    #[serde(skip_serializing,skip_deserializing,default = "Mesh::new_empty")]    
+    #[serde(skip_serializing,skip_deserializing,default = "Mesh::new_empty")]
     ///The internal geometry data
     mesh: Mesh<'a>,
-    
+
     ///The color of each triangles.
     color: Color8,
-    
+
     ///The position of the object.
     position: Vector3f,
-    
+
     ///The path to a .obj file that will be used to build the mesh.
-    obj_path: String,    
+    obj_path: String,
 }
 
 impl<'a> Object<'a> {
      pub fn load_mesh(&mut self) {
-        self.mesh = obj_parser::open_obj(&self.obj_path); 
+        self.mesh = obj_parser::open_obj(&self.obj_path);
     }
 }
 
@@ -124,7 +155,7 @@ mod obj_parser {
     use std::fs::File;
     use super::Mesh;
     use std::io::{BufRead, BufReader};
-    use math::{Vector2f,Vector3f}; 
+    use math::{Vector2f,Vector3f};
     enum LineType {
         Ignore,
         Face((u32,u32,u32),(u32,u32,u32),Option<(u32,u32,u32)>),
@@ -132,13 +163,13 @@ mod obj_parser {
         Normal(f32,f32,f32),
         TexCoord(f32,f32),
     }
-    
+
 
     pub fn open_obj<'a>(file: &String) -> Mesh<'a> {
-        
+
         let mut result = Mesh::new_empty();
         let reader = BufReader::new(open_obj_file(file.as_str()));
-        
+
         let mut tris : Vec<((u32,u32,u32),(u32,u32,u32),Option<(u32,u32,u32)>)> = vec!();
         let mut pos : Vec<Vector3f> = vec!();
         let mut normals : Vec<Vector3f> = vec!();
@@ -150,7 +181,7 @@ mod obj_parser {
                 Ok(t) => t,
                 Err(e) => panic!(e),
             };
-            
+
             match parsed_line {
                 LineType::Ignore => continue,
                 LineType::Face(pos,norm,tex) => tris.push((pos,norm,tex)),
@@ -162,16 +193,16 @@ mod obj_parser {
             },
         };
         }
-         
+
         result.set_list_pos(pos);
         result.set_list_norm(normals);
         result.set_list_tex(tex);
-        
+
         for triangle in tris {
             //do triangle stuff here
 
         }
-        
+
         result
     }
 
@@ -194,7 +225,7 @@ mod obj_parser {
                                                 .collect();
         r
     }
-    
+
     fn convert_to_u32(string: &str) -> u32 {
         str::parse::<u32>(string).expect("Error while parsing integer indices")
     }
@@ -232,7 +263,7 @@ mod obj_parser {
         })),
         }
     }
-    
+
     fn parse_normal(line : String) -> Result<LineType,String> {
         //We clone the line, to use line after for debugging.
         let floats = get_floats(line.clone());
@@ -269,7 +300,7 @@ mod obj_parser {
                     }
             },
             //In cas of an error, we just propagate it one level further
-            Err(e) => Err(e), 
+            Err(e) => Err(e),
         }
     }
 
@@ -293,7 +324,7 @@ mod obj_parser {
                 ' ' => parse_vertex(line),
                 'n' => parse_normal(line),
                 't' => parse_tex_coord(line),
-                _ => Err("Unexpected symbol".to_string()), 
+                _ => Err("Unexpected symbol".to_string()),
             },
             _ => Err("Unexpected symbol".to_string()),
         }
