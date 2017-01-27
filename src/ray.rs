@@ -117,7 +117,8 @@ mod tests {
         };
 
         let plane = Plane::new(&v1, &v2, &origin);
-        assert!(plane.a * test.x + plane.b * test.y + plane.c * test.z + plane.d < 0.001);
+        let equation = plane.a * test.x + plane.b * test.y + plane.c * test.z + plane.d;
+        assert!((if equation > 0.0 { equation } else { -equation}) < 0.00001);
     }
 
     #[test]
@@ -173,7 +174,7 @@ mod tests {
         let intersection = plane.getIntersectionPoint(&ray);
         assert!(match intersection {
             None => false,
-            Some(point) => (point.position - Vector3f {x : 0.0, y : -35.0, z : 0.0}).norm() < 0.001,
+            Some(point) => (point.position - Vector3f {x : 0.0, y : -35.0, z : 0.0}).norm() < 0.00001,
         })
     }
 }
