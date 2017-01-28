@@ -80,7 +80,7 @@ fn write_string_to_file(j:&str,file_name:String) -> std::io::Result<()> {
         }
 
         /// Load all objects meshes
-        pub fn load_objects(&mut self) {
+        pub fn load_objects(&'a mut self) {
             self.objects.iter_mut().map(|obj| obj.load_mesh());
         }
 

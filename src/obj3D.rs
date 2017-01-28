@@ -4,6 +4,11 @@ use std::clone::Clone;
 use render::{Color8};
 
 
+struct Raw_Point(usize,usize,Option<usize>);
+struct Raw_Triangle(Raw_Point,Raw_Point,Raw_Point);
+
+
+
 #[derive(Clone)]
 pub struct GeoPoint<'a> {
     norm : &'a Vector3f,
@@ -31,15 +36,49 @@ impl<'a> Triangle<'a> {
         Triangle{u:u,v:v,w:w}
     }
 }
+pub fn gen_point<'a>(vec_pos: &'a Vec<Vector3f>,
+                  vec_norm: &'a Vec<Vector3f>,
+                  vec_tex: &'a Option<Vec<Vector2f>>,
+                  ind_pos:usize,
+                  ind_norm:usize,
+                  ind_tex:Option<usize>)-> GeoPoint<'a> {
+         //For the simplicity of the example, we juste use "None"
+         let point : GeoPoint<'a> = GeoPoint::new(vec_pos.get(ind_pos).unwrap(),vec_norm.get(ind_norm).unwrap(),None);
+         point
+}
 
+fn add_triangles<'a>(triangles : Vec<Raw_Triangle>,
+                        list_triangles : &'a mut Vec<Triangle<'a>>,
+                        list_pos : &'a Vec<Vector3f>,
+                        list_norm : &'a Vec<Vector3f>,
+                        list_tex: &'a Option<Vec<Vector2f>>) {
+    for tr in triangles {
+ 
+        let (ind_pos1,ind_norm1,ind_tex1) = ((tr.0).0,(tr.0).1,(tr.0).2);
+  
+ 
+        let p1 : GeoPoint<'a> = gen_point(list_pos,list_norm,list_tex,ind_pos1,ind_norm1,ind_tex1); //Immutable borrow
+          
+        let p2 : GeoPoint<'a> = gen_point(list_pos,list_norm,list_tex,ind_pos1,ind_norm1,ind_tex1); //Immutable borrow
+         
+        let p3 : GeoPoint<'a> = gen_point(list_pos,list_norm,list_tex,ind_pos1,ind_norm1,ind_tex1); //Immutable borrow
+        
+        list_triangles.push(Triangle::new(p1,p2,p3)) //Mutable borrow
+    }
+}
+
+
+    
+    
 /// The standard Indexed Face Set data structure for mesh.
 pub struct Mesh<'a> {
     
-    //points: Vec<GeoPoint<'a>>,
-    
     list_norm : Vec<Vector3f>,
+    
     list_pos: Vec<Vector3f>,
+    
     list_tex : Option<Vec<Vector2f>>,
+    
     triangles : Vec<Triangle<'a>>,
 }
 
@@ -64,7 +103,7 @@ impl<'a> Mesh<'a> {
     pub fn store_norm(&mut self, norm:Vector3f) {
         self.list_norm.push(norm);
     }
-
+/*
     pub fn gen_point(&'a self,ind_pos:usize, ind_norm:usize,ind_tex:Option<usize>) -> GeoPoint<'a> {
         let tex_coord = match ind_tex {
             //TODO Maybe we should that get(i).unwrap() != None, because this is certainly not a
@@ -84,18 +123,23 @@ impl<'a> Mesh<'a> {
         point
     }
 
-
-    pub fn add_triangle(&'a mut self,(ind_pos1,ind_norm1,ind_tex1):(usize,usize,Option<usize>), (ind_pos2,ind_norm2,ind_tex2) : (usize,usize,Option<usize>), (ind_pos3,ind_norm3,ind_tex3):(usize,usize,Option<usize>)) {
-        unimplemented!()
-        //let triangle : Triangle<'a> = Triangle::new(;
+    pub fn add_triangle<'b>(&'b mut self,(ind_pos1,ind_norm1,ind_tex1):(usize,usize,Option<usize>), (ind_pos2,ind_norm2,ind_tex2) : (usize,usize,Option<usize>), (ind_pos3,ind_norm3,ind_tex3):(usize,usize,Option<usize>)) {
+        let p1 : GeoPoint<'a> = self.gen_point::<'a>(ind_pos1,ind_norm1,ind_tex1);
         
         //self.triangles.push(Triangle::new(&self.points[ind1],self.points.get_unchecked(ind2),self.points.get_unchecked(ind3)));
     }
-
+*/
     // Creates a new empty mesh
     pub fn new_empty() -> Mesh<'a> {
         Mesh{triangles: vec!(), list_norm: vec!(), list_pos: vec!(), list_tex:None}
     }
+
+    pub fn new(pos: Vec<Vector3f>,norm: Vec<Vector3f>, tex:Option<Vec<Vector2f>>) -> Mesh<'a> {
+        Mesh{list_norm:norm,
+            list_pos:pos,
+            list_tex:tex,
+            triangles:vec!()}
+        }
 }
 
 #[derive(Serialize,Deserialize)]
@@ -115,14 +159,14 @@ pub struct Object<'a> {
 }
 
 impl<'a> Object<'a> {
-     pub fn load_mesh(&mut self) {
-        self.mesh = obj_parser::open_obj(&self.obj_path); 
+     pub fn load_mesh(&'a mut self) {
+        obj_parser::open_obj(self.mesh,&self.obj_path); 
     }
 }
 
 mod obj_parser {
+    use super::{Mesh,Raw_Point,Raw_Triangle,add_triangles};
     use std::fs::File;
-    use super::Mesh;
     use std::io::{BufRead, BufReader};
     use math::{Vector2f,Vector3f}; 
     enum LineType {
@@ -132,11 +176,20 @@ mod obj_parser {
         Normal(f32,f32,f32),
         TexCoord(f32,f32),
     }
-    
 
-    pub fn open_obj<'a>(file: &String) -> Mesh<'a> {
+    // A function to convert an Option<(u32,u32,u32)> to (Option<usize>,..).
+    // Useful for parsing texture coordinates
+    pub fn propagate_option(val:Option<(u32,u32,u32)>) -> (Option<usize>,Option<usize>,Option<usize>) {
+        match val {
+            Some(tuple) => (Some(tuple.0 as usize),Some(tuple.1 as usize),Some(tuple.2 as usize)),
+            None => (None,None,None),
+        }
+    }
+    
+    // Open an obj file and return a mesh with the data.
+    pub fn open_obj<'a>(mesh: &'a mut Mesh<'a>,file: &String) {
         
-        let mut result = Mesh::new_empty();
+
         let reader = BufReader::new(open_obj_file(file.as_str()));
         
         let mut tris : Vec<((u32,u32,u32),(u32,u32,u32),Option<(u32,u32,u32)>)> = vec!();
@@ -150,7 +203,7 @@ mod obj_parser {
                 Ok(t) => t,
                 Err(e) => panic!(e),
             };
-            
+            // We parse the file line by line and fill the vectors   
             match parsed_line {
                 LineType::Ignore => continue,
                 LineType::Face(pos,norm,tex) => tris.push((pos,norm,tex)),
@@ -162,17 +215,19 @@ mod obj_parser {
             },
         };
         }
-         
-        result.set_list_pos(pos);
-        result.set_list_norm(normals);
-        result.set_list_tex(tex);
-        
-        for triangle in tris {
-            //do triangle stuff here
 
+        let mut raw_triangle : Vec<Raw_Triangle> = vec!();
+        // We propagate the option for text_coord to the underlying tuple and we perform the
+        // conversion from u32 to usize through propagate_option
+        let mut tris = tris.iter_mut().map(|t| (t.0,t.1,propagate_option(t.2)))
+                                        .collect::<Vec<((u32,u32,u32),(u32,u32,u32),(Option<usize>,Option<usize>,Option<usize>))>>();
+        for t in tris {
+            let (p1,p2,p3) = (Raw_Point((t.0).0 as usize,(t.1).0 as usize,(t.2).0),
+                            Raw_Point((t.0).1 as usize,(t.1).1 as usize,(t.2).1),
+                            Raw_Point((t.0).2 as usize,(t.1).2 as usize,(t.2).2)); 
+            raw_triangle.push(Raw_Triangle(p1,p2,p3))
         }
-        
-        result
+        add_triangles(raw_triangle,&mut mesh.triangles,&mesh.list_pos, &mesh.list_norm,&mesh.list_tex)
     }
 
 
@@ -188,8 +243,8 @@ mod obj_parser {
 
     fn get_face(str : String) -> Vec<Vec<String>> {
         let r : Vec<Vec<String>> = str.split(' ').map(|x| x.split('/') // we split the line by the '/' character
-                                                            .map(|x| x.to_string()) // we convert the char to a string
-                                                            .collect())
+                                                           .map(|x| x.to_string()) // we convert the char to a string
+                                                           .collect())
                                                 .filter(|x| x[0]!="f") // we remove useless junk
                                                 .collect();
         r
