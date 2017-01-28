@@ -31,7 +31,7 @@ pub struct IntersectionPoint {
 pub trait Surface {
     /** @returns the intersection point between the surface and
     the ray given. */
-    fn getIntersectionPoint(&self, ray : &Ray) -> Option<IntersectionPoint>;
+    fn get_intersection_point(&self, ray : &Ray) -> Option<IntersectionPoint>;
 }
 
 
@@ -44,7 +44,7 @@ impl Plane {
 
 impl Surface for Plane {
 
-    fn getIntersectionPoint(&self, ray : &Ray) -> Option<IntersectionPoint> {
+    fn get_intersection_point(&self, ray : &Ray) -> Option<IntersectionPoint> {
 
         let slope : &Vector3f = &ray.slope;
         let origin : &Vector3f = &ray.origin;
@@ -143,7 +143,7 @@ mod tests {
             }
         };
 
-        assert!(match plane.getIntersectionPoint(&ray) {
+        assert!(match plane.get_intersection_point(&ray) {
             None => true,
             _ => false,
         });
@@ -171,7 +171,7 @@ mod tests {
             }
         };
 
-        let intersection = plane.getIntersectionPoint(&ray);
+        let intersection = plane.get_intersection_point(&ray);
         assert!(match intersection {
             None => false,
             Some(point) => (point.position - Vector3f {x : 0.0, y : -35.0, z : 0.0}).norm() < 0.00001,

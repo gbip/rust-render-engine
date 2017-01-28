@@ -33,7 +33,7 @@ impl<'a> Triangle<'a> {
 }
 
 impl<'a> Surface for Triangle<'a> {
-    fn getIntersectionPoint(&self, ray : &Ray) -> Option<IntersectionPoint> {
+    fn get_intersection_point(&self, ray : &Ray) -> Option<IntersectionPoint> {
         let u = *self.u.pos;
         let v = *self.v.pos;
         let w = *self.w.pos;
@@ -42,7 +42,7 @@ impl<'a> Surface for Triangle<'a> {
         let vecB = w - u;
         let plane = Plane::new(&vecA, &vecB, &u);
 
-        let result = plane.getIntersectionPoint(&ray);
+        let result = plane.get_intersection_point(&ray);
 
         if let Some(ref point) = result {
             // On calcule si le point appartient à la face triangle
