@@ -1,4 +1,5 @@
 #![feature(proc_macro)]
+#![allow(dead_code)]
 mod math;
 #[allow(non_snake_case)]
 mod obj3D;
