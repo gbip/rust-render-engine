@@ -160,7 +160,7 @@ pub struct Object<'a> {
 
 impl<'a> Object<'a> {
      pub fn load_mesh(&'a mut self) {
-        obj_parser::open_obj(self.mesh,&self.obj_path); 
+        obj_parser::open_obj(&mut self.mesh,&self.obj_path); 
     }
 }
 

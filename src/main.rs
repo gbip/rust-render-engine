@@ -12,15 +12,10 @@ extern crate serde;
 
 use scene::World;
 
-use obj3D::obj_parser::{};
 use obj3D::{Mesh};
 
 fn main() {
     let world = World::new_empty();
     world.save_world_to_file("world1.json");
-
-}
-
-fn test_parser() {
 
 }
