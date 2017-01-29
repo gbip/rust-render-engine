@@ -4,7 +4,17 @@ use std::clone::Clone;
 use render::{Color8};
 
 
+// The Raw Point represents a triangle point where each coordinate is an index to the real value
+// stored in a vector
+#[derive(Debug)]
 struct Raw_Point(usize,usize,Option<usize>);
+
+// The Raw Data represents a a type of value for each points of the triangle. It could be position,
+// normals or textures.
+struct Raw_Data(u32,u32,u32);
+
+// A simple structure to hold data before initializing the triangle. 
+#[derive(Debug)]
 struct Raw_Triangle(Raw_Point,Raw_Point,Raw_Point);
 
 
@@ -42,8 +52,8 @@ pub fn gen_point<'a>(vec_pos: &'a Vec<Vector3f>,
                   ind_pos:usize,
                   ind_norm:usize,
                   ind_tex:Option<usize>)-> GeoPoint<'a> {
-         //For the simplicity of the example, we juste use "None"
-         let point : GeoPoint<'a> = GeoPoint::new(vec_pos.get(ind_pos).unwrap(),vec_norm.get(ind_norm).unwrap(),None);
+        
+         let point : GeoPoint<'a> = GeoPoint::new(vec_pos.get(ind_pos-1).unwrap(),vec_norm.get(ind_norm-1).unwrap(),None);
          point
 }
 
@@ -56,7 +66,6 @@ fn add_triangles<'a>(triangles : Vec<Raw_Triangle>,
  
         let (ind_pos1,ind_norm1,ind_tex1) = ((tr.0).0,(tr.0).1,(tr.0).2);
   
- 
         let p1 : GeoPoint<'a> = gen_point(list_pos,list_norm,list_tex,ind_pos1,ind_norm1,ind_tex1); //Immutable borrow
           
         let p2 : GeoPoint<'a> = gen_point(list_pos,list_norm,list_tex,ind_pos1,ind_norm1,ind_tex1); //Immutable borrow
@@ -83,7 +92,19 @@ pub struct Mesh<'a> {
 }
 
 impl<'a> Mesh<'a> {
-   
+    
+    pub fn set_pos(& mut self, vec:Vec<Vector3f>) {
+        self.list_pos=vec;
+    }
+
+    pub fn set_norm(& mut self, vec:Vec<Vector3f>) {
+        self.list_norm=vec;
+    }
+
+    pub fn set_tex(& mut self, vec:Option<Vec<Vector2f>>) {
+        self.list_tex=vec;
+    }
+
     // Creates a new empty mesh
     pub fn new_empty() -> Mesh<'a> {
         Mesh{triangles: vec!(), list_norm: vec!(), list_pos: vec!(), list_tex:None}
@@ -135,13 +156,13 @@ impl<'a> Object<'a> {
 }
 
 mod obj_parser {
-    use super::{Mesh,Raw_Point,Raw_Triangle,add_triangles};
+    use super::{Mesh,Raw_Point,Raw_Triangle,Raw_Data,add_triangles};
     use std::fs::File;
     use std::io::{BufRead, BufReader};
     use math::{Vector2f,Vector3f}; 
     enum LineType {
         Ignore,
-        Face((u32,u32,u32),(u32,u32,u32),Option<(u32,u32,u32)>),
+        Face(Raw_Data,Raw_Data,Option<Raw_Data>),
         Vertex(f32,f32,f32),
         Normal(f32,f32,f32),
         TexCoord(f32,f32),
@@ -149,7 +170,7 @@ mod obj_parser {
 
     // A function to convert an Option<(u32,u32,u32)> to (Option<usize>,..).
     // Useful for parsing texture coordinates
-    pub fn propagate_option(val:Option<(u32,u32,u32)>) -> (Option<usize>,Option<usize>,Option<usize>) {
+    fn propagate_option(val:Option<Raw_Data>) -> (Option<usize>,Option<usize>,Option<usize>) {
         match val {
             Some(tuple) => (Some(tuple.0 as usize),Some(tuple.1 as usize),Some(tuple.2 as usize)),
             None => (None,None,None),
@@ -159,10 +180,9 @@ mod obj_parser {
     // Open an obj file and return a mesh with the data.
     pub fn open_obj<'a>(mesh: &'a mut Mesh<'a>,file: &String) {
         
-
         let reader = BufReader::new(open_obj_file(file.as_str()));
         
-        let mut tris : Vec<((u32,u32,u32),(u32,u32,u32),Option<(u32,u32,u32)>)> = vec!();
+        let mut tris : Vec<(Raw_Data,Raw_Data,Option<Raw_Data>)> = vec!();
         let mut pos : Vec<Vector3f> = vec!();
         let mut normals : Vec<Vector3f> = vec!();
         let mut tex : Option<Vec<Vector2f>> = None;
@@ -187,16 +207,23 @@ mod obj_parser {
         }
 
         let mut raw_triangle : Vec<Raw_Triangle> = vec!();
-        // We propagate the option for text_coord to the underlying tuple and we perform the
-        // conversion from u32 to usize through propagate_option
-        let mut tris = tris.iter_mut().map(|t| (t.0,t.1,propagate_option(t.2)))
-                                        .collect::<Vec<((u32,u32,u32),(u32,u32,u32),(Option<usize>,Option<usize>,Option<usize>))>>();
+        
+        // We just convert the Option<Raw_Data> to a (Option<usize>,...,...)
+        let mut tris : Vec<(Raw_Data,Raw_Data,(Option<usize>,Option<usize>,Option<usize>))> = 
+                    tris.into_iter()
+                    .map(|t| (t.0,t.1,propagate_option(t.2)))
+                    .collect::<Vec<(Raw_Data,Raw_Data,(Option<usize>,Option<usize>,Option<usize>))>>();
         for t in tris {
             let (p1,p2,p3) = (Raw_Point((t.0).0 as usize,(t.1).0 as usize,(t.2).0),
                             Raw_Point((t.0).1 as usize,(t.1).1 as usize,(t.2).1),
                             Raw_Point((t.0).2 as usize,(t.1).2 as usize,(t.2).2)); 
             raw_triangle.push(Raw_Triangle(p1,p2,p3))
         }
+        
+        mesh.set_pos(pos);
+        mesh.set_norm(normals);
+        mesh.set_tex(tex);
+        
         add_triangles(raw_triangle,&mut mesh.triangles,&mesh.list_pos, &mesh.list_norm,&mesh.list_tex)
     }
 
@@ -211,9 +238,12 @@ mod obj_parser {
             .collect()
     }
 
+    // Input : " 2//1 4//1 3//1"
+    // Output : [["2", "1"], ["4", "1"], ["3", "1"]]
     fn get_face(str : String) -> Vec<Vec<String>> {
         let r : Vec<Vec<String>> = str.split(' ').map(|x| x.split('/') // we split the line by the '/' character
                                                            .map(|x| x.to_string()) // we convert the char to a string
+                                                           .filter(|x| x!="") // we remove the empty strings
                                                            .collect())
                                                 .filter(|x| x[0]!="f") // we remove useless junk
                                                 .collect();
@@ -224,35 +254,42 @@ mod obj_parser {
         str::parse::<u32>(string).expect("Error while parsing integer indices")
     }
 
+
+    // Take the first 3 elements of a vector, and returns a Raw_Data tuple.
+    fn make_tuple(vec: Vec<u32>) -> Raw_Data {
+        Raw_Data(vec[0],vec[1],vec[2])
+    }
+
     // We know two things : either there is position + normal, or there is position + normal +
     // textures. Plus, we only have vertex per triangle.
-    //TODO: Maybe this function should return a tuple, because it checks that there is only 3 value.
-    fn extract_indexes(line : String) -> Result<(Vec<u32>,Vec<u32>,Option<Vec<u32>>),String> {
+    fn extract_indexes(line : String) -> Result<(Raw_Data,Raw_Data,Option<Raw_Data>),String> {
         let data = get_face(line.clone());
         let mut id_pos : Vec<u32> = vec!();
         let mut id_norm : Vec<u32> = vec!();
         let mut id_tex : Vec<u32> = vec!();
+
+        //Represents the fact that a line may contain an invalid number of indices
         let mut error = false;
         let parsed_data : Vec<Vec<u32>> = data.iter().map(|u|
-                        u.iter()
-                        .map(|val| convert_to_u32(val))
-                        .collect())
+                                                u.iter()
+                                                .map(|val| convert_to_u32(val))
+                                                .collect())
                                                     .collect();
+        
+        //Splitting the case between the position + normal or the pos + norm + tex scenario
+        for elem in parsed_data {
+            match elem.len() {
+                3 => {id_pos.push(elem[0]); id_norm.push(elem[1]); id_tex.push(elem[2])},
+                2 => {id_pos.push(elem[0]);id_norm.push(elem[1]);},
+                _ => {error = true;},
+            }
+        }
 
-
-            //_ => Err(format!("Incorrect number of indices : {} | line : {}", u.len(), line)),
-        parsed_data.iter().map(|u| match u.len() {
-            //TODO : check that the first indice is pos, the second is normal and the third is
-            //texture.
-            3 => {id_pos.push(u[0]); id_norm.push(u[1]); id_tex.push(u[2])},
-            2 => {id_pos.push(u[0]);id_norm.push(u[1]);},
-            _ => {error = true;},
-        });
         match error {
 
         true => Err(format!("Incorrect number of indices, line : {}", line)),
-        false => Ok((id_pos,id_norm, match id_tex.len() {
-                    3 => Some(id_tex),
+        false => Ok((make_tuple(id_pos),make_tuple(id_norm), match id_tex.len() {
+                    3 => Some(make_tuple(id_tex)),
                     _ => None,
         })),
         }
@@ -286,13 +323,7 @@ mod obj_parser {
         let indices = extract_indexes(line);
         match indices {
             // Transform the vector into a tuple3
-            Ok(i) => { let pos = vec_to_tuple3(i.0);
-                    let norm = vec_to_tuple3(i.1);
-                    match i.2 {
-                        Some(tex_vec) => Ok(LineType::Face(pos,norm,Some(vec_to_tuple3(tex_vec)))),
-                        None => Ok(LineType::Face(pos,norm,None)),
-                    }
-            },
+            Ok(i) =>  Ok(LineType::Face(i.0,i.1,i.2)),
             //In cas of an error, we just propagate it one level further
             Err(e) => Err(e), 
         }
@@ -329,5 +360,17 @@ mod obj_parser {
             Ok(t) => t,
             Err(e) => panic!("Error while trying to open the file: {} - {}", path,e),
         }
+    }
+
+    mod test {
+        use super::*;
+
+        #[test]
+        fn test_extract_indices() {
+
+            unimplemented!()
+            
+        }
+
     }
 }
