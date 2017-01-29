@@ -1,10 +1,12 @@
 use std::vec::Vec;
 use math::{Vector3,VectorialOperations, Vector3f};
 use obj3D;
+use obj3D::Object;
 use std::fs::File;
 use std::io::{Write};
 use std;
 use serde_json;
+use render::Color8;
 
 fn write_string_to_file(j:&str,file_name:String) -> std::io::Result<()> {
         let mut file = File::create(file_name).unwrap();
@@ -84,6 +86,7 @@ fn write_string_to_file(j:&str,file_name:String) -> std::io::Result<()> {
             self.objects.iter_mut().map(|obj| obj.load_mesh());
         }
 
+        //Generates a new empty world
         pub fn new_empty() -> World<'a> {
             let base_vector = [Vector3::new(1_f32,0_f32,0_f32),Vector3::new(0_f32,1_f32,0_f32),Vector3::new(0_f32,0_f32,1_f32)];
             World{base_vector:base_vector,
@@ -91,9 +94,21 @@ fn write_string_to_file(j:&str,file_name:String) -> std::io::Result<()> {
                   objects:vec!()}
         }
 
-        /// This function already prints some error handling, so the result type is only there in
-        /// case of.
-        pub fn save_world_to_file(self,file:&str) {
+        //Allocates a new object so that we can initialize it
+        fn get_new_empty_object(&'a mut self) -> &'a mut Object<'a> {
+            self.objects.push(Object::new_empty());
+            self.objects.last_mut().unwrap()
+        }
+       
+
+        //Add an object to the world
+        pub fn add_object(&'a mut self,color:Color8,pos:Vector3f,path:String) {
+            
+            Object::initialize(self.get_new_empty_object(),color,pos,path);
+
+        }
+
+        pub fn save_world_to_file(&self,file:&str) {
             match write_string_to_file(&serde_json::to_string(&self).unwrap() ,file.to_string()) {
 
                 Err(e) =>println!("Could not save world. Error : {}",e),

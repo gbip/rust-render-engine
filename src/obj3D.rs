@@ -84,51 +84,6 @@ pub struct Mesh<'a> {
 
 impl<'a> Mesh<'a> {
    
-    pub fn set_list_norm(&mut self, new_list:Vec<Vector3f>) {
-        self.list_norm = new_list;
-    }
-    
-    pub fn set_list_pos(&mut self, new_list:Vec<Vector3f>) {
-        self.list_pos = new_list;
-    }
-
-    pub fn set_list_tex(&mut self, new_list: Option<Vec<Vector2f>>) {
-        self.list_tex=new_list;
-    }
-
-    pub fn store_position(&mut self,pos:Vector3f) {
-        self.list_pos.push(pos);
-    }
-
-    pub fn store_norm(&mut self, norm:Vector3f) {
-        self.list_norm.push(norm);
-    }
-/*
-    pub fn gen_point(&'a self,ind_pos:usize, ind_norm:usize,ind_tex:Option<usize>) -> GeoPoint<'a> {
-        let tex_coord = match ind_tex {
-            //TODO Maybe we should that get(i).unwrap() != None, because this is certainly not a
-            //behavior that we want.
-            Some(i) => match self.list_tex {
-                None => panic!("Error, vertex has a texture coordinate, while mesh is storing no texture coordinate"),
-                Some(ref vec) => vec.get(i),
-            },
-            None => match self.list_tex {
-                None => None,
-                Some(_) => panic!("Error, did not provide texture coordinate for a point will the mesh is explicitelly havin a texture mapping"),
-            },
-        };
-         // It is safe to call .unwrap() because we know that the indice is in bound : we only
-        // creates mesh through .obj file and and out of range index could only come from the file
-        let point : GeoPoint<'a> = GeoPoint::new(self.list_pos.get(ind_pos).unwrap(),self.list_norm.get(ind_norm).unwrap(),tex_coord); 
-        point
-    }
-
-    pub fn add_triangle<'b>(&'b mut self,(ind_pos1,ind_norm1,ind_tex1):(usize,usize,Option<usize>), (ind_pos2,ind_norm2,ind_tex2) : (usize,usize,Option<usize>), (ind_pos3,ind_norm3,ind_tex3):(usize,usize,Option<usize>)) {
-        let p1 : GeoPoint<'a> = self.gen_point::<'a>(ind_pos1,ind_norm1,ind_tex1);
-        
-        //self.triangles.push(Triangle::new(&self.points[ind1],self.points.get_unchecked(ind2),self.points.get_unchecked(ind3)));
-    }
-*/
     // Creates a new empty mesh
     pub fn new_empty() -> Mesh<'a> {
         Mesh{triangles: vec!(), list_norm: vec!(), list_pos: vec!(), list_tex:None}
@@ -159,8 +114,23 @@ pub struct Object<'a> {
 }
 
 impl<'a> Object<'a> {
-     pub fn load_mesh(&'a mut self) {
+    
+    pub fn initialize(&'a mut self,color:Color8,position:Vector3f,path:String) {
+       self.color=color;
+       self.position=position;
+       self.obj_path=path;
+       self.load_mesh();
+    }
+    
+    pub fn load_mesh(&'a mut self) {
         obj_parser::open_obj(&mut self.mesh,&self.obj_path); 
+    }
+
+    pub fn new_empty() -> Object<'a> {
+        Object{mesh:Mesh::new_empty(),
+                color:Color8::new_black(),
+                position:Vector3::new(0_f32,0_f32,0_f32),
+                obj_path:"".to_string()}
     }
 }
 

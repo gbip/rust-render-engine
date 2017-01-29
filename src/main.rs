@@ -11,11 +11,17 @@ extern crate serde_json;
 extern crate serde;
 
 use scene::World;
-
+use render::Color8;
+use math::Vector3;
 use obj3D::{Mesh};
 
 fn main() {
-    let world = World::new_empty();
-    world.save_world_to_file("world1.json");
+    let mut world = World::new_empty();
+    
+    world.add_object(Color8::new_black(),
+                    Vector3::new(42_f32,0.56_f32,23.2_f32),
+                    "/home/paul/repos/rust-render-engine/models/plane_no_uv.obj".to_string());
+
+    //world.save_world_to_file("world1.json");
 
 }
