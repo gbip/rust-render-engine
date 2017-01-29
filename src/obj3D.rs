@@ -1,8 +1,8 @@
 use std::vec::Vec;
-use math::{Vector3, Vector3f,Vector2f};
+use math::{Vector3, Vector3f,Vector2f, VectorialOperations};
 use std::clone::Clone;
 use render::{Color8};
-
+use ray::{Ray, Plane, Surface, IntersectionPoint};
 
 // The Raw Point represents a triangle point where each coordinate is an index to the real value
 // stored in a vector
@@ -13,7 +13,7 @@ struct Raw_Point(usize,usize,Option<usize>);
 // normals or textures.
 struct Raw_Data(u32,u32,u32);
 
-// A simple structure to hold data before initializing the triangle. 
+// A simple structure to hold data before initializing the triangle.
 #[derive(Debug)]
 struct Raw_Triangle(Raw_Point,Raw_Point,Raw_Point);
 
@@ -46,13 +46,45 @@ impl<'a> Triangle<'a> {
         Triangle{u:u,v:v,w:w}
     }
 }
+
+impl<'a> Surface for Triangle<'a> {
+    fn get_intersection_point(&self, ray : &Ray) -> Option<IntersectionPoint> {
+        let u = *self.u.pos;
+        let v = *self.v.pos;
+        let w = *self.w.pos;
+
+        let vecA = v - u;
+        let vecB = w - u;
+        let plane = Plane::new(&vecA, &vecB, &u);
+
+        let result = plane.get_intersection_point(&ray);
+
+        if let Some(ref point) = result {
+            // On calcule si le point appartient à la face triangle
+            let vecP = point.position - u;
+            let a : f32 = vecA.norm();
+            let b : f32 = vecB.norm();
+            let ap : f32 = vecP.dot_product(&vecA) / a;
+            let bp : f32 = vecP.dot_product(&vecB) / b;
+
+            if !(a >= 0.0 && b >= 0.0 && bp / b < 1.0 - ap / a) {
+                return None;
+            }
+
+            // TODO divers traitements d'interpolation (facilités par le calcul de ap et bp)
+        }
+
+        result
+    }
+}
+
 pub fn gen_point<'a>(vec_pos: &'a Vec<Vector3f>,
                   vec_norm: &'a Vec<Vector3f>,
                   vec_tex: &'a Option<Vec<Vector2f>>,
                   ind_pos:usize,
                   ind_norm:usize,
                   ind_tex:Option<usize>)-> GeoPoint<'a> {
-        
+
          let point : GeoPoint<'a> = GeoPoint::new(vec_pos.get(ind_pos-1).unwrap(),vec_norm.get(ind_norm-1).unwrap(),None);
          point
 }
@@ -63,36 +95,32 @@ fn add_triangles<'a>(triangles : Vec<Raw_Triangle>,
                         list_norm : &'a Vec<Vector3f>,
                         list_tex: &'a Option<Vec<Vector2f>>) {
     for tr in triangles {
- 
+
         let (ind_pos1,ind_norm1,ind_tex1) = ((tr.0).0,(tr.0).1,(tr.0).2);
-  
+
         let p1 : GeoPoint<'a> = gen_point(list_pos,list_norm,list_tex,ind_pos1,ind_norm1,ind_tex1); //Immutable borrow
-          
+
         let p2 : GeoPoint<'a> = gen_point(list_pos,list_norm,list_tex,ind_pos1,ind_norm1,ind_tex1); //Immutable borrow
-         
+
         let p3 : GeoPoint<'a> = gen_point(list_pos,list_norm,list_tex,ind_pos1,ind_norm1,ind_tex1); //Immutable borrow
-        
+
         list_triangles.push(Triangle::new(p1,p2,p3)) //Mutable borrow
     }
 }
 
-
-    
-    
 /// The standard Indexed Face Set data structure for mesh.
 pub struct Mesh<'a> {
-    
+
     list_norm : Vec<Vector3f>,
-    
+
     list_pos: Vec<Vector3f>,
-    
+
     list_tex : Option<Vec<Vector2f>>,
-    
+
     triangles : Vec<Triangle<'a>>,
 }
 
 impl<'a> Mesh<'a> {
-    
     pub fn set_pos(& mut self, vec:Vec<Vector3f>) {
         self.list_pos=vec;
     }
@@ -120,31 +148,30 @@ impl<'a> Mesh<'a> {
 
 #[derive(Serialize,Deserialize)]
 pub struct Object<'a> {
-    #[serde(skip_serializing,skip_deserializing,default = "Mesh::new_empty")]    
+    #[serde(skip_serializing,skip_deserializing,default = "Mesh::new_empty")]
     ///The internal geometry data
     mesh: Mesh<'a>,
-    
+
     ///The color of each triangles.
     color: Color8,
-    
+
     ///The position of the object.
     position: Vector3f,
-    
+
     ///The path to a .obj file that will be used to build the mesh.
-    obj_path: String,    
+    obj_path: String,
 }
 
 impl<'a> Object<'a> {
-    
     pub fn initialize(&'a mut self,color:Color8,position:Vector3f,path:String) {
        self.color=color;
        self.position=position;
        self.obj_path=path;
        self.load_mesh();
     }
-    
+
     pub fn load_mesh(&'a mut self) {
-        obj_parser::open_obj(&mut self.mesh,&self.obj_path); 
+        obj_parser::open_obj(&mut self.mesh,&self.obj_path);
     }
 
     pub fn new_empty() -> Object<'a> {
@@ -159,7 +186,7 @@ mod obj_parser {
     use super::{Mesh,Raw_Point,Raw_Triangle,Raw_Data,add_triangles};
     use std::fs::File;
     use std::io::{BufRead, BufReader};
-    use math::{Vector2f,Vector3f}; 
+    use math::{Vector2f,Vector3f};
     enum LineType {
         Ignore,
         Face(Raw_Data,Raw_Data,Option<Raw_Data>),
@@ -176,12 +203,12 @@ mod obj_parser {
             None => (None,None,None),
         }
     }
-    
+
     // Open an obj file and return a mesh with the data.
     pub fn open_obj<'a>(mesh: &'a mut Mesh<'a>,file: &String) {
-        
+
         let reader = BufReader::new(open_obj_file(file.as_str()));
-        
+
         let mut tris : Vec<(Raw_Data,Raw_Data,Option<Raw_Data>)> = vec!();
         let mut pos : Vec<Vector3f> = vec!();
         let mut normals : Vec<Vector3f> = vec!();
@@ -193,7 +220,8 @@ mod obj_parser {
                 Ok(t) => t,
                 Err(e) => panic!(e),
             };
-            // We parse the file line by line and fill the vectors   
+
+            // We parse the file line by line and fill the vectors
             match parsed_line {
                 LineType::Ignore => continue,
                 LineType::Face(pos,norm,tex) => tris.push((pos,norm,tex)),
@@ -202,28 +230,29 @@ mod obj_parser {
                 LineType::TexCoord(u,v) => match tex {
                     Some(ref mut vec) => {vec.push(Vector2f::new(u,v));},
                     None => { tex = Some(vec!());},
-            },
-        };
+                },
+            };
         }
 
+
         let mut raw_triangle : Vec<Raw_Triangle> = vec!();
-        
+
         // We just convert the Option<Raw_Data> to a (Option<usize>,...,...)
-        let mut tris : Vec<(Raw_Data,Raw_Data,(Option<usize>,Option<usize>,Option<usize>))> = 
+        let mut tris : Vec<(Raw_Data,Raw_Data,(Option<usize>,Option<usize>,Option<usize>))> =
                     tris.into_iter()
                     .map(|t| (t.0,t.1,propagate_option(t.2)))
                     .collect::<Vec<(Raw_Data,Raw_Data,(Option<usize>,Option<usize>,Option<usize>))>>();
         for t in tris {
             let (p1,p2,p3) = (Raw_Point((t.0).0 as usize,(t.1).0 as usize,(t.2).0),
                             Raw_Point((t.0).1 as usize,(t.1).1 as usize,(t.2).1),
-                            Raw_Point((t.0).2 as usize,(t.1).2 as usize,(t.2).2)); 
+                            Raw_Point((t.0).2 as usize,(t.1).2 as usize,(t.2).2));
             raw_triangle.push(Raw_Triangle(p1,p2,p3))
         }
-        
+
         mesh.set_pos(pos);
         mesh.set_norm(normals);
         mesh.set_tex(tex);
-        
+
         add_triangles(raw_triangle,&mut mesh.triangles,&mesh.list_pos, &mesh.list_norm,&mesh.list_tex)
     }
 
@@ -249,7 +278,7 @@ mod obj_parser {
                                                 .collect();
         r
     }
-    
+
     fn convert_to_u32(string: &str) -> u32 {
         str::parse::<u32>(string).expect("Error while parsing integer indices")
     }
@@ -275,7 +304,7 @@ mod obj_parser {
                                                 .map(|val| convert_to_u32(val))
                                                 .collect())
                                                     .collect();
-        
+
         //Splitting the case between the position + normal or the pos + norm + tex scenario
         for elem in parsed_data {
             match elem.len() {
@@ -294,7 +323,7 @@ mod obj_parser {
         })),
         }
     }
-    
+
     fn parse_normal(line : String) -> Result<LineType,String> {
         //We clone the line, to use line after for debugging.
         let floats = get_floats(line.clone());
@@ -325,7 +354,7 @@ mod obj_parser {
             // Transform the vector into a tuple3
             Ok(i) =>  Ok(LineType::Face(i.0,i.1,i.2)),
             //In cas of an error, we just propagate it one level further
-            Err(e) => Err(e), 
+            Err(e) => Err(e),
         }
     }
 
@@ -349,7 +378,7 @@ mod obj_parser {
                 ' ' => parse_vertex(line),
                 'n' => parse_normal(line),
                 't' => parse_tex_coord(line),
-                _ => Err("Unexpected symbol".to_string()), 
+                _ => Err("Unexpected symbol".to_string()),
             },
             _ => Err("Unexpected symbol".to_string()),
         }
@@ -369,8 +398,23 @@ mod obj_parser {
         fn test_extract_indices() {
 
             unimplemented!()
-            
+
         }
 
     }
+}
+
+
+#[cfg(test)]
+mod tests {
+
+    use obj3D::*;
+
+    #[test]
+    fn test_triangle_intersects() {
+        unimplemented!();
+    }
+
+    // TESTS DU PARSER
+
 }
