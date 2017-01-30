@@ -22,8 +22,14 @@ qui permet de positionner ce point sur le rayon. */
 #[derive(Debug, PartialEq)]
 pub struct IntersectionPoint {
     pub position : Vector3f,
+    pub fragment : Fragment,
     param : f32,
-    unique : bool,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Fragment {
+    normal : Vector3f,
+    tex : Option<Vector3f>,
 }
 
 
@@ -33,6 +39,7 @@ pub trait Surface {
     the ray given. */
     fn get_intersection_point(&self, ray : &Ray) -> Option<IntersectionPoint>;
 }
+
 
 
 impl Plane {
@@ -55,31 +62,38 @@ impl Surface for Plane {
 
         let result : Option<IntersectionPoint>;
         if m == 0.0 {
-            if p == 0.0 {
-                result = Some(IntersectionPoint {
-                    position : Vector3f {x : 0.0, y : 0.0, z : 0.0},
-                    param : 0.0,
-                    unique : false });
-            }
-            else {
-                result = None;
-            }
+            result = None;
         }
         else {
             let t = p / m;
 
-            result = Some(IntersectionPoint {
-                position : Vector3f {
-                    x : slope.x * t + origin.x,
-                    y : slope.y * t + origin.y,
-                    z : slope.z * t + origin.z,
-                },
-                param : t,
-                unique : true,
-            });
+            if t < 0.0 {
+                //La surface est "avant" le point d'émission du rayon
+                result = None;
+            }
+            else {
+                result = Some(IntersectionPoint {
+                    position : Vector3f {
+                        x : slope.x * t + origin.x,
+                        y : slope.y * t + origin.y,
+                        z : slope.z * t + origin.z,
+                    },
+                    fragment : Fragment::new_empty(),
+                    param : t,
+                });
+            }
         }
 
         result
+    }
+}
+
+impl Fragment {
+    pub fn new_empty() -> Fragment {
+        Fragment {
+            normal : Vector3f { x: 0_f32, y: 0_f32, z: 0_f32 },
+            tex : None,
+        }
     }
 }
 
@@ -150,7 +164,7 @@ mod tests {
     }
 
     #[test]
-    fn test_plane_intersects_ray_once() {
+    fn test_plane_not_intersects_ray_due_to_wrong_sense() {
         let plane = Plane {
             a : 0.0,
             b : 1.0,
@@ -173,8 +187,37 @@ mod tests {
 
         let intersection = plane.get_intersection_point(&ray);
         assert!(match intersection {
+            None => true,
+            Some(point) => false,
+        });
+    }
+
+    #[test]
+    fn test_plane_intersects_ray_once() {
+        let plane = Plane {
+            a : 0.0,
+            b : 1.0,
+            c : 6.0,
+            d : 35.0
+        };
+
+        let ray = Ray {
+            origin : Vector3f {
+                x : 0.0,
+                y : 0.0,
+                z : 0.0
+            },
+            slope : Vector3f {
+                x : 0.0,
+                y : -1.0,
+                z : 0.0,
+            }
+        };
+
+        let intersection = plane.get_intersection_point(&ray);
+        assert!(match intersection {
             None => false,
             Some(point) => (point.position - Vector3f {x : 0.0, y : -35.0, z : 0.0}).norm() < 0.00001,
-        })
+        });
     }
 }

@@ -2,7 +2,7 @@ use std::vec::Vec;
 use math::{Vector3, Vector3f,Vector2f, VectorialOperations};
 use std::clone::Clone;
 use render::{Color8};
-use ray::{Ray, Plane, Surface, IntersectionPoint};
+use ray::{Ray, Plane, Surface, IntersectionPoint, Fragment};
 
 // The Raw Point represents a triangle point where each coordinate is an index to the real value
 // stored in a vector
@@ -57,7 +57,8 @@ impl<'a> Surface for Triangle<'a> {
         let vecB = w - u;
         let plane = Plane::new(&vecA, &vecB, &u);
 
-        let result = plane.get_intersection_point(&ray);
+        let mut result = plane.get_intersection_point(&ray);
+        let fragment = Fragment::new_empty();
 
         if let Some(ref point) = result {
             // On calcule si le point appartient à la face triangle
@@ -71,7 +72,7 @@ impl<'a> Surface for Triangle<'a> {
                 return None;
             }
 
-            // TODO divers traitements d'interpolation (facilités par le calcul de ap et bp)
+            // TODO Interpolation des normales et textures
         }
 
         result
