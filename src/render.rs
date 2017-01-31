@@ -1,5 +1,4 @@
 use std::vec::Vec;
-use std::fs::File;
 use std::path::Path;
 use scene;
 

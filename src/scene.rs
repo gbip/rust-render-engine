@@ -127,7 +127,7 @@ impl World {
     }
 
     pub fn save_world_to_file(&self,file:&str) {
-        match write_string_to_file(&serde_json::to_string(&self).unwrap() ,file.to_string()) {
+        match write_string_to_file(&serde_json::to_string_pretty(&self).unwrap() ,file.to_string()) {
 
             Err(e) =>println!("Could not save world. Error : {}",e),
 
