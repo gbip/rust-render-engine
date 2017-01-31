@@ -47,22 +47,23 @@ impl<'a> Triangle<'a> {
     }
 }
 
+
 impl<'a> Surface for Triangle<'a> {
     fn get_intersection_point(&self, ray : &Ray) -> Option<IntersectionPoint> {
-        let u = *self.u.pos;
-        let v = *self.v.pos;
-        let w = *self.w.pos;
+        let u = self.u.pos;
+        let v = self.v.pos;
+        let w = self.w.pos;
 
-        let vecA = v - u;
-        let vecB = w - u;
-        let plane = Plane::new(&vecA, &vecB, &u);
+        // Calcul des vecteurs du repère barycentrique
+        let vecA = *v - *u;
+        let vecB = *w - *u;
+        let plane = Plane::new(&vecA, &vecB, u);
 
         let mut result = plane.get_intersection_point(&ray);
-        let fragment = Fragment::new_empty();
 
-        if let Some(ref point) = result {
+        if let Some(ref mut point) = result {
             // On calcule si le point appartient à la face triangle
-            let vecP = point.position - u;
+            let vecP = point.position - *u;
             let a : f32 = vecA.norm();
             let b : f32 = vecB.norm();
             let ap : f32 = vecP.dot_product(&vecA) / a;
@@ -72,7 +73,12 @@ impl<'a> Surface for Triangle<'a> {
                 return None;
             }
 
-            // TODO Interpolation des normales et textures
+            // Interpolation des normales et textures
+            let na = *self.v.norm - *self.u.norm;
+            let nb = *self.w.norm - *self.u.norm;
+            point.fragment.normal = *self.u.norm + (na * (ap / a)) + (nb * (bp / b));
+
+            // TODO textures
         }
 
         result

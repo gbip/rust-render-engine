@@ -23,13 +23,13 @@ qui permet de positionner ce point sur le rayon. */
 pub struct IntersectionPoint {
     pub position : Vector3f,
     pub fragment : Fragment,
-    param : f32,
+    pub param : f32,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Fragment {
-    normal : Vector3f,
-    tex : Option<Vector3f>,
+    pub normal : Vector3f,
+    pub tex : Option<Vector3f>,
 }
 
 
