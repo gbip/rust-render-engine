@@ -1,7 +1,7 @@
 use std::vec::Vec;
 use math::{Vector3, Vector3f,Vector2f, VectorialOperations};
 use std::clone::Clone;
-use render::{Color8};
+use render::{Color8, Color};
 use ray::{Ray, Plane, Surface, IntersectionPoint, Fragment};
 
 // The Raw Point represents a triangle point where each coordinate is an index to the real value
@@ -183,7 +183,7 @@ impl<'a> Object<'a> {
 
     pub fn new_empty() -> Object<'a> {
         Object{mesh:Mesh::new_empty(),
-                color:Color8::new_black(),
+                color:Color8::new_neutral(),
                 position:Vector3::new(0_f32,0_f32,0_f32),
                 obj_path:"".to_string()}
     }

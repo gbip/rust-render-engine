@@ -1,7 +1,9 @@
 use std::vec::Vec;
+use std::fs::File;
+use std::path::Path;
 use scene;
 
-extern crate image;
+use image;
 
 /// A tuple that represents a color in a RGB value on 8 bits
 #[derive(Clone,Debug,Serialize,Deserialize)]
@@ -11,56 +13,71 @@ pub struct Color8 {
     b : u8,
 }
 
+pub struct ImageData<T : Color> {
+    width : usize,
+    height : usize,
+    pub pixels : Vec<T>
+}
+
+pub trait Color : Clone {
+    fn new_neutral() -> Self;
+    fn get_RGB(&self) -> (u8, u8, u8);
+    fn get_RGBA(&self) -> (u8, u8, u8, u8);
+}
+
+
 impl Color8 {
-    fn is_black(&self) -> bool {
-        self.r==0 && self.g == 0 && self.b == 0
-    }
-    pub fn new_black() -> Self {
-        Color8{r:0,g:0,b:0}
-    }
     pub fn new(r:u8,g:u8,b:u8) -> Self {
         Color8{r:r,g:g,b:b}
     }
 }
 
-pub struct ImageData<T> {
-    pub pixels : Vec<Vec<T>>
+impl Color for Color8 {
+    fn new_neutral() -> Self {
+        Color8{r:0,g:0,b:0}
+    }
+
+    fn get_RGB(&self) -> (u8, u8, u8) {
+        (self.r, self.g, self.b)
+    }
+
+    fn get_RGBA(&self) -> (u8, u8, u8, u8) {
+        (self.r, self.g, self.b, 255_u8)
+    }
 }
 
-pub type Image = ImageData<Color8>;
+impl<T : Color> ImageData<T> {
 
-impl ImageData<Color8> {
-    fn display_black(&self) {
-        let mut result : String = "".to_string();
-            for line in self.pixels.iter() {
-                for pixel in line.iter() {
-                    if !pixel.is_black() {
-                        result.push('#');
-                    }
-                    else {
-                        result.push('*');
-                    }
-                }
-                result.push('\n');
-            }
-            println!("{}",result);
+    pub fn new(sizex:usize, sizey:usize) -> Self {
+        let px : Vec<T> = vec![T::new_neutral(); sizex * sizey];
+        ImageData::<T> {width : sizex, height: sizey, pixels:px}
     }
 
-    pub fn draw_horizontal_line(&mut self,a:usize,b:usize,y:usize, color:Color8) {
-        for i in a..b {
-            self.pixels[y][i] = color.clone();
+    pub fn write_to_file(&self, pathname : &str) {
+        let mut buffer = vec!();
+
+        for ref color in self.pixels.iter() {
+            let (r, g, b) = color.get_RGB();
+            buffer.push(r);
+            buffer.push(g);
+            buffer.push(b);
         }
-    }
-    pub fn new(sizex:usize,sizey:usize) -> Self {
-        let px : Vec<Vec<Color8>> = vec!(vec!(Color8::new_black()));
-        Image{pixels:px}
+
+        let _ = image::save_buffer(&Path::new(pathname), buffer.as_slice(), self.width, self.height, image::RGB(8)).unwrap();
     }
 }
 
 use math::Vector2;
-/// Represent a Surface on which you can draw a picture (a screen, a file, etc.)
-trait Surface {
-    fn write_to(data : &Image);
+
+pub struct Renderer {
+    resX : usize,
+    resY : usize,
+}
+
+impl Renderer {
+    fn render(&self) {
+
+    }
 }
 
 /// An internal data structur that represent the boundary box of the region to be rendered
