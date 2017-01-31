@@ -81,7 +81,7 @@ impl Renderer {
 
     pub fn render(&self, world : &scene::World, camera : &mut scene::Camera) -> ImageData<Color8> {
         // Création de l'image qui résulte du rendu
-        let mut result = ImageData::<Color8>::new(self.res_x, self.res_y);
+        let result = ImageData::<Color8>::new(self.res_x, self.res_y);
 
         // On paramètre la caméra
         let fres_x = self.res_x as f32;

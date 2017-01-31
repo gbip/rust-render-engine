@@ -1,33 +1,33 @@
 use std::vec::Vec;
 use math::{Vector3, Vector3f,Vector2f, VectorialOperations};
-use std::clone::Clone;
 use render::{Color8, Color};
-use ray::{Ray, Plane, Surface, IntersectionPoint, Fragment};
+use ray::{Ray, Plane, Surface, IntersectionPoint};
 
 // The Raw Point represents a triangle point where each coordinate is an index to the real value
 // stored in a vector
 #[derive(Debug)]
-struct Raw_Point(usize,usize,Option<usize>);
+
+struct RawPoint(usize,usize,Option<usize>);
 
 // The Raw Data represents a a type of value for each points of the triangle. It could be position,
 // normals or textures.
-struct Raw_Data(u32,u32,u32);
+struct RawData(u32,u32,u32);
 
 // A simple structure to hold data before initializing the triangle.
 #[derive(Debug)]
-struct Raw_Triangle(Raw_Point,Raw_Point,Raw_Point);
+struct RawTriangle(RawPoint,RawPoint,RawPoint);
 
 
 
 #[derive(Clone)]
-pub struct GeoPoint<'a> {
-    norm : &'a Vector3f,
-    tex: Option<&'a Vector2f>,
-    pos: &'a Vector3f,
+pub struct GeoPoint {
+    norm : Vector3f,
+    tex: Option<Vector2f>,
+    pos: Vector3f,
 }
 
-impl<'a> GeoPoint<'a> {
-    pub fn new(pos: &'a Vector3f, norm: &'a Vector3f, tex: Option<&'a Vector2f>) -> GeoPoint<'a> {
+impl GeoPoint {
+    pub fn new(pos: Vector3f, norm: Vector3f, tex: Option<Vector2f>) -> GeoPoint {
         GeoPoint{norm:norm,
                 tex:tex,
                 pos:pos}
@@ -35,35 +35,35 @@ impl<'a> GeoPoint<'a> {
 }
 
 #[derive(Clone)]
-pub struct Triangle<'a> {
-    u : GeoPoint<'a>,
-    v : GeoPoint<'a>,
-    w : GeoPoint<'a>,
+pub struct Triangle {
+    u : GeoPoint,
+    v : GeoPoint,
+    w : GeoPoint,
 }
 
-impl<'a> Triangle<'a> {
-    pub fn new(u : GeoPoint<'a>, v : GeoPoint<'a>, w: GeoPoint<'a>) -> Triangle<'a> {
+impl Triangle {
+    pub fn new(u : GeoPoint, v : GeoPoint, w: GeoPoint) -> Triangle {
         Triangle{u:u,v:v,w:w}
     }
 }
 
 
-impl<'a> Surface for Triangle<'a> {
+impl Surface for Triangle {
     fn get_intersection_point(&self, ray : &Ray) -> Option<IntersectionPoint> {
         let u = self.u.pos;
         let v = self.v.pos;
         let w = self.w.pos;
 
         // Calcul des vecteurs du repère barycentrique
-        let vecA = *v - *u;
-        let vecB = *w - *u;
-        let plane = Plane::new(&vecA, &vecB, u);
+        let vecA = &v - &u;
+        let vecB = &w - &u;
+        let plane = Plane::new(&vecA, &vecB, &u);
 
         let mut result = plane.get_intersection_point(&ray);
 
         if let Some(ref mut point) = result {
             // On calcule si le point appartient à la face triangle
-            let vecP = point.position - *u;
+            let vecP = point.position - u;
             let a : f32 = vecA.norm();
             let b : f32 = vecB.norm();
             let ap : f32 = vecP.dot_product(&vecA) / a;
@@ -74,9 +74,9 @@ impl<'a> Surface for Triangle<'a> {
             }
 
             // Interpolation des normales et textures
-            let na = *self.v.norm - *self.u.norm;
-            let nb = *self.w.norm - *self.u.norm;
-            point.fragment.normal = *self.u.norm + (na * (ap / a)) + (nb * (bp / b));
+            let na = &self.v.norm - &self.u.norm;
+            let nb = &self.w.norm - &self.u.norm;
+            point.fragment.normal = self.u.norm + (na * (ap / a)) + (nb * (bp / b));
 
             // TODO textures
         }
@@ -85,38 +85,8 @@ impl<'a> Surface for Triangle<'a> {
     }
 }
 
-pub fn gen_point<'a>(vec_pos: &'a Vec<Vector3f>,
-                  vec_norm: &'a Vec<Vector3f>,
-                  vec_tex: &'a Option<Vec<Vector2f>>,
-                  ind_pos:usize,
-                  ind_norm:usize,
-                  ind_tex:Option<usize>)-> GeoPoint<'a> {
-
-         let point : GeoPoint<'a> = GeoPoint::new(vec_pos.get(ind_pos-1).unwrap(),vec_norm.get(ind_norm-1).unwrap(),None);
-         point
-}
-
-fn add_triangles<'a>(triangles : Vec<Raw_Triangle>,
-                        list_triangles : &'a mut Vec<Triangle<'a>>,
-                        list_pos : &'a Vec<Vector3f>,
-                        list_norm : &'a Vec<Vector3f>,
-                        list_tex: &'a Option<Vec<Vector2f>>) {
-    for tr in triangles {
-
-        let (ind_pos1,ind_norm1,ind_tex1) = ((tr.0).0,(tr.0).1,(tr.0).2);
-
-        let p1 : GeoPoint<'a> = gen_point(list_pos,list_norm,list_tex,ind_pos1,ind_norm1,ind_tex1); //Immutable borrow
-
-        let p2 : GeoPoint<'a> = gen_point(list_pos,list_norm,list_tex,ind_pos1,ind_norm1,ind_tex1); //Immutable borrow
-
-        let p3 : GeoPoint<'a> = gen_point(list_pos,list_norm,list_tex,ind_pos1,ind_norm1,ind_tex1); //Immutable borrow
-
-        list_triangles.push(Triangle::new(p1,p2,p3)) //Mutable borrow
-    }
-}
-
 /// The standard Indexed Face Set data structure for mesh.
-pub struct Mesh<'a> {
+pub struct Mesh {
 
     list_norm : Vec<Vector3f>,
 
@@ -124,10 +94,10 @@ pub struct Mesh<'a> {
 
     list_tex : Option<Vec<Vector2f>>,
 
-    triangles : Vec<Triangle<'a>>,
+    triangles : Vec<Triangle>,
 }
 
-impl<'a> Mesh<'a> {
+impl Mesh {
     pub fn set_pos(& mut self, vec:Vec<Vector3f>) {
         self.list_pos=vec;
     }
@@ -141,23 +111,54 @@ impl<'a> Mesh<'a> {
     }
 
     // Creates a new empty mesh
-    pub fn new_empty() -> Mesh<'a> {
+    pub fn new_empty() -> Mesh {
         Mesh{triangles: vec!(), list_norm: vec!(), list_pos: vec!(), list_tex:None}
     }
 
-    pub fn new(pos: Vec<Vector3f>,norm: Vec<Vector3f>, tex:Option<Vec<Vector2f>>) -> Mesh<'a> {
+    pub fn new(pos: Vec<Vector3f>,norm: Vec<Vector3f>, tex:Option<Vec<Vector2f>>) -> Mesh {
         Mesh{list_norm:norm,
             list_pos:pos,
             list_tex:tex,
             triangles:vec!()}
+    }
+
+    fn create_point(&self,pos:usize,norm:usize,tex:Option<usize>) -> GeoPoint {
+
+        // VERY IMPORTANT : We have to offset all indices by -1 because in a .obj file, indices starts at 1, while in a Vec they starts at 0 !
+        GeoPoint::new(self.list_pos[pos-1], self.list_norm[norm-1], match tex {
+            Some(index) => match self.list_tex {
+                Some(ref vec) => Some(vec[index-1]),
+                None => panic!("Error, a point as a texture coordinate while the mesh doesn't have one.")
+        },
+            None => match self.list_tex {
+                None => None,
+                Some(_) => panic!("Error, the mesh has some texture coordinates, but a point doesn't have texture coordinates."),
+            }
+        })
+    }
+    
+
+    fn add_triangles(&mut self,tris:Vec<RawTriangle>) {
+
+        for triangle in tris {
+            let p1 = triangle.0;
+            let p2 = triangle.1;
+            let p3 = triangle.2;
+            let u = self.create_point(p1.0,p1.1,p1.2);
+            let v = self.create_point(p2.0,p2.1,p2.2);
+            let w = self.create_point(p3.0,p3.1,p3.2);
+            self.triangles.push(Triangle::new(u,v,w));
         }
+
+    }
+
 }
 
 #[derive(Serialize,Deserialize)]
-pub struct Object<'a> {
+pub struct Object {
     #[serde(skip_serializing,skip_deserializing,default = "Mesh::new_empty")]
     ///The internal geometry data
-    mesh: Mesh<'a>,
+    mesh: Mesh,
 
     ///The color of each triangles.
     color: Color8,
@@ -169,19 +170,23 @@ pub struct Object<'a> {
     obj_path: String,
 }
 
-impl<'a> Object<'a> {
-    pub fn initialize(&'a mut self,color:Color8,position:Vector3f,path:String) {
-       self.color=color;
-       self.position=position;
-       self.obj_path=path;
-       self.load_mesh();
+impl Object {
+    //Creates a new object and load the mesh.
+    pub fn new(color:Color8,position:Vector3f,path:String) -> Object {
+        let mut result = Object::new_empty();
+        result.color=color;
+        result.position=position;
+        result.obj_path=path;
+        result.load_mesh();
+        result
     }
 
-    pub fn load_mesh(&'a mut self) {
-        obj_parser::open_obj(&mut self.mesh,&self.obj_path);
+    //Load the mesh for the object "self", through obj_parser
+    pub fn load_mesh(& mut self) {
+        self.mesh = obj_parser::open_obj(&self.obj_path);
     }
 
-    pub fn new_empty() -> Object<'a> {
+    pub fn new_empty() -> Object {
         Object{mesh:Mesh::new_empty(),
                 color:Color8::new_neutral(),
                 position:Vector3::new(0_f32,0_f32,0_f32),
@@ -190,13 +195,13 @@ impl<'a> Object<'a> {
 }
 
 mod obj_parser {
-    use super::{Mesh,Raw_Point,Raw_Triangle,Raw_Data,add_triangles};
+    use super::{Mesh,RawPoint,RawTriangle,RawData};
     use std::fs::File;
     use std::io::{BufRead, BufReader};
     use math::{Vector2f,Vector3f};
     enum LineType {
         Ignore,
-        Face(Raw_Data,Raw_Data,Option<Raw_Data>),
+        Face(RawData,RawData,Option<RawData>),
         Vertex(f32,f32,f32),
         Normal(f32,f32,f32),
         TexCoord(f32,f32),
@@ -204,7 +209,7 @@ mod obj_parser {
 
     // A function to convert an Option<(u32,u32,u32)> to (Option<usize>,..).
     // Useful for parsing texture coordinates
-    fn propagate_option(val:Option<Raw_Data>) -> (Option<usize>,Option<usize>,Option<usize>) {
+    fn propagate_option(val:Option<RawData>) -> (Option<usize>,Option<usize>,Option<usize>) {
         match val {
             Some(tuple) => (Some(tuple.0 as usize),Some(tuple.1 as usize),Some(tuple.2 as usize)),
             None => (None,None,None),
@@ -212,11 +217,11 @@ mod obj_parser {
     }
 
     // Open an obj file and return a mesh with the data.
-    pub fn open_obj<'a>(mesh: &'a mut Mesh<'a>,file: &String) {
+    pub fn open_obj(file: &String) -> Mesh {
 
         let reader = BufReader::new(open_obj_file(file.as_str()));
 
-        let mut tris : Vec<(Raw_Data,Raw_Data,Option<Raw_Data>)> = vec!();
+        let mut tris : Vec<(RawData,RawData,Option<RawData>)> = vec!();
         let mut pos : Vec<Vector3f> = vec!();
         let mut normals : Vec<Vector3f> = vec!();
         let mut tex : Option<Vec<Vector2f>> = None;
@@ -241,26 +246,29 @@ mod obj_parser {
             };
         }
 
+        let mut mesh = Mesh::new_empty();
 
-        let mut raw_triangle : Vec<Raw_Triangle> = vec!();
 
-        // We just convert the Option<Raw_Data> to a (Option<usize>,...,...)
-        let mut tris : Vec<(Raw_Data,Raw_Data,(Option<usize>,Option<usize>,Option<usize>))> =
+        let mut raw_triangles : Vec<RawTriangle> = vec!();
+
+        // We just convert the Option<RawData> to a (Option<usize>,...,...)
+        let tris : Vec<(RawData,RawData,(Option<usize>,Option<usize>,Option<usize>))> =
                     tris.into_iter()
                     .map(|t| (t.0,t.1,propagate_option(t.2)))
-                    .collect::<Vec<(Raw_Data,Raw_Data,(Option<usize>,Option<usize>,Option<usize>))>>();
+                    .collect::<Vec<(RawData,RawData,(Option<usize>,Option<usize>,Option<usize>))>>();
         for t in tris {
-            let (p1,p2,p3) = (Raw_Point((t.0).0 as usize,(t.1).0 as usize,(t.2).0),
-                            Raw_Point((t.0).1 as usize,(t.1).1 as usize,(t.2).1),
-                            Raw_Point((t.0).2 as usize,(t.1).2 as usize,(t.2).2));
-            raw_triangle.push(Raw_Triangle(p1,p2,p3))
+            let (p1,p2,p3) = (RawPoint((t.0).0 as usize,(t.1).0 as usize,(t.2).0),
+                            RawPoint((t.0).1 as usize,(t.1).1 as usize,(t.2).1),
+                            RawPoint((t.0).2 as usize,(t.1).2 as usize,(t.2).2));
+            raw_triangles.push(RawTriangle(p1,p2,p3))
         }
 
         mesh.set_pos(pos);
         mesh.set_norm(normals);
         mesh.set_tex(tex);
 
-        add_triangles(raw_triangle,&mut mesh.triangles,&mesh.list_pos, &mesh.list_norm,&mesh.list_tex)
+        mesh.add_triangles(raw_triangles);
+        mesh
     }
 
 
@@ -291,14 +299,14 @@ mod obj_parser {
     }
 
 
-    // Take the first 3 elements of a vector, and returns a Raw_Data tuple.
-    fn make_tuple(vec: Vec<u32>) -> Raw_Data {
-        Raw_Data(vec[0],vec[1],vec[2])
+    // Take the first 3 elements of a vector, and returns a RawData tuple.
+    fn make_tuple(vec: Vec<u32>) -> RawData {
+        RawData(vec[0],vec[1],vec[2])
     }
 
     // We know two things : either there is position + normal, or there is position + normal +
     // textures. Plus, we only have vertex per triangle.
-    fn extract_indexes(line : String) -> Result<(Raw_Data,Raw_Data,Option<Raw_Data>),String> {
+    fn extract_indexes(line : String) -> Result<(RawData,RawData,Option<RawData>),String> {
         let data = get_face(line.clone());
         let mut id_pos : Vec<u32> = vec!();
         let mut id_norm : Vec<u32> = vec!();
@@ -397,17 +405,12 @@ mod obj_parser {
             Err(e) => panic!("Error while trying to open the file: {} - {}", path,e),
         }
     }
-
+    #[cfg(test)]
     mod test {
-        use super::*;
-
         #[test]
         fn test_extract_indices() {
-
             unimplemented!()
-
         }
-
     }
 }
 

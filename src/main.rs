@@ -16,7 +16,6 @@ extern crate image;
 use scene::World;
 use render::{Color8, Color, ImageData};
 use math::Vector3;
-use obj3D::{Mesh};
 
 fn test_image() {
     let image = ImageData::<Color8>::new(500, 600);
@@ -32,5 +31,5 @@ fn main() {
                     Vector3::new(42_f32,0.56_f32,23.2_f32),
                     "models/plane_no_uv.obj".to_string());
 
-    //world.save_world_to_file("world1.json");
+    world.save_world_to_file("world1.json");
 }

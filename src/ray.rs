@@ -1,5 +1,3 @@
-use math;
-
 use math::Vector3f;
 use math::VectorialOperations;
 

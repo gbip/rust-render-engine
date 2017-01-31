@@ -88,46 +88,41 @@ impl R3Base {
 }
 
 #[derive(Serialize,Deserialize)]
-pub struct World<'a> {
+pub struct World {
     /// The base vector of the world :
     /// the 3rd one is UP (aka we are in XYZ configuration)
     base_vector : [Vector3<f32>; 3],
     /// A Vec containing all the cameras in the world
     cameras : Vec<Camera>,
 
-    objects : Vec<obj3D::Object<'a>>,
+    objects : Vec<obj3D::Object>,
 }
 
-impl<'a> World<'a> {
+impl World {
     /// This method create a camera at <position>, aiming at <target>
-    fn add_camera(self : &'a mut World<'a>, position : Vector3f, target : Vector3f) {
+    fn add_camera(self : & mut World<>, position : Vector3f, target : Vector3f) {
         self.cameras.push(Camera::new(position, target, self.base_vector[2]));
     }
 
     /// Load all objects meshes
-    pub fn load_objects(&'a mut self) {
-        self.objects.iter_mut().map(|obj| obj.load_mesh());
+    pub fn load_objects(& mut self) {
+        for obj in &mut self.objects {
+            obj.load_mesh();
+        }
     }
 
     //Generates a new empty world
-    pub fn new_empty() -> World<'a> {
+    pub fn new_empty() -> World {
         let base_vector = [Vector3::new(1_f32,0_f32,0_f32),Vector3::new(0_f32,1_f32,0_f32),Vector3::new(0_f32,0_f32,1_f32)];
         World{base_vector:base_vector,
               cameras:vec!(),
               objects:vec!()}
     }
 
-    //Allocates a new object so that we can initialize it
-    fn get_new_empty_object(&'a mut self) -> &'a mut Object {
-        self.objects.push(Object::new_empty());
-        self.objects.last_mut().unwrap()
-    }
-
-
     //Add an object to the world
-    pub fn add_object(&'a mut self,color:Color8,pos:Vector3f,path:String) {
+    pub fn add_object(& mut self,color:Color8,pos:Vector3f,path:String) {
 
-        Object::initialize(self.get_new_empty_object(),color,pos,path);
+        self.objects.push(Object::new(color,pos,path));
 
     }
 
@@ -140,7 +135,7 @@ impl<'a> World<'a> {
 
         }
     }
-    pub fn load_world_from_file<'b>(file: String) -> World<'b> {
+    pub fn load_world_from_file(file: String) -> World {
        let world : World = serde_json::from_str(file.as_str()).unwrap();
         world
     }
