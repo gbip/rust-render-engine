@@ -75,8 +75,28 @@ pub struct Renderer {
 }
 
 impl Renderer {
-    fn render(&self) {
+    pub fn new(resX : usize, resY : usize) -> Self {
+        Renderer {resX : resX, resY : resY}
+    }
 
+    pub fn render(&self, world : &scene::World, camera : &mut scene::Camera) -> ImageData<Color8> {
+        // Création de l'image qui résulte du rendu
+        let mut result = ImageData::<Color8>::new(self.resX, self.resY);
+
+        // On paramètre la caméra
+        let fresX = self.resX as f32;
+        let fresY = self.resY as f32;
+        camera.ratio = fresY / fresX;
+
+        // On crée les "canvas"
+
+        // On emet les rayons
+
+        // Post process
+
+        // Chaque pixel est recomposé suivant les rayons qui en ont été émis
+
+        result
     }
 }
 

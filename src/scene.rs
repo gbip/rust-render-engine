@@ -23,11 +23,40 @@ pub struct Camera {
     /// The position of the point at which the camera is aiming, in world space coordinates
     target_position : Vector3f,
 
+    // The horizontal field of view, exprimed in degrees.
+    fov : f32,
+
+    // The ratio between the height and the width of the camera.
+    pub ratio : f32,
+
     /// This array of vector is defining a new orthnormal base of the space where :
     ///     - k1 is the vector that describes how the camera is aiming (ie
     /// world_position-target_position).
     ///     - k2 and k3 are choosen randomly.
     base_vector : R3Base,
+}
+
+const DEFAULT_FOV : f32 = 70.0;
+const DEFAULT_RATIO : f32 = 1.0;
+
+impl Camera {
+    fn new(position : Vector3f, target : Vector3f, up : Vector3f) -> Self {
+        let mut cam_base = R3Base{u: Vector3::new(0_f32,0_f32,0_f32),
+                                  v: Vector3::new(0_f32,0_f32,0_f32),
+                                  w: Vector3::new(0_f32,0_f32,0_f32)};
+        cam_base.make_camera_base(&position,&target,&up);
+        Camera { world_position: position,
+            target_position: target,
+            fov : DEFAULT_FOV,
+            ratio : DEFAULT_RATIO,
+            base_vector: cam_base
+        }
+    }
+
+    fn setup(&mut self, fov : f32, ratio : f32) {
+        self.fov = fov;
+        self.ratio = ratio;
+    }
 }
 
 #[derive(Serialize,Deserialize)]
@@ -72,14 +101,7 @@ pub struct World<'a> {
 impl<'a> World<'a> {
     /// This method create a camera at <position>, aiming at <target>
     fn add_camera(self : &'a mut World<'a>, position : Vector3f, target : Vector3f) {
-        let mut cam_base = R3Base{u: Vector3::new(0_f32,0_f32,0_f32),
-                                  v: Vector3::new(0_f32,0_f32,0_f32),
-                                  w: Vector3::new(0_f32,0_f32,0_f32)};
-        cam_base.make_camera_base(&position,&target,&self.base_vector[2]);
-        let new_cam = Camera{world_position: position,
-                             target_position: target,
-                             base_vector: cam_base};
-        self.cameras.push(new_cam);
+        self.cameras.push(Camera::new(position, target, self.base_vector[2]));
     }
 
     /// Load all objects meshes
