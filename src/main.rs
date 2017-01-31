@@ -6,6 +6,7 @@ mod obj3D;
 mod scene;
 mod render;
 mod ray;
+mod color;
 
 #[macro_use]
 extern crate serde_derive;
@@ -14,11 +15,12 @@ extern crate serde;
 extern crate image;
 
 use scene::World;
-use render::{Color8, Color, ImageData};
+use render::Image;
 use math::Vector3;
+use color::RGBA32;
 
 fn test_image() {
-    let image = ImageData::<Color8>::new(500, 600);
+    let image = Image::new(500, 600);
     image.write_to_file("object.png");
 }
 
@@ -27,7 +29,7 @@ fn main() {
 
     //test_image();
 
-    world.add_object(Color8::new_neutral(),
+    world.add_object(RGBA32::new_black(),
                     Vector3::new(42_f32,0.56_f32,23.2_f32),
                     "models/plane_no_uv.obj".to_string());
 

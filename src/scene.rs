@@ -6,7 +6,7 @@ use std::fs::File;
 use std::io::{Write};
 use std;
 use serde_json;
-use render::Color8;
+use color::RGBA32;
 
 fn write_string_to_file(j:&str,file_name:String) -> std::io::Result<()> {
         let mut file = File::create(file_name).unwrap();
@@ -120,7 +120,7 @@ impl World {
     }
 
     //Add an object to the world
-    pub fn add_object(& mut self,color:Color8,pos:Vector3f,path:String) {
+    pub fn add_object(& mut self,color:RGBA32,pos:Vector3f,path:String) {
 
         self.objects.push(Object::new(color,pos,path));
 

@@ -1,6 +1,6 @@
 use std::vec::Vec;
 use math::{Vector3, Vector3f,Vector2f, VectorialOperations};
-use render::{Color8, Color};
+use color::RGBA32;
 use ray::{Ray, Plane, Surface, IntersectionPoint};
 
 // The Raw Point represents a triangle point where each coordinate is an index to the real value
@@ -19,7 +19,7 @@ struct RawTriangle(RawPoint,RawPoint,RawPoint);
 
 
 
-#[derive(Clone)]
+#[derive(Clone,Debug,Copy)]
 pub struct GeoPoint {
     norm : Vector3f,
     tex: Option<Vector2f>,
@@ -34,7 +34,7 @@ impl GeoPoint {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone,Debug,Copy)]
 pub struct Triangle {
     u : GeoPoint,
     v : GeoPoint,
@@ -86,51 +86,27 @@ impl Surface for Triangle {
 }
 
 /// The standard Indexed Face Set data structure for mesh.
+#[derive(Clone,Debug)]
 pub struct Mesh {
-
-    list_norm : Vec<Vector3f>,
-
-    list_pos: Vec<Vector3f>,
-
-    list_tex : Option<Vec<Vector2f>>,
-
     triangles : Vec<Triangle>,
 }
 
 impl Mesh {
-    pub fn set_pos(& mut self, vec:Vec<Vector3f>) {
-        self.list_pos=vec;
-    }
-
-    pub fn set_norm(& mut self, vec:Vec<Vector3f>) {
-        self.list_norm=vec;
-    }
-
-    pub fn set_tex(& mut self, vec:Option<Vec<Vector2f>>) {
-        self.list_tex=vec;
-    }
-
     // Creates a new empty mesh
     pub fn new_empty() -> Mesh {
-        Mesh{triangles: vec!(), list_norm: vec!(), list_pos: vec!(), list_tex:None}
+        Mesh{triangles: vec!()}
     }
 
-    pub fn new(pos: Vec<Vector3f>,norm: Vec<Vector3f>, tex:Option<Vec<Vector2f>>) -> Mesh {
-        Mesh{list_norm:norm,
-            list_pos:pos,
-            list_tex:tex,
-            triangles:vec!()}
-    }
-
-    fn create_point(&self,pos:usize,norm:usize,tex:Option<usize>) -> GeoPoint {
+    fn create_point(pos:usize,norm:usize,tex:Option<usize>,
+        list_pos : &Vec<Vector3f>,list_norm : &Vec<Vector3f> ,list_tex : &Option<Vec<Vector2f>>) -> GeoPoint {
 
         // VERY IMPORTANT : We have to offset all indices by -1 because in a .obj file, indices starts at 1, while in a Vec they starts at 0 !
-        GeoPoint::new(self.list_pos[pos-1], self.list_norm[norm-1], match tex {
-            Some(index) => match self.list_tex {
+        GeoPoint::new(list_pos[pos-1], list_norm[norm-1], match tex {
+            Some(index) => match *list_tex {
                 Some(ref vec) => Some(vec[index-1]),
                 None => panic!("Error, a point as a texture coordinate while the mesh doesn't have one.")
         },
-            None => match self.list_tex {
+            None => match *list_tex {
                 None => None,
                 Some(_) => panic!("Error, the mesh has some texture coordinates, but a point doesn't have texture coordinates."),
             }
@@ -138,15 +114,14 @@ impl Mesh {
     }
     
 
-    fn add_triangles(&mut self,tris:Vec<RawTriangle>) {
-
+    fn add_triangles(&mut self,tris:Vec<RawTriangle>,pos : Vec<Vector3f>,norm : Vec<Vector3f> ,tex :Option<Vec<Vector2f>>) {
         for triangle in tris {
             let p1 = triangle.0;
             let p2 = triangle.1;
             let p3 = triangle.2;
-            let u = self.create_point(p1.0,p1.1,p1.2);
-            let v = self.create_point(p2.0,p2.1,p2.2);
-            let w = self.create_point(p3.0,p3.1,p3.2);
+            let u = Mesh::create_point(p1.0,p1.1,p1.2, &pos, &norm, &tex);
+            let v = Mesh::create_point(p2.0,p2.1,p2.2, &pos, &norm, &tex);
+            let w = Mesh::create_point(p3.0,p3.1,p3.2, &pos, &norm, &tex);
             self.triangles.push(Triangle::new(u,v,w));
         }
 
@@ -161,7 +136,7 @@ pub struct Object {
     mesh: Mesh,
 
     ///The color of each triangles.
-    color: Color8,
+    color: RGBA32,
 
     ///The position of the object.
     position: Vector3f,
@@ -172,7 +147,7 @@ pub struct Object {
 
 impl Object {
     //Creates a new object and load the mesh.
-    pub fn new(color:Color8,position:Vector3f,path:String) -> Object {
+    pub fn new(color:RGBA32,position:Vector3f,path:String) -> Object {
         let mut result = Object::new_empty();
         result.color=color;
         result.position=position;
@@ -188,7 +163,7 @@ impl Object {
 
     pub fn new_empty() -> Object {
         Object{mesh:Mesh::new_empty(),
-                color:Color8::new_neutral(),
+                color:RGBA32::new_black(),
                 position:Vector3::new(0_f32,0_f32,0_f32),
                 obj_path:"".to_string()}
     }
@@ -263,11 +238,7 @@ mod obj_parser {
             raw_triangles.push(RawTriangle(p1,p2,p3))
         }
 
-        mesh.set_pos(pos);
-        mesh.set_norm(normals);
-        mesh.set_tex(tex);
-
-        mesh.add_triangles(raw_triangles);
+        mesh.add_triangles(raw_triangles,pos,normals,tex);
         mesh
     }
 

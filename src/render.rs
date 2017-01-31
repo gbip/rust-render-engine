@@ -1,55 +1,20 @@
 use std::vec::Vec;
 use std::path::Path;
 use scene;
-
 use image;
+use color::RGBA32;
 
-/// A tuple that represents a color in a RGB value on 8 bits
-#[derive(Clone,Debug,Serialize,Deserialize)]
-pub struct Color8 {
-    r : u8,
-    g : u8,
-    b : u8,
-}
-
-pub struct ImageData<T : Color> {
+pub struct Image {
     width : usize,
     height : usize,
-    pub pixels : Vec<T>
+    pub pixels : Vec<RGBA32>
 }
 
-pub trait Color : Clone {
-    fn new_neutral() -> Self;
-    fn get_rgb(&self) -> (u8, u8, u8);
-    fn get_rgba(&self) -> (u8, u8, u8, u8);
-}
-
-
-impl Color8 {
-    pub fn new(r:u8,g:u8,b:u8) -> Self {
-        Color8{r:r,g:g,b:b}
-    }
-}
-
-impl Color for Color8 {
-    fn new_neutral() -> Self {
-        Color8{r:0,g:0,b:0}
-    }
-
-    fn get_rgb(&self) -> (u8, u8, u8) {
-        (self.r, self.g, self.b)
-    }
-
-    fn get_rgba(&self) -> (u8, u8, u8, u8) {
-        (self.r, self.g, self.b, 255_u8)
-    }
-}
-
-impl<T : Color> ImageData<T> {
+impl Image {
 
     pub fn new(sizex:usize, sizey:usize) -> Self {
-        let px : Vec<T> = vec![T::new_neutral(); sizex * sizey];
-        ImageData::<T> {width : sizex, height: sizey, pixels:px}
+        let px : Vec<RGBA32> = vec![RGBA32::new_black(); sizex * sizey];
+        Image {width : sizex, height: sizey, pixels:px}
     }
 
     pub fn write_to_file(&self, pathname : &str) {
@@ -57,9 +22,10 @@ impl<T : Color> ImageData<T> {
 
         for ref color in self.pixels.iter() {
             let (r, g, b) = color.get_rgb();
-            buffer.push(r);
-            buffer.push(g);
-            buffer.push(b);
+            //TODO : Check the conversion from u32 to u8
+            buffer.push(r as u8);
+            buffer.push(g as u8);
+            buffer.push(b as u8);
         }
 
         let _ = image::save_buffer(&Path::new(pathname), buffer.as_slice(), self.width as u32, self.height as u32, image::RGB(8)).unwrap();
@@ -78,9 +44,9 @@ impl Renderer {
         Renderer {res_x : res_x, res_y : res_y}
     }
 
-    pub fn render(&self, world : &scene::World, camera : &mut scene::Camera) -> ImageData<Color8> {
+    pub fn render(&self, world : &scene::World, camera : &mut scene::Camera) -> Image {
         // Création de l'image qui résulte du rendu
-        let result = ImageData::<Color8>::new(self.res_x, self.res_y);
+        let result = Image::new(self.res_x, self.res_y);
 
         // On paramètre la caméra
         let fres_x = self.res_x as f32;
