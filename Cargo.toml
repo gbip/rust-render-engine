@@ -6,6 +6,7 @@ authors = ["Paul Florence <florencepaul@hotmail.fr>"]
 [dependencies]
 serde_derive = "0.8.21"
 serde_json = "0.8.4"
+image = "*"
 
 [dependencies.serde]
 version = "0.8.21"
