@@ -37,21 +37,19 @@ use math::Vector2;
 pub struct Renderer {
     res_x : usize,
     res_y : usize,
+    ratio : f32,
 }
 
 impl Renderer {
     pub fn new(res_x : usize, res_y : usize) -> Self {
-        Renderer {res_x : res_x, res_y : res_y}
+        Renderer {res_x : res_x,
+            res_y : res_y,
+            ratio : (res_x as f32/res_y as f32)}
     }
 
     pub fn render(&self, world : &scene::World, camera : &mut scene::Camera) -> Image {
         // Création de l'image qui résulte du rendu
         let result = Image::new(self.res_x, self.res_y);
-
-        // On paramètre la caméra
-        let fres_x = self.res_x as f32;
-        let fres_y = self.res_y as f32;
-        camera.ratio = fres_y / fres_x;
 
         // On crée les "canvas"
 
@@ -61,7 +59,8 @@ impl Renderer {
 
         // Chaque pixel est recomposé suivant les rayons qui en ont été émis
 
-        result
+        //result;
+        unimplemented!();
     }
 }
 

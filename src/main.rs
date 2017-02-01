@@ -1,5 +1,7 @@
 #![feature(proc_macro)]
 #![allow(dead_code)]
+#![cfg_attr(feature="clippy", feature(plugin))]
+#![cfg_attr(feature="clippy", plugin(clippy))]
 mod math;
 #[allow(non_snake_case)]
 mod obj3D;

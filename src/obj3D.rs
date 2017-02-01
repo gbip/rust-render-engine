@@ -59,7 +59,7 @@ impl Surface for Triangle {
         let vecB = &w - &u;
         let plane = Plane::new(&vecA, &vecB, &u);
 
-        let mut result = plane.get_intersection_point(&ray);
+        let mut result = plane.get_intersection_point(ray);
 
         if let Some(ref mut point) = result {
             // On calcule si le point appartient à la face triangle
@@ -98,7 +98,7 @@ impl Mesh {
     }
 
     fn create_point(pos:usize,norm:usize,tex:Option<usize>,
-        list_pos : &Vec<Vector3f>,list_norm : &Vec<Vector3f> ,list_tex : &Option<Vec<Vector2f>>) -> GeoPoint {
+        list_pos : &[Vector3f],list_norm : &[Vector3f],list_tex : &Option<Vec<Vector2f>>) -> GeoPoint {
 
         // VERY IMPORTANT : We have to offset all indices by -1 because in a .obj file, indices starts at 1, while in a Vec they starts at 0 !
         GeoPoint::new(list_pos[pos-1], list_norm[norm-1], match tex {
@@ -192,9 +192,9 @@ mod obj_parser {
     }
 
     // Open an obj file and return a mesh with the data.
-    pub fn open_obj(file: &String) -> Mesh {
+    pub fn open_obj(file: &str) -> Mesh {
 
-        let reader = BufReader::new(open_obj_file(file.as_str()));
+        let reader = BufReader::new(open_obj_file(file));
 
         let mut tris : Vec<(RawData,RawData,Option<RawData>)> = vec!();
         let mut pos : Vec<Vector3f> = vec!();
@@ -256,13 +256,13 @@ mod obj_parser {
     // Input : " 2//1 4//1 3//1"
     // Output : [["2", "1"], ["4", "1"], ["3", "1"]]
     fn get_face(str : String) -> Vec<Vec<String>> {
-        let r : Vec<Vec<String>> = str.split(' ').map(|x| x.split('/') // we split the line by the '/' character
-                                                           .map(|x| x.to_string()) // we convert the char to a string
-                                                           .filter(|x| x!="") // we remove the empty strings
-                                                           .collect())
-                                                .filter(|x| x[0]!="f") // we remove useless junk
-                                                .collect();
-        r
+        str.split(' ').map(|x| x.split('/') // we split the line by the '/' character
+                                .map(|x| x.to_string()) // we convert the char to a string
+                                .filter(|x| x!="") // we remove the empty strings
+                                .collect())
+                      .filter(|x| x[0]!="f") // we remove useless junk
+                      .collect()
+        
     }
 
     fn convert_to_u32(string: &str) -> u32 {

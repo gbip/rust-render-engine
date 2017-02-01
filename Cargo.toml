@@ -7,8 +7,12 @@ authors = ["Paul Florence <florencepaul@hotmail.fr>"]
 serde_derive = "0.8.21"
 serde_json = "0.8.4"
 image = "*"
+clippy = {version = "*", optional = true}
 
 [dependencies.serde]
 version = "0.8.21"
 default-features = false
 features = ["alloc","collections","std"]
+
+[features]
+default = []
