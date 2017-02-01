@@ -7,6 +7,7 @@ mod scene;
 mod render;
 mod ray;
 mod color;
+mod img;
 
 #[macro_use]
 extern crate serde_derive;
@@ -15,12 +16,12 @@ extern crate serde;
 extern crate image;
 
 use scene::World;
-use render::Image;
+use img::Image;
 use math::Vector3;
 use color::RGBA32;
 
 fn test_image() {
-    let image = Image::new(500, 600);
+    let image = Image::<RGBA32>::new(500, 600);
     image.write_to_file("object.png");
 }
 

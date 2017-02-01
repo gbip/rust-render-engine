@@ -1,36 +1,7 @@
-use std::vec::Vec;
-use std::path::Path;
+
 use scene;
-use image;
+use img::Image;
 use color::RGBA32;
-
-pub struct Image {
-    width : usize,
-    height : usize,
-    pub pixels : Vec<RGBA32>
-}
-
-impl Image {
-
-    pub fn new(sizex:usize, sizey:usize) -> Self {
-        let px : Vec<RGBA32> = vec![RGBA32::new_black(); sizex * sizey];
-        Image {width : sizex, height: sizey, pixels:px}
-    }
-
-    pub fn write_to_file(&self, pathname : &str) {
-        let mut buffer = vec!();
-
-        for ref color in self.pixels.iter() {
-            let (r, g, b) = color.get_rgb();
-            //TODO : Check the conversion from u32 to u8
-            buffer.push(r as u8);
-            buffer.push(g as u8);
-            buffer.push(b as u8);
-        }
-
-        let _ = image::save_buffer(&Path::new(pathname), buffer.as_slice(), self.width as u32, self.height as u32, image::RGB(8)).unwrap();
-    }
-}
 
 use math::Vector2;
 
@@ -44,9 +15,9 @@ impl Renderer {
         Renderer {res_x : res_x, res_y : res_y}
     }
 
-    pub fn render(&self, world : &scene::World, camera : &mut scene::Camera) -> Image {
+    pub fn render(&self, world : &scene::World, camera : &mut scene::Camera) -> Image<RGBA32> {
         // Création de l'image qui résulte du rendu
-        let result = Image::new(self.res_x, self.res_y);
+        let result = Image::<RGBA32>::new(self.res_x, self.res_y);
 
         // On paramètre la caméra
         let fres_x = self.res_x as f32;
