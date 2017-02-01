@@ -1,7 +1,7 @@
 use std::vec::Vec;
 use math::{Vector3, Vector3f,Vector2f, VectorialOperations};
 use color::RGBA32;
-use ray::{Ray, Plane, Surface, IntersectionPoint};
+use ray::{Ray, Plane, Surface, Fragment};
 
 // The Raw Point represents a triangle point where each coordinate is an index to the real value
 // stored in a vector
@@ -49,7 +49,7 @@ impl Triangle {
 
 
 impl Surface for Triangle {
-    fn get_intersection_point(&self, ray : &Ray) -> Option<IntersectionPoint> {
+    fn get_intersection(&self, ray : &Ray) -> Option<Fragment> {
         let u = self.u.pos;
         let v = self.v.pos;
         let w = self.w.pos;
@@ -59,7 +59,7 @@ impl Surface for Triangle {
         let vecB = &w - &u;
         let plane = Plane::new(&vecA, &vecB, &u);
 
-        let mut result = plane.get_intersection_point(ray);
+        let mut result = plane.get_intersection(ray);
 
         if let Some(ref mut point) = result {
             // On calcule si le point appartient à la face triangle
@@ -76,7 +76,7 @@ impl Surface for Triangle {
             // Interpolation des normales et textures
             let na = &self.v.norm - &self.u.norm;
             let nb = &self.w.norm - &self.u.norm;
-            point.fragment.normal = self.u.norm + (na * (ap / a)) + (nb * (bp / b));
+            point.normal = self.u.norm + (na * (ap / a)) + (nb * (bp / b));
 
             // TODO textures
         }
@@ -112,7 +112,7 @@ impl Mesh {
             }
         })
     }
-    
+
 
     fn add_triangles(&mut self,tris:Vec<RawTriangle>,pos : Vec<Vector3f>,norm : Vec<Vector3f> ,tex :Option<Vec<Vector2f>>) {
         for triangle in tris {
@@ -262,7 +262,7 @@ mod obj_parser {
                                 .collect())
                       .filter(|x| x[0]!="f") // we remove useless junk
                       .collect()
-        
+
     }
 
     fn convert_to_u32(string: &str) -> u32 {
