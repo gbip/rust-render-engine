@@ -1,9 +1,9 @@
-
 use scene;
 use img::Image;
 use color::RGBA32;
+use math::Vector3f;
+use ray::IntersectionPoint;
 
-use math::Vector2;
 
 pub struct Renderer {
     res_x : usize,
@@ -38,8 +38,10 @@ impl Renderer {
 /// An internal data structur that represent the boundary box of the region to be rendered
 /// where u is the bottom left corner and v is the top right corner
 pub struct Canvas {
-    pub u : Vector2<f32>,
-    pub v : Vector2<f32>,
+    u : Vector3f,
+    v : Vector3f,
+    w : Vector3f,
+    rays : Vec<IntersectionPoint>,
 }
 
 /// Represents a window through which the camera is seeing the world. It depends mainly of the
@@ -50,19 +52,20 @@ impl Canvas {
     /// This method will panic if the canvas is a line or a dot: u1.x = u2.x or u1.y = u2.y . It
     /// will also panic if u1.x > u2.x or u1.y > u2.y
     /// TODO : Make this return a result and not panic!()...
-    pub fn new(u1: Vector2<f32>, u2: Vector2<f32>) -> Canvas {
-       assert!(u1.x != u2.x && u1.y != u2.y);
-       assert!(u1.x < u2.x && u1.y < u2.y);
-       Canvas{u:u1,v:u2}
+    pub fn new(u: Vector3f, v: Vector3f, w: Vector3f) -> Canvas {
+       //assert!(u1.x != u2.x && u1.y != v.y);
+       //assert!(u1.x < u2.x && u1.y < u2.y);
+       Canvas{u:u,v:v,w:w,rays:vec!()}
     }
 
     /// Returns the 4 corner of the rendering rectangle, in a clockwise order, starting by the
     /// top left corner.
-    pub fn get_corners(&self) -> [Vector2<f32>;4] {
-        let u1 = Vector2{x: self.u.x,y: self.v.y};
+    pub fn get_corners(&self) -> [Vector3f;4] {
+        /*let u1 = Vector2{x: self.u.x,y: self.v.y};
         let u2 = Vector2{x: self.v.x,y: self.v.y};
         let u3 = Vector2{x: self.v.x,y: self.u.x};
         let u4 = Vector2{x: self.u.x,y: self.u.y};
-        [u1,u2,u3,u4]
+        [u1,u2,u3,u4]*/
+        unimplemented!()
     }
 }

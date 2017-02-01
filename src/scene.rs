@@ -1,5 +1,5 @@
 use std::vec::Vec;
-use math::{Vector3,VectorialOperations, Vector3f};
+use math::{Vector3,Vector3f};
 use obj3D;
 use obj3D::Object;
 use std::fs::File;
@@ -83,7 +83,7 @@ impl World {
         self.objects.push(Object::new(color,pos,path));
     }
 
-    pub fn save_world_to_file(&self,file:&str) {
+    pub fn save_to_file(&self,file:&str) {
         match write_string_to_file(&serde_json::to_string_pretty(&self).unwrap() ,file.to_string()) {
 
             Err(e) =>println!("Could not save world. Error : {}",e),
@@ -92,7 +92,7 @@ impl World {
 
         }
     }
-    pub fn load_world_from_file(file: String) -> World {
-       serde_json::from_str(file.as_str()).unwrap()
+    pub fn load_from_file(file: &str) -> World {
+       serde_json::from_str(file).unwrap()
     }
 }
