@@ -20,6 +20,7 @@ extern crate image;
 use scene::World;
 use img::Image;
 use color::RGBA32;
+use math::Vector3;
 
 fn test_image() {
     let image = Image::<RGBA32>::new(500, 600);
@@ -27,11 +28,11 @@ fn test_image() {
 }
 
 fn main() {
-    let world = World::load_from_file("world1.json");
-
-    /*world.add_object(RGBA32::new_black(),
+    //let world = World::load_from_file("world1.json");
+    let mut world = World::new_empty();
+    world.add_object(RGBA32::new_black(),
                     Vector3::new(42_f32,0.56_f32,23.2_f32),
                     "models/plane_no_uv.obj".to_string());
-	*/
+	
     world.save_to_file("world1.json");
 }

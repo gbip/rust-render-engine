@@ -59,12 +59,12 @@ pub struct World {
 
 impl World {
     /// This method create a camera at <position>, aiming at <target>
-    fn add_camera(self : & mut World, position : Vector3f, target : Vector3f) {
+    pub fn add_camera(self : & mut World, position : Vector3f, target : Vector3f) {
         self.cameras.push(Camera::new(position, target,self.base_vector[2]));
     }
 
     /// Load all objects meshes
-    pub fn load_objects(& mut self) {
+    fn load_objects(& mut self) {
         for obj in &mut self.objects {
             obj.load_mesh();
         }
@@ -93,6 +93,11 @@ impl World {
         }
     }
     pub fn load_from_file(file: &str) -> World {
-       serde_json::from_str(file).unwrap()
+       let mut world : World = match serde_json::from_str(file) {
+            Ok(val) => val,
+            Err(e) => panic!("Error while loading world. Serde error is : {}",e),
+       };
+       world.load_objects();
+       world
     }
 }

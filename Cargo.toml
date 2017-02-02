@@ -4,15 +4,15 @@ version = "0.1.0"
 authors = ["Paul Florence <florencepaul@hotmail.fr>"]
 
 [dependencies]
-serde_derive = "0.8.21"
-serde_json = "0.8.4"
+serde_derive = "0.9.*"
+serde_json = "0.9.*"
 image = "*"
 clippy = {version = "*", optional = true}
 
 [dependencies.serde]
-version = "0.8.21"
+version = "0.9.*"
 default-features = false
 features = ["alloc","collections","std"]
 
 [features]
-default = []
+default = ["clippy"]
