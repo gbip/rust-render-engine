@@ -1,7 +1,6 @@
 /target/
 Cargo.lock
 /obj
-*.obj
 *.json
 /*.swp
 **/*.rs.bk

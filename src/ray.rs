@@ -15,19 +15,12 @@ pub struct Plane {
     d : f32,
 }
 
-/** Cet objet contient la position d'un point et un paramètre
-qui permet de positionner ce point sur le rayon. */
-#[derive(Debug, PartialEq)]
-pub struct IntersectionPoint {
-    pub position : Vector3f,
-    pub fragment : Fragment,
-    pub param : f32,
-}
-
 #[derive(Debug, PartialEq)]
 pub struct Fragment {
+    pub position : Vector3f,
     pub normal : Vector3f,
     pub tex : Option<Vector3f>,
+    pub param : f32,
 }
 
 
@@ -35,7 +28,7 @@ pub struct Fragment {
 pub trait Surface {
     /** @returns the intersection point between the surface and
     the ray given. */
-    fn get_intersection_point(&self, ray : &Ray) -> Option<IntersectionPoint>;
+    fn get_intersection(&self, ray : &Ray) -> Option<Fragment>;
 }
 
 
@@ -49,7 +42,7 @@ impl Plane {
 
 impl Surface for Plane {
 
-    fn get_intersection_point(&self, ray : &Ray) -> Option<IntersectionPoint> {
+    fn get_intersection(&self, ray : &Ray) -> Option<Fragment> {
 
         let slope : &Vector3f = &ray.slope;
         let origin : &Vector3f = &ray.origin;
@@ -58,7 +51,7 @@ impl Surface for Plane {
         let m = self.a * slope.x + self.b * slope.y + self.c * slope.z;
         let p = - (self.d + self.a * origin.x + self.b * origin.y + self.c * origin.z);
 
-        let result : Option<IntersectionPoint>;
+        let result : Option<Fragment>;
         if m == 0.0 {
             result = None;
         }
@@ -70,15 +63,11 @@ impl Surface for Plane {
                 result = None;
             }
             else {
-                result = Some(IntersectionPoint {
-                    position : Vector3f {
-                        x : slope.x * t + origin.x,
-                        y : slope.y * t + origin.y,
-                        z : slope.z * t + origin.z,
-                    },
-                    fragment : Fragment::new_empty(),
-                    param : t,
-                });
+                result = Some(Fragment::new(Vector3f {
+                    x : slope.x * t + origin.x,
+                    y : slope.y * t + origin.y,
+                    z : slope.z * t + origin.z,
+                }, t));
             }
         }
 
@@ -87,10 +76,12 @@ impl Surface for Plane {
 }
 
 impl Fragment {
-    pub fn new_empty() -> Fragment {
+    pub fn new(position : Vector3f, param : f32) -> Fragment {
         Fragment {
+            position : position,
             normal : Vector3f { x: 0_f32, y: 0_f32, z: 0_f32 },
             tex : None,
+            param : param,
         }
     }
 }

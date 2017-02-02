@@ -2,7 +2,7 @@ use scene;
 use img::Image;
 use color::RGBA32;
 use math::Vector3f;
-use ray::IntersectionPoint;
+use ray::Fragment;
 
 
 pub struct Renderer {
@@ -13,12 +13,18 @@ pub struct Renderer {
 
 impl Renderer {
     pub fn new(res_x : usize, res_y : usize) -> Self {
-        Renderer {res_x : res_x,
+        Renderer {
+            res_x : res_x,
             res_y : res_y,
-            ratio : (res_x as f32/res_y as f32)}
+            ratio : (res_x as f32/res_y as f32)
+        }
     }
 
-    pub fn render(&self, world : &scene::World, camera : &mut scene::Camera) -> Image<RGBA32> {
+    pub fn emit_rays(&self, world : &scene::World, camera : &scene::Camera, canvas : &mut Canvas) {
+
+    }
+
+    pub fn render(&self, world : &scene::World, camera : &scene::Camera) -> Image<RGBA32> {
         // Création de l'image qui résulte du rendu
         let result = Image::<RGBA32>::new(self.res_x, self.res_y);
 
@@ -30,7 +36,7 @@ impl Renderer {
 
         // Chaque pixel est recomposé suivant les rayons qui en ont été émis
 
-        //result;
+        //result
         unimplemented!();
     }
 }
@@ -41,7 +47,7 @@ pub struct Canvas {
     u : Vector3f,
     v : Vector3f,
     w : Vector3f,
-    rays : Vec<IntersectionPoint>,
+    rays : Vec<Fragment>,
 }
 
 /// Represents a window through which the camera is seeing the world. It depends mainly of the
