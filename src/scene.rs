@@ -6,13 +6,14 @@ use std::fs::File;
 use std::io::{Write,Read};
 use std;
 use serde_json;
-use color::RGBA32;
+use color::RGBA8;
 
 fn write_string_to_file(j:&str,file_name:String) -> std::io::Result<()> {
         let mut file = File::create(file_name).unwrap();
             file.write_all(j.as_bytes())
 }
 
+#[allow(unused_must_use)]
 fn open_file_as_string(file:&str) -> String {
     let mut result : String = "".to_string();
     match File::open(file) {
@@ -88,7 +89,7 @@ impl World {
     }
 
     //Add an object to the world
-    pub fn add_object(& mut self,color:RGBA32,pos:Vector3f,path:String) {
+    pub fn add_object(& mut self,color:RGBA8,pos:Vector3f,path:String) {
         self.objects.push(Object::new(color,pos,path));
     }
 

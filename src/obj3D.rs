@@ -1,7 +1,7 @@
 use std::vec::Vec;
 use std::fmt;
 use math::{Vector3, Vector3f,Vector2f, VectorialOperations};
-use color::RGBA32;
+use color::RGBA8;
 use ray::{Ray, Plane, Surface, IntersectionPoint};
 
 // The Raw Point represents a triangle point where each coordinate is an index to the real value
@@ -137,7 +137,7 @@ pub struct Object {
     mesh: Mesh,
 
     ///The color of each triangles.
-    color: RGBA32,
+    color: RGBA8,
 
     ///The position of the object.
     position: Vector3f,
@@ -148,7 +148,7 @@ pub struct Object {
 
 impl Object {
     //Creates a new object and load the mesh.
-    pub fn new(color:RGBA32,position:Vector3f,path:String) -> Object {
+    pub fn new(color:RGBA8,position:Vector3f,path:String) -> Object {
         let mut result = Object::new_empty();
         result.color=color;
         result.position=position;
@@ -164,7 +164,7 @@ impl Object {
 
     pub fn new_empty() -> Object {
         Object{mesh:Mesh::new_empty(),
-                color:RGBA32::new_black(),
+                color:RGBA8::new_black(),
                 position:Vector3::new(0_f32,0_f32,0_f32),
                 obj_path:"".to_string()}
     }

@@ -16,11 +16,23 @@ extern crate serde_derive;
 extern crate serde_json;
 extern crate serde;
 extern crate image;
+extern crate getopts;
 
 use scene::World;
 use img::Image;
-use color::RGBA32;
+use color::{RGBA8,RGBA32};
 use math::Vector3;
+
+fn generate_template() {
+    let mut world = World::new_empty();
+    world.add_object(RGBA8::new_black(),
+                     Vector3::new(42_f32,0.56_f32,23.2_f32),
+                    "models/plane_no_uv.obj".to_string());
+    //world.add_object(RGBA32::new(
+
+    world.save_to_file("world1.json");
+
+}
 
 fn test_image() {
     let image = Image::<RGBA32>::new(500, 600);
