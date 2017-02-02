@@ -22,16 +22,91 @@ use scene::World;
 use img::Image;
 use color::{RGBA8,RGBA32};
 use math::Vector3;
+use getopts::Options;
+use std::env;
 
-fn generate_template() {
+// Generate a template file at the location [path]
+fn generate_template(path:String) {
     let mut world = World::new_empty();
     world.add_object(RGBA8::new_black(),
                      Vector3::new(42_f32,0.56_f32,23.2_f32),
                     "models/plane_no_uv.obj".to_string());
-    //world.add_object(RGBA32::new(
+    
+    world.save_to_file(path.as_str());
+}
 
-    world.save_to_file("world1.json");
 
+// Usage of the program :
+// 2 functions : generate a template for a scene, and render a scene 
+//  -> Generate a template :
+//      -g [PATH] or --generate [PATH]
+//  -> To load a scene :
+//       Specify the input scene (needed)
+//      -r [PATH] or --read [PATH] 
+//      Specify the output file
+//      -w [PATH] or --write output [PATH] (optional)
+fn parse_arg() {
+    let mut options = Options::new();
+
+    // Generating a template
+    options.optflagopt("g","generate","Generate a template for creating a new scene","FILE");
+
+    // Rendering :
+    // -> Load a file
+    options.optflagopt("r","read","Open a scene file (.json) for rendering","FILE");
+    
+    // -> Set the output file
+    options.optflagopt("w","write","Save the rendered image to a file","FILE");
+
+    // Collecting the argument from the environnement
+    let args : Vec<String> = env::args().collect();
+    let program = args[0].clone();
+
+    let matches = match options.parse(args) {
+        Ok(val) => val,
+        Err(e) => panic!(e.to_string()),
+    };
+    
+    let at_least_one_option = matches.opt_present("g") || matches.opt_present("w") || matches.opt_present("r");
+    
+    if !at_least_one_option {
+        show_usage(program);
+        return
+    }
+
+    // Handling the template case
+    if matches.opt_present("g") {
+        generate_template(match matches.opt_str("g") {
+            Some(path) => path,
+            None => "template.json".to_string(),
+        });
+    }
+    
+    // Handling the case where we need to render
+    if matches.opt_present("w") {
+        let output_path = match matches.opt_str("w") {
+            Some(path) => path,
+            None => "untitled.png".to_string(),
+        };
+        if matches.opt_present("r") {
+            let input_path = match matches.opt_str("r") {
+                Some(path) => path,
+                None => {show_usage(program);return},
+            };
+            render(input_path,output_path);
+        }
+        else {
+            show_usage(program);
+        }
+    }
+}
+
+// Print in the console how to use the program
+fn show_usage(program:String) {
+    println!("Usage : {} -g FILE -r FILE -w FILE",program.as_str());
+    println!("-g FILE or --generate FILE : Generate a template file in the location FILE for creating a scene");
+    println!("-r FILE or --read FILE : Read FILE to load the scene before rendering. Needed for rendering, without a scene specified, the program will not render.");
+    println!("-w FILE or --write FILE : Write the output to FILE. The default is 'untitled.png'");
 }
 
 fn test_image() {
@@ -39,7 +114,12 @@ fn test_image() {
     image.write_to_file("object.png");
 }
 
+// The function that will be called when the programm need to render
+fn render(input:String,output:String) {
+    let world = World::load_from_file(input.as_str());
+    println!("{:?}",world);
+}
+
 fn main() {
-    let world = World::load_from_file("world1.json");
-    println!("World is : {:?}", world);
+    parse_arg();
 }
