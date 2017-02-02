@@ -28,11 +28,12 @@ fn test_image() {
 }
 
 fn main() {
-    //let world = World::load_from_file("world1.json");
-    let mut world = World::new_empty();
-    world.add_object(RGBA32::new_black(),
-                    Vector3::new(42_f32,0.56_f32,23.2_f32),
-                    "models/plane_no_uv.obj".to_string());
+    let world = World::load_from_file("world1.json");
+    println!("World is : {:?}", world);
+    //let mut world = World::new_empty();
+    //world.add_object(RGBA32::new_black(),
+    //                 Vector3::new(42_f32,0.56_f32,23.2_f32),
+    //                "models/plane_no_uv.obj".to_string());
 	
-    world.save_to_file("world1.json");
+    //world.save_to_file("world1.json");
 }

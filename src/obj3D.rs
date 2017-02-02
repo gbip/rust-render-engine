@@ -1,4 +1,5 @@
 use std::vec::Vec;
+use std::fmt;
 use math::{Vector3, Vector3f,Vector2f, VectorialOperations};
 use color::RGBA32;
 use ray::{Ray, Plane, Surface, IntersectionPoint};
@@ -166,6 +167,12 @@ impl Object {
                 color:RGBA32::new_black(),
                 position:Vector3::new(0_f32,0_f32,0_f32),
                 obj_path:"".to_string()}
+    }
+}
+
+impl fmt::Debug for Object {
+    fn fmt(&self,f : &mut fmt::Formatter) -> fmt::Result {
+        write!(f,"Object {{color: {:?}, position: {:?}, model : {:?} }}",self.color,self.position,self.obj_path)
     }
 }
 
