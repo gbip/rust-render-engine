@@ -2,7 +2,8 @@ use scene;
 use img::Image;
 use color::RGBA32;
 use math::Vector3f;
-use ray::Fragment;
+use ray::{Ray,Fragment};
+
 
 
 pub struct Renderer {
@@ -28,12 +29,18 @@ impl Renderer {
         // Création de l'image qui résulte du rendu
         let result = Image::<RGBA32>::new(self.res_x, self.res_y);
 
+        let rays : Vec<Ray> = vec!();
+        let points : Vec<Fragment> = vec!();
         // On crée les "canvas"
 
         // On emet les rayons
-
+       
         // Post process
-
+        //for ray in rays {
+        //    points=world.objects.iter().map(|obj| obj.triangles().map(|tri| tri.get_intersection_point(ray,&obj.color()))
+        //                                                        .collect())
+        //                               .collect();
+        //                                 }
         // Chaque pixel est recomposé suivant les rayons qui en ont été émis
 
         //result

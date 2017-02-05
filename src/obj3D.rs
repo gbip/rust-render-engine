@@ -1,8 +1,9 @@
 use std::vec::Vec;
 use std::fmt;
 use math::{Vector3, Vector3f,Vector2f, VectorialOperations};
-use color::RGBA8;
+use color::{RGBA8,RGBA32};
 use ray::{Ray, Plane, Surface, Fragment};
+use std::slice::Iter;
 
 // The Raw Point represents a triangle point where each coordinate is an index to the real value
 // stored in a vector
@@ -50,7 +51,7 @@ impl Triangle {
 
 
 impl Surface for Triangle {
-    fn get_intersection(&self, ray : &Ray) -> Option<Fragment> {
+    fn get_intersection(&self, ray : &Ray, color : &RGBA32) -> Option<Fragment> {
         let u = self.u.pos;
         let v = self.v.pos;
         let w = self.w.pos;
@@ -60,7 +61,7 @@ impl Surface for Triangle {
         let vecB = &w - &u;
         let plane = Plane::new(&vecA, &vecB, &u);
 
-        let mut result = plane.get_intersection(ray);
+        let mut result = plane.get_intersection(ray,color);
 
         if let Some(ref mut point) = result {
             // On calcule si le point appartient à la face triangle
@@ -81,19 +82,17 @@ impl Surface for Triangle {
 
             // TODO textures
         }
-
         result
     }
 }
 
-/// The standard Indexed Face Set data structure for mesh.
 #[derive(Clone,Debug)]
 pub struct Mesh {
     triangles : Vec<Triangle>,
 }
 
 impl Mesh {
-    // Creates a new empty mesh
+    // Crée un nouveau mesh vide
     pub fn new_empty() -> Mesh {
         Mesh{triangles: vec!()}
     }
@@ -101,7 +100,8 @@ impl Mesh {
     fn create_point(pos:usize,norm:usize,tex:Option<usize>,
         list_pos : &[Vector3f],list_norm : &[Vector3f],list_tex : &Option<Vec<Vector2f>>) -> GeoPoint {
 
-        // VERY IMPORTANT : We have to offset all indices by -1 because in a .obj file, indices starts at 1, while in a Vec they starts at 0 !
+        // Très important : il faut décaller chaque indice de 1, car dans la norme .obj le premier
+        // indice est 1, alors que dans le vector c'est 0.
         GeoPoint::new(list_pos[pos-1], list_norm[norm-1], match tex {
             Some(index) => match *list_tex {
                 Some(ref vec) => Some(vec[index-1]),
@@ -113,7 +113,6 @@ impl Mesh {
             }
         })
     }
-
 
     fn add_triangles(&mut self,tris:Vec<RawTriangle>,pos : Vec<Vector3f>,norm : Vec<Vector3f> ,tex :Option<Vec<Vector2f>>) {
         for triangle in tris {
@@ -128,46 +127,72 @@ impl Mesh {
 
     }
 
+    // Renvoie un itérateur sur &Triangle. (lecture seule)
+    pub fn triangles(&self) -> Iter<Triangle> {
+        self.triangles.iter() 
+    }
+
 }
 
 #[derive(Serialize,Deserialize)]
 pub struct Object {
     #[serde(skip_serializing,skip_deserializing,default = "Mesh::new_empty")]
-    ///The internal geometry data
+    // La géométrie de l'objet
     mesh: Mesh,
 
-    ///The color of each triangles.
+    // La couleur (diffus) de l'objet. Deviendra certainement par la suite le shadeR.
     color: RGBA8,
 
-    ///The position of the object.
+    // La position de l'objet (offset qui se propagera ensuite aux triangles)
     position: Vector3f,
 
-    ///The path to a .obj file that will be used to build the mesh.
+    // Le chemin vers un .obj qui permettra de charger l'objet
     obj_path: String,
+    
+    // Le nom de l'objet
+    name : String,
 }
 
 impl Object {
-    //Creates a new object and load the mesh.
-    pub fn new(color:RGBA8,position:Vector3f,path:String) -> Object {
+    // Crée un nouvel objet
+    pub fn new(color:RGBA8,position:Vector3f,path:String,name:String) -> Object {
         let mut result = Object::new_empty();
         result.color=color;
         result.position=position;
         result.obj_path=path;
+        result.name=name;
         result.load_mesh();
         result
     }
 
-    //Load the mesh for the object "self", through obj_parser
-    pub fn load_mesh(& mut self) {
+    // Charge la géométrie donnée par le chemin "obj_path"
+    fn load_mesh(& mut self) {
         self.mesh = obj_parser::open_obj(&self.obj_path);
     }
-
+    
+    // Initialise un objet. Pour l'instant cela ne fait que charger le mesh, mais on peut imaginer
+    // d'autres traitements.
+    pub fn initialize(&mut self) {
+        self.load_mesh();
+    }
+    // Crée un objet vide
     pub fn new_empty() -> Object {
         Object{mesh:Mesh::new_empty(),
                 color:RGBA8::new_black(),
                 position:Vector3::new(0_f32,0_f32,0_f32),
-                obj_path:"".to_string()}
+                obj_path:"".to_string(),
+                name:"untitled".to_string()}
     }
+
+    // Renvoie un iterator sur des refs vers les triangles de l'objet (lecture seule).
+    pub fn triangles(&self) -> Iter<Triangle> {
+        self.mesh.triangles()
+    }
+    
+    pub fn color(&self) -> RGBA8 {
+        self.color
+    }
+
 }
 
 impl fmt::Debug for Object {

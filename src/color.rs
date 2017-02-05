@@ -2,7 +2,7 @@ use img;
 use std::u8;
 
 // A struct for all internal color management, but not for textures and objecs colors.
-#[derive(Clone,Debug,Copy,Serialize,Deserialize)]
+#[derive(Clone,Debug,Copy,Serialize,Deserialize,PartialEq)]
 pub struct RGBA32 {
     r : u32,
     g : u32,

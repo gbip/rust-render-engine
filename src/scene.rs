@@ -58,29 +58,28 @@ impl Camera {
 
 #[derive(Serialize,Deserialize,Debug)]
 pub struct World {
-    /// The base vector of the world :
-    /// the 3rd one is UP (aka we are in XYZ configuration)
+    // Les vecteurs de base du monde. Le 3é vecteur indique la verticale.
     base_vector : [Vector3<f32>; 3],
-    /// A Vec containing all the cameras in the world
+    // Les différentes camera du monde
     cameras : Vec<Camera>,
 
     objects : Vec<obj3D::Object>,
 }
 
 impl World {
-    /// This method create a camera at <position>, aiming at <target>
+    // Ajoute une caméra dans le monde
     pub fn add_camera(self : & mut World, position : Vector3f, target : Vector3f) {
         self.cameras.push(Camera::new(position, target,self.base_vector[2]));
     }
 
-    /// Load all objects meshes
+    // Charge la géomètrie de tous les objets. Utilisé uniquement en fin de deserialization.
     fn load_objects(& mut self) {
         for obj in &mut self.objects {
-            obj.load_mesh();
+            obj.initialize();
         }
     }
 
-    //Generates a new empty world
+    // Génére un monde vide
     pub fn new_empty() -> World {
         let base_vector = [Vector3::new(1_f32,0_f32,0_f32),Vector3::new(0_f32,1_f32,0_f32),Vector3::new(0_f32,0_f32,1_f32)];
         World{base_vector:base_vector,
@@ -88,11 +87,12 @@ impl World {
               objects:vec!()}
     }
 
-    //Add an object to the world
-    pub fn add_object(& mut self,color:RGBA8,pos:Vector3f,path:String) {
-        self.objects.push(Object::new(color,pos,path));
+    // Ajoute un objet dans le monde
+    pub fn add_object(& mut self,color:RGBA8,pos:Vector3f,path:String,name:String) {
+        self.objects.push(Object::new(color,pos,path,name));
     }
 
+    // Enregistre le monde dans un fichier
     pub fn save_to_file(&self,file:&str) {
         match write_string_to_file(&serde_json::to_string_pretty(&self).unwrap() ,file.to_string()) {
 
@@ -102,6 +102,8 @@ impl World {
 
         }
     }
+
+    // Initialise un nouveau monde depuis un fichier.
     pub fn load_from_file(file: &str) -> World {
         println!("Loading scene from file : {} ", file);
         let file = open_file_as_string(file);

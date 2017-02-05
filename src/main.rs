@@ -30,7 +30,8 @@ fn generate_template(path:String) {
     let mut world = World::new_empty();
     world.add_object(RGBA8::new_black(),
                      Vector3::new(42_f32,0.56_f32,23.2_f32),
-                    "models/plane_no_uv.obj".to_string());
+                    "models/plane_no_uv.obj".to_string(),
+                    "Example".to_string());
     
     world.save_to_file(path.as_str());
 }

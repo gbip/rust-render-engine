@@ -1,5 +1,6 @@
 use math::Vector3f;
 use math::VectorialOperations;
+use color::RGBA32;
 
 #[derive(Debug, PartialEq)]
 pub struct Ray {
@@ -21,6 +22,7 @@ pub struct Fragment {
     pub normal : Vector3f,
     pub tex : Option<Vector3f>,
     pub param : f32,
+    pub color : RGBA32
 }
 
 
@@ -28,7 +30,7 @@ pub struct Fragment {
 pub trait Surface {
     /** @returns the intersection point between the surface and
     the ray given. */
-    fn get_intersection(&self, ray : &Ray) -> Option<Fragment>;
+    fn get_intersection(&self, ray : &Ray, color : &RGBA32) -> Option<Fragment>;
 }
 
 
@@ -42,7 +44,7 @@ impl Plane {
 
 impl Surface for Plane {
 
-    fn get_intersection(&self, ray : &Ray) -> Option<Fragment> {
+    fn get_intersection(&self, ray : &Ray, color: &RGBA32) -> Option<Fragment> {
 
         let slope : &Vector3f = &ray.slope;
         let origin : &Vector3f = &ray.origin;
@@ -67,7 +69,7 @@ impl Surface for Plane {
                     x : slope.x * t + origin.x,
                     y : slope.y * t + origin.y,
                     z : slope.z * t + origin.z,
-                }, t));
+                }, t, color.clone()));
             }
         }
 
@@ -76,12 +78,13 @@ impl Surface for Plane {
 }
 
 impl Fragment {
-    pub fn new(position : Vector3f, param : f32) -> Fragment {
+    pub fn new(position : Vector3f, param : f32, color : RGBA32) -> Fragment {
         Fragment {
             position : position,
             normal : Vector3f { x: 0_f32, y: 0_f32, z: 0_f32 },
             tex : None,
             param : param,
+            color : color,
         }
     }
 }
@@ -146,7 +149,7 @@ mod tests {
             }
         };
 
-        assert!(match plane.get_intersection_point(&ray) {
+        assert!(match plane.get_intersection(&ray, &RGBA32::new_black()) {
             None => true,
             _ => false,
         });
@@ -174,7 +177,7 @@ mod tests {
             }
         };
 
-        let intersection = plane.get_intersection_point(&ray);
+        let intersection = plane.get_intersection(&ray,&RGBA32::new_black());
         assert!(match intersection {
             None => true,
             Some(point) => false,
@@ -203,7 +206,7 @@ mod tests {
             }
         };
 
-        let intersection = plane.get_intersection_point(&ray);
+        let intersection = plane.get_intersection(&ray,&RGBA32::new_black());
         assert!(match intersection {
             None => false,
             Some(point) => (point.position - Vector3f {x : 0.0, y : -35.0, z : 0.0}).norm() < 0.00001,
