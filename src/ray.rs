@@ -6,6 +6,9 @@ use color::RGBA32;
 pub struct Ray {
     slope : Vector3f,
     origin : Vector3f,
+    // Un paramètre qui indique l'extrémité du rayon. Par exemple, lorsque le rayon est arrêté par
+    // une surface il ne se propage pas sur les surfaces situées derrière.
+    max_t : f32
 }
 
 #[derive(Debug, Clone)]
@@ -34,6 +37,11 @@ pub trait Surface {
 }
 
 
+impl Ray {
+    fn new(origin : Vector3f, slope : Vector3f) -> Ray {
+        Ray {origin : origin, slope : slope, max_t : -1.0}
+    }
+}
 
 impl Plane {
     pub fn new(vec1 : &Vector3f, vec2 : &Vector3f, origin : &Vector3f) -> Plane {
@@ -60,8 +68,8 @@ impl Surface for Plane {
         else {
             let t = p / m;
 
-            if t < 0.0 {
-                //La surface est "avant" le point d'émission du rayon
+            if t < 0.0 || t > ray.max_t {
+                //La surface est "avant" ou "après" le point d'émission du rayon
                 result = None;
             }
             else {

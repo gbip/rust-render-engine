@@ -1,5 +1,5 @@
 use std::vec::Vec;
-use math::{Vector3,Vector3f};
+use math::{Vector3,Vector3f, VectorialOperations};
 use obj3D;
 use obj3D::Object;
 use std::fs::File;
@@ -35,12 +35,16 @@ pub struct Camera {
     // The horizontal field of view, exprimed in degrees.
     fov : f32,
 
+    // La distance entre le canvas et l'origine de la caméra.
+    clip : f32,
+
     // The vector that represents the up direction
     up: Vector3f,
 
 }
 
 const DEFAULT_FOV : f32 = 70.0;
+const DEFAULT_CLIP : f32 = 0.1;
 
 impl Camera {
     fn new(position : Vector3f, target : Vector3f, up: Vector3f) -> Self {
@@ -48,11 +52,28 @@ impl Camera {
                 target_position: target,
                 fov : DEFAULT_FOV,
                 up: up,
+                clip : DEFAULT_CLIP
         }
     }
 
-    fn setup(&mut self, fov : f32) {
+    fn set_fov(&mut self, fov : f32) {
         self.fov = fov;
+    }
+
+    pub fn get_canvas_basis(&self, ratio : f32) -> (Vector3f, Vector3f, Vector3f) {
+        let cam_vector = self.target_position - self.world_position;
+
+        let e3 = cam_vector / cam_vector.norm();
+        let e2 = self.up / self.up.norm();
+        let e1 = e3.cross_product(&e2);
+
+        let fov_tan = (self.fov / 2.0).tan();
+
+        let vec1 = e1 * (fov_tan * 2.0);
+        let vec2 = e2 * (fov_tan * 2.0 * ratio);
+        let origin = self.world_position + e3 * self.clip - e2 / 2.0 - e1 / 2.0;
+
+        (origin, vec1, vec2)
     }
 }
 

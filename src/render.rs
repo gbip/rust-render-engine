@@ -29,12 +29,30 @@ impl Renderer {
         // Création de l'image qui résulte du rendu
         let result = Image::<RGBA32>::new(self.res_x, self.res_y);
 
+        let mut canvas : Vec<Canvas> = vec!();
         let rays : Vec<Ray> = vec!();
         let points : Vec<Fragment> = vec!();
+
         // On crée les "canvas"
+        let (origin, vec1, vec2) = camera.get_canvas_basis(self.ratio);
+
+        for x in 0..(self.res_x - 1) {
+            for y in 0..(self.res_y - 1) {
+                let x1 = x as f32 / self.res_x as f32;
+                let x2 = (x + 1) as f32 / self.res_x as f32;
+                let y1 = y as f32 / self.res_y as f32;
+                let y2 = (y + 1) as f32 / self.res_y as f32;
+
+                canvas.push(Canvas::new(
+                    origin + vec1 * x1 + vec2 * y1,
+                    origin + vec1 * x2 + vec2 * y1,
+                    origin + vec1 * x1 + vec2 * y2
+                ));
+            }
+        }
 
         // On emet les rayons
-       
+
         // Post process
         //for ray in rays {
         //    points=world.objects.iter().map(|obj| obj.triangles().map(|tri| tri.get_intersection_point(ray,&obj.color()))
@@ -48,8 +66,6 @@ impl Renderer {
     }
 }
 
-/// An internal data structur that represent the boundary box of the region to be rendered
-/// where u is the bottom left corner and v is the top right corner
 pub struct Canvas {
     u : Vector3f,
     v : Vector3f,
