@@ -12,7 +12,6 @@ pub struct RGBA32 {
 
 // A struct to support the classic 8 bit color values that is used to : write to a .png file,
 // manage object color through textures.
-
 #[derive(Clone,Debug,Copy,Serialize,Deserialize)]
 pub struct RGBA8 {
     r : u8,

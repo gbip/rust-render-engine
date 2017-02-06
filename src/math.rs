@@ -1,6 +1,7 @@
 use std::ops::{Add, Sub, Mul, Div};
 use std::cmp::PartialEq;
 use std::fmt;
+use std::f32;
 // A basic module that implements some usefull mathematics tools
 #[derive(Debug, Copy, Clone,Serialize,Deserialize)]
 pub struct Vector3<T> {
@@ -24,6 +25,22 @@ pub struct Vector2<T> {
     pub y: T,
 }
 
+// L'égalité pour les nombres flottants avec un seuil
+pub trait AlmostEq<T> {
+    // Si le seuil (threshold) est absent, alors l'implémentation doit le mettre à la plus petite
+    // valeur possible.
+    fn equal_with_threshold(&self, other: &Self, threshold : Option<T>) -> bool;
+    
+    // De même que pour equal_with_threshold, l'implémentation doit spécifier la plus petite valeur
+    // possible si le seuil est absent
+    fn not_equal_with_threshold(&self, other: &Self, threshold: Option<T>) -> bool;
+    
+    // Lire "almost non equal"
+    fn ane(&self, other: &Self) -> bool;
+    
+    // Lire "almost equal". Le threshold est à f32::EPSILON.
+    fn aeq(&self, other: &Self) -> bool;
+}
 
 impl<T> Vector3<T> {
     pub fn new(x: T, y: T, z: T) -> Vector3<T> {
@@ -54,6 +71,27 @@ impl<T> fmt::Display for Vector2<T> where
 pub type Vector3f = Vector3<f32>;
 pub type Vector2f = Vector2<f32>;
 
+impl AlmostEq<f32> for Vector3<f32> {
+    fn equal_with_threshold(&self,other : &Self,threshold: Option<f32>) -> bool {
+        let new_threshold = match threshold {
+            Some(thre) => thre,
+            None => f32::EPSILON,
+        };
+        (((self.x-other.x).abs() <= new_threshold) && ((self.y-other.y).abs() <= new_threshold) && ((self.z-other.z).abs() <= new_threshold))
+    }
+
+    fn not_equal_with_threshold(&self, other: &Self, threshold: Option<f32>) -> bool {
+        !AlmostEq::equal_with_threshold(self,other,threshold)
+    }
+
+    fn ane(&self, other: &Self) -> bool {
+        AlmostEq::not_equal_with_threshold(self,other,None)
+    }
+
+    fn aeq(&self, other: &Self) -> bool {
+        AlmostEq::equal_with_threshold(self,other,None)
+    }
+}
 
 // Implementation of the operator '=='
 impl<T> PartialEq<Vector3<T>> for Vector3<T>
@@ -63,6 +101,7 @@ impl<T> PartialEq<Vector3<T>> for Vector3<T>
         (self.x == other.x) && (self.y == other.y) && (self.z == other.z)
     }
 }
+
 
 // Macro helper to implement for us basic arithmetic operations for all types that can
 // represent a real number (f32, f64, u8, etc.).
@@ -271,6 +310,7 @@ impl_vec_operations!(f32);
 
 
 #[cfg(test)]
+#[allow(float_cmp)]
 mod tests {
     use math::*;
 
@@ -349,7 +389,7 @@ mod tests {
                        y: 1_f32,
                        z: 1_f32,
                    });
-        assert!(v2 != v3 && v3 != v2 && v1 != v3);
+        assert!(v2 != v3 && v1 != v3);
     }
 
     #[test]
@@ -376,7 +416,7 @@ mod tests {
             y: 0_f32,
             z: 0_f32,
         };
-        assert_eq!(&v2 * 2_f32, v2);
+        assert_eq!(&v2 * 2_f32,v2);
     }
 
     #[test]
@@ -430,11 +470,6 @@ mod tests {
             y: 1_f32,
             z: 1_f32,
         };
-        let v2 = Vector3 {
-            x: 0_f32,
-            y: 0_f32,
-            z: 1_f32,
-        };
         let v3 = Vector3 {
             x: 55_f32,
             y: -3_f32,
@@ -472,11 +507,6 @@ mod tests {
             x: 0_f32,
             y: 0_f32,
             z: 1_f32,
-        };
-        let v3 = Vector3 {
-            x: 55_f32,
-            y: -3_f32,
-            z: 9_f32,
         };
         let zero = Vector3 {
             x: 0_f32,
@@ -521,5 +551,26 @@ mod tests {
         assert_eq!(v1.dot_product_ref(&v3), 61_f32);
         assert_eq!(v2.dot_product_ref(&v3), -9_f32);
         assert_eq!(v1.dot_product_ref(&v1), 3_f32);
+    }
+    #[test]
+    fn test_almot_eq_vec3() {
+        let v1 = Vector3::new(0_f32,0_f32,0_f32);
+        let v2 = Vector3::new(1_f32,0_f32,0_f32);
+        let v3 = Vector3::new(0_f32,1_f32,0_f32);
+        let v4 = Vector3::new(0_f32,0_f32,1_f32);
+        let v5 = Vector3::new(0_f32,0_f32,1_f32 + f32::EPSILON);
+        let mut v6 = Vector3::new(f32::EPSILON,0_f32,f32::EPSILON);
+        let v7 = Vector3::new(-f32::EPSILON,-f32::EPSILON,0_f32);
+
+        assert!(v1.ane(&v2) && v1.ane(&v3) && v1.ane(&v4) && v1.ane(&v5));
+        assert!(v2.ane(&v3) && v2.ane(&v4) && v3.ane(&v4));
+        assert!(v6.aeq(&v1));
+        // transitivité
+        assert!(v6.ane(&v7));
+        assert!(v7.ane(&v6));
+        assert!(v1.aeq(&v6) && v1.aeq(&v7));
+        v6=2.0*v6;
+        assert!(v6.ane(&v1));
+
     }
 }
