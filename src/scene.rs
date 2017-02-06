@@ -70,8 +70,6 @@ impl Camera {
 
         let fov_tan = (self.fov / 2.0).to_radians().tan();
 
-        println!("{}", e1);
-
         let vec1 = e1 * (fov_tan * 2.0 * self.clip);
         let vec2 = e2 * (fov_tan * 2.0 * self.clip / ratio);
         let origin = self.world_position + e3 * self.clip - vec2 / 2.0 - vec1 / 2.0;
@@ -157,7 +155,6 @@ mod test {
 
         let (origin, vec1, vec2) = cam.get_canvas_basis(1.0);
 
-        println!("{}", vec2);
         assert!((origin - Vector3f {x : 4.0, y : 2.0, z : 4.0 - 2.0_f32.sqrt()}).norm() < 0.001);
         assert!((vec1 - Vector3f {x : - 2.0, y : 2.0, z : 0.0}).norm() < 0.001);
         assert!((vec2 - Vector3f {x : 0.0, y : - 0.0, z : 2.0 * 2.0_f32.sqrt()}).norm() < 0.001);
