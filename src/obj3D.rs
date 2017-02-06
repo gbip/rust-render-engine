@@ -259,6 +259,7 @@ mod obj_parser {
         let mut raw_triangles : Vec<RawTriangle> = vec!();
 
         // We just convert the Option<RawData> to a (Option<usize>,...,...)
+        #[allow(type_complexity)]
         let tris : Vec<(RawData,RawData,(Option<usize>,Option<usize>,Option<usize>))> =
                     tris.into_iter()
                     .map(|t| (t.0,t.1,propagate_option(t.2)))
@@ -332,15 +333,17 @@ mod obj_parser {
             }
         }
 
-        match error {
-
-        true => Err(format!("Incorrect number of indices, line : {}", line)),
-        false => Ok((make_tuple(id_pos),make_tuple(id_norm), match id_tex.len() {
+        if error {
+            Err(format!("Incorrect number of indices, line : {}", line))
+            }
+        else {
+            Ok((make_tuple(id_pos),make_tuple(id_norm), match id_tex.len() {
                     3 => Some(make_tuple(id_tex)),
                     _ => None,
-        })),
+                }))
+            }
         }
-    }
+    
 
     fn parse_normal(line : String) -> Result<LineType,String> {
         //We clone the line, to use line after for debugging.

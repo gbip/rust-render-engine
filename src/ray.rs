@@ -77,7 +77,7 @@ impl Surface for Plane {
                     x : slope.x * t + origin.x,
                     y : slope.y * t + origin.y,
                     z : slope.z * t + origin.z,
-                }, t, color.clone()));
+                }, t, *color));
             }
         }
 
@@ -101,14 +101,13 @@ impl Fragment {
 
 #[cfg(test)]
 mod tests {
-    use math::Vector3;
     use ray::*;
 
     #[test]
     fn test_plane_equation() {
         let v1 = Vector3f {
             x : 5.0 - 8.0,
-            y : 3.0 - 3.0,
+            y : 0.0,
             z : 2.0 - 7.0,
         };
 
@@ -190,7 +189,7 @@ mod tests {
         let intersection = plane.get_intersection(&ray,&RGBA32::new_black());
         assert!(match intersection {
             None => true,
-            Some(point) => false,
+            Some(_) => false,
         });
     }
 

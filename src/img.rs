@@ -25,7 +25,7 @@ impl<T : Pixel> Image<T> {
             buffer.push(b);
         }
 
-        let _ = image::save_buffer(&Path::new(pathname), buffer.as_slice(), self.width as u32, self.height as u32, image::RGB(8)).unwrap();
+        image::save_buffer(&Path::new(pathname), buffer.as_slice(), self.width as u32, self.height as u32, image::RGB(8)).unwrap();
     }
 }
 

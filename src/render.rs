@@ -20,11 +20,11 @@ impl Renderer {
             ratio : (res_x as f32/res_y as f32)
         }
     }
-
+    #[allow(unused_variables)]
     pub fn emit_rays(&self, world : &scene::World, camera : &scene::Camera, canvas : &mut Canvas) {
 
     }
-
+    #[allow(unused_variables)]
     pub fn render(&self, world : &scene::World, camera : &scene::Camera) -> Image<RGBA32> {
         // Création de l'image qui résulte du rendu
         let result = Image::<RGBA32>::new(self.res_x, self.res_y);
