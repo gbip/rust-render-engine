@@ -477,8 +477,6 @@ mod obj_parser {
 #[cfg(test)]
 mod tests {
 
-    use obj3D::*;
-
     #[test]
     fn test_triangle_intersects() {
         unimplemented!();

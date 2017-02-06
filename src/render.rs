@@ -5,7 +5,7 @@ use math::Vector3f;
 use ray::{Ray, Fragment};
 
 
-
+#[derive(Serialize,Deserialize,Debug)]
 pub struct Renderer {
     res_x: usize,
     res_y: usize,

@@ -7,6 +7,7 @@ use std::io::{Write, Read};
 use std;
 use serde_json;
 use color::RGBA8;
+use render::Renderer;
 
 fn write_string_to_file(j: &str, file_name: String) -> std::io::Result<()> {
     let mut file = File::create(file_name).unwrap();
@@ -21,6 +22,46 @@ fn open_file_as_string(file: &str) -> String {
         Err(e) => panic!("Error could not open file {}, the error is : {}", file, e),
     };
     result
+}
+
+// Une simple scène
+#[derive(Serialize,Deserialize,Debug)]
+pub struct Scene {
+    pub world: World,
+    renderer: Renderer,
+}
+
+impl Scene {
+    // Charge la scène depuis un fichier "file"
+    pub fn load_from_file(file: String) -> Self {
+        println!("Loading scene from file : {} ", file);
+        let file = open_file_as_string(file.as_str());
+        let mut scene: Scene = match serde_json::from_str(file.as_str()) {
+            Ok(val) => val,
+            Err(e) => panic!("Error while loading world. Serde error is : {}", e),
+        };
+        scene.world.load_objects();
+        scene
+    }
+
+    // Nouvelle scène vide, avec une résolution de base de 960x540
+    pub fn new_empty() -> Self {
+        Scene {
+            world: World::new_empty(),
+            renderer: Renderer::new(960, 540),
+        }
+    }
+
+    // Ecris la structure de la scène dans le fichier "file" en JSON sans la géomètrie
+    pub fn save_to_file(&self, file: String) {
+        match write_string_to_file(&serde_json::to_string_pretty(&self).unwrap(), file) {
+
+            Err(e) => println!("Could not save world. Error : {}", e),
+
+            Ok(_) => println!("World sucessfully saved"),
+
+        }
+    }
 }
 
 #[derive(Serialize,Deserialize,Debug)]
@@ -116,30 +157,6 @@ impl World {
     // Ajoute un objet dans le monde
     pub fn add_object(&mut self, color: RGBA8, pos: Vector3f, path: String, name: String) {
         self.objects.push(Object::new(color, pos, path, name));
-    }
-
-    // Enregistre le monde dans un fichier
-    pub fn save_to_file(&self, file: &str) {
-        match write_string_to_file(&serde_json::to_string_pretty(&self).unwrap(),
-                                   file.to_string()) {
-
-            Err(e) => println!("Could not save world. Error : {}", e),
-
-            Ok(_) => println!("World sucessfully saved"),
-
-        }
-    }
-
-    // Initialise un nouveau monde depuis un fichier.
-    pub fn load_from_file(file: &str) -> World {
-        println!("Loading scene from file : {} ", file);
-        let file = open_file_as_string(file);
-        let mut world: World = match serde_json::from_str(file.as_str()) {
-            Ok(val) => val,
-            Err(e) => panic!("Error while loading world. Serde error is : {}", e),
-        };
-        world.load_objects();
-        world
     }
 }
 

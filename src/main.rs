@@ -18,7 +18,7 @@ extern crate serde;
 extern crate image;
 extern crate getopts;
 
-use scene::World;
+use scene::Scene;
 use img::Image;
 use color::{RGBA8, RGBA32};
 use math::Vector3;
@@ -27,13 +27,13 @@ use std::env;
 
 // Generate a template file at the location [path]
 fn generate_template(path: String) {
-    let mut world = World::new_empty();
-    world.add_object(RGBA8::new_black(),
-                     Vector3::new(42_f32, 0.56_f32, 23.2_f32),
-                     "models/plane_no_uv.obj".to_string(),
-                     "Example".to_string());
+    let mut scene = Scene::new_empty();
+    scene.world.add_object(RGBA8::new_black(),
+                           Vector3::new(42_f32, 0.56_f32, 23.2_f32),
+                           "models/plane_no_uv.obj".to_string(),
+                           "Example".to_string());
 
-    world.save_to_file(path.as_str());
+    scene.save_to_file(path);
 }
 
 
@@ -128,10 +128,38 @@ fn test_image() {
 
 // The function that will be called when the programm need to render
 fn render(input: String, output: String) {
-    let world = World::load_from_file(input.as_str());
-    println!("{:?}", world);
+    let scene = Scene::load_from_file(input);
+    println!("{:?}", scene);
 }
 
 fn main() {
     parse_arg();
+}
+
+#[cfg(test)]
+mod test {
+    use std::process::Command;
+    use super::*;
+
+    // Generate a template, render it, and then remove it.
+    #[test]
+    fn test_template_generation_and_loading() {
+        generate_template("test".to_string());
+        Scene::load_from_file("test".to_string());
+        Command::new("rm")
+            .arg("test")
+            .output()
+            .expect("Error can't remove file test");
+
+    }
+
+
+
+
+
+
+
+
+
+
 }
