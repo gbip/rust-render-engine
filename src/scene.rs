@@ -47,7 +47,7 @@ const DEFAULT_FOV : f32 = 70.0;
 const DEFAULT_CLIP : f32 = 0.1;
 
 impl Camera {
-    fn new(position : Vector3f, target : Vector3f, up: Vector3f) -> Self {
+    pub fn new(position : Vector3f, target : Vector3f, up: Vector3f) -> Self {
         Camera {world_position: position,
                 target_position: target,
                 fov : DEFAULT_FOV,
@@ -56,22 +56,25 @@ impl Camera {
         }
     }
 
-    fn set_fov(&mut self, fov : f32) {
+    pub fn set_fov(&mut self, fov : f32) {
         self.fov = fov;
     }
 
     pub fn get_canvas_basis(&self, ratio : f32) -> (Vector3f, Vector3f, Vector3f) {
         let cam_vector = self.target_position - self.world_position;
+        let e1_not_norm = cam_vector.cross_product(&self.up);
 
+        let e1 = e1_not_norm / e1_not_norm.norm();
         let e3 = cam_vector / cam_vector.norm();
-        let e2 = self.up / self.up.norm();
-        let e1 = e3.cross_product(&e2);
+        let e2 = e1.cross_product(&e3);
 
-        let fov_tan = (self.fov / 2.0).tan();
+        let fov_tan = (self.fov / 2.0).to_radians().tan();
 
-        let vec1 = e1 * (fov_tan * 2.0);
-        let vec2 = e2 * (fov_tan * 2.0 * ratio);
-        let origin = self.world_position + e3 * self.clip - e2 / 2.0 - e1 / 2.0;
+        println!("{}", e1);
+
+        let vec1 = e1 * (fov_tan * 2.0 * self.clip);
+        let vec2 = e2 * (fov_tan * 2.0 * self.clip / ratio);
+        let origin = self.world_position + e3 * self.clip - vec2 / 2.0 - vec1 / 2.0;
 
         (origin, vec1, vec2)
     }
@@ -134,5 +137,29 @@ impl World {
        };
        world.load_objects();
        world
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use scene::Camera;
+    use math::{Vector3f, VectorialOperations};
+
+    #[test]
+    fn test_canvas_basis() {
+        let cam : Camera = Camera {
+            world_position : Vector3f { x : 4.0, y : 4.0, z : 4.0 },
+            target_position : Vector3f { x : -1.0, y : -1.0, z : 4.0},
+            up : Vector3f {x : 0.0, y : 0.0, z : 1.0},
+            fov : 90.0,
+            clip : 2.0_f32.sqrt(),
+        };
+
+        let (origin, vec1, vec2) = cam.get_canvas_basis(1.0);
+
+        println!("{}", vec2);
+        assert!((origin - Vector3f {x : 4.0, y : 2.0, z : 4.0 - 2.0_f32.sqrt()}).norm() < 0.001);
+        assert!((vec1 - Vector3f {x : - 2.0, y : 2.0, z : 0.0}).norm() < 0.001);
+        assert!((vec2 - Vector3f {x : 0.0, y : - 0.0, z : 2.0 * 2.0_f32.sqrt()}).norm() < 0.001);
     }
 }
