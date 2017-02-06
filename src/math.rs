@@ -29,15 +29,15 @@ pub struct Vector2<T> {
 pub trait AlmostEq<T> {
     // Si le seuil (threshold) est absent, alors l'implémentation doit le mettre à la plus petite
     // valeur possible.
-    fn equal_with_threshold(&self, other: &Self, threshold : Option<T>) -> bool;
-    
+    fn equal_with_threshold(&self, other: &Self, threshold: Option<T>) -> bool;
+
     // De même que pour equal_with_threshold, l'implémentation doit spécifier la plus petite valeur
     // possible si le seuil est absent
     fn not_equal_with_threshold(&self, other: &Self, threshold: Option<T>) -> bool;
-    
+
     // Lire "almost non equal"
     fn ane(&self, other: &Self) -> bool;
-    
+
     // Lire "almost equal". Le threshold est à f32::EPSILON.
     fn aeq(&self, other: &Self) -> bool;
 }
@@ -48,23 +48,25 @@ impl<T> Vector3<T> {
     }
 }
 
-impl<T> fmt::Display for Vector3<T> where
-    T : fmt::Display {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f,"({} , {} , {})",self.x,self.y,self.z)
+impl<T> fmt::Display for Vector3<T>
+    where T: fmt::Display
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({} , {} , {})", self.x, self.y, self.z)
     }
 }
 
 impl<T> Vector2<T> {
-    pub fn new(x:T,y:T) -> Vector2<T> {
-        Vector2{x:x,y:y}
+    pub fn new(x: T, y: T) -> Vector2<T> {
+        Vector2 { x: x, y: y }
     }
 }
 
-impl<T> fmt::Display for Vector2<T> where
-    T : fmt::Display {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f,"({} , {})",self.x,self.y)
+impl<T> fmt::Display for Vector2<T>
+    where T: fmt::Display
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({} , {})", self.x, self.y)
     }
 }
 // One basic aliases for implementation convenience in other module.
@@ -72,24 +74,26 @@ pub type Vector3f = Vector3<f32>;
 pub type Vector2f = Vector2<f32>;
 
 impl AlmostEq<f32> for Vector3<f32> {
-    fn equal_with_threshold(&self,other : &Self,threshold: Option<f32>) -> bool {
+    fn equal_with_threshold(&self, other: &Self, threshold: Option<f32>) -> bool {
         let new_threshold = match threshold {
             Some(thre) => thre,
             None => f32::EPSILON,
         };
-        (((self.x-other.x).abs() <= new_threshold) && ((self.y-other.y).abs() <= new_threshold) && ((self.z-other.z).abs() <= new_threshold))
+        (((self.x - other.x).abs() <= new_threshold) &&
+         ((self.y - other.y).abs() <= new_threshold) &&
+         ((self.z - other.z).abs() <= new_threshold))
     }
 
     fn not_equal_with_threshold(&self, other: &Self, threshold: Option<f32>) -> bool {
-        !AlmostEq::equal_with_threshold(self,other,threshold)
+        !AlmostEq::equal_with_threshold(self, other, threshold)
     }
 
     fn ane(&self, other: &Self) -> bool {
-        AlmostEq::not_equal_with_threshold(self,other,None)
+        AlmostEq::not_equal_with_threshold(self, other, None)
     }
 
     fn aeq(&self, other: &Self) -> bool {
-        AlmostEq::equal_with_threshold(self,other,None)
+        AlmostEq::equal_with_threshold(self, other, None)
     }
 }
 
@@ -416,7 +420,7 @@ mod tests {
             y: 0_f32,
             z: 0_f32,
         };
-        assert_eq!(&v2 * 2_f32,v2);
+        assert_eq!(&v2 * 2_f32, v2);
     }
 
     #[test]
@@ -554,13 +558,13 @@ mod tests {
     }
     #[test]
     fn test_almot_eq_vec3() {
-        let v1 = Vector3::new(0_f32,0_f32,0_f32);
-        let v2 = Vector3::new(1_f32,0_f32,0_f32);
-        let v3 = Vector3::new(0_f32,1_f32,0_f32);
-        let v4 = Vector3::new(0_f32,0_f32,1_f32);
-        let v5 = Vector3::new(0_f32,0_f32,1_f32 + f32::EPSILON);
-        let mut v6 = Vector3::new(f32::EPSILON,0_f32,f32::EPSILON);
-        let v7 = Vector3::new(-f32::EPSILON,-f32::EPSILON,0_f32);
+        let v1 = Vector3::new(0_f32, 0_f32, 0_f32);
+        let v2 = Vector3::new(1_f32, 0_f32, 0_f32);
+        let v3 = Vector3::new(0_f32, 1_f32, 0_f32);
+        let v4 = Vector3::new(0_f32, 0_f32, 1_f32);
+        let v5 = Vector3::new(0_f32, 0_f32, 1_f32 + f32::EPSILON);
+        let mut v6 = Vector3::new(f32::EPSILON, 0_f32, f32::EPSILON);
+        let v7 = Vector3::new(-f32::EPSILON, -f32::EPSILON, 0_f32);
 
         assert!(v1.ane(&v2) && v1.ane(&v3) && v1.ane(&v4) && v1.ane(&v5));
         assert!(v2.ane(&v3) && v2.ane(&v4) && v3.ane(&v4));
@@ -569,7 +573,7 @@ mod tests {
         assert!(v6.ane(&v7));
         assert!(v7.ane(&v6));
         assert!(v1.aeq(&v6) && v1.aeq(&v7));
-        v6=2.0*v6;
+        v6 = 2.0 * v6;
         assert!(v6.ane(&v1));
 
     }

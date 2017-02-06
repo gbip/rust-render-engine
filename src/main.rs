@@ -20,59 +20,66 @@ extern crate getopts;
 
 use scene::World;
 use img::Image;
-use color::{RGBA8,RGBA32};
+use color::{RGBA8, RGBA32};
 use math::Vector3;
 use getopts::Options;
 use std::env;
 
 // Generate a template file at the location [path]
-fn generate_template(path:String) {
+fn generate_template(path: String) {
     let mut world = World::new_empty();
     world.add_object(RGBA8::new_black(),
-                     Vector3::new(42_f32,0.56_f32,23.2_f32),
-                    "models/plane_no_uv.obj".to_string(),
-                    "Example".to_string());
-    
+                     Vector3::new(42_f32, 0.56_f32, 23.2_f32),
+                     "models/plane_no_uv.obj".to_string(),
+                     "Example".to_string());
+
     world.save_to_file(path.as_str());
 }
 
 
 // Usage of the program :
-// 2 functions : generate a template for a scene, and render a scene 
+// 2 functions : generate a template for a scene, and render a scene
 //  -> Generate a template :
 //      -g [PATH] or --generate [PATH]
 //  -> To load a scene :
 //       Specify the input scene (needed)
-//      -r [PATH] or --read [PATH] 
+//      -r [PATH] or --read [PATH]
 //      Specify the output file
 //      -w [PATH] or --write output [PATH] (optional)
 fn parse_arg() {
     let mut options = Options::new();
 
     // Generating a template
-    options.optflagopt("g","generate","Generate a template for creating a new scene","FILE");
+    options.optflagopt("g",
+                       "generate",
+                       "Generate a template for creating a new scene",
+                       "FILE");
 
     // Rendering :
     // -> Load a file
-    options.optflagopt("r","read","Open a scene file (.json) for rendering","FILE");
-    
+    options.optflagopt("r",
+                       "read",
+                       "Open a scene file (.json) for rendering",
+                       "FILE");
+
     // -> Set the output file
-    options.optflagopt("w","write","Save the rendered image to a file","FILE");
+    options.optflagopt("w", "write", "Save the rendered image to a file", "FILE");
 
     // Collecting the argument from the environnement
-    let args : Vec<String> = env::args().collect();
+    let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
 
     let matches = match options.parse(args) {
         Ok(val) => val,
         Err(e) => panic!(e.to_string()),
     };
-    
-    let at_least_one_option = matches.opt_present("g") || matches.opt_present("w") || matches.opt_present("r");
-    
+
+    let at_least_one_option = matches.opt_present("g") || matches.opt_present("w") ||
+                              matches.opt_present("r");
+
     if !at_least_one_option {
         show_usage(program);
-        return
+        return;
     }
 
     // Handling the template case
@@ -82,7 +89,7 @@ fn parse_arg() {
             None => "template.json".to_string(),
         });
     }
-    
+
     // Handling the case where we need to render
     if matches.opt_present("w") {
         let output_path = match matches.opt_str("w") {
@@ -92,21 +99,25 @@ fn parse_arg() {
         if matches.opt_present("r") {
             let input_path = match matches.opt_str("r") {
                 Some(path) => path,
-                None => {show_usage(program);return},
+                None => {
+                    show_usage(program);
+                    return;
+                }
             };
-            render(input_path,output_path);
-        }
-        else {
+            render(input_path, output_path);
+        } else {
             show_usage(program);
         }
     }
 }
 
 // Print in the console how to use the program
-fn show_usage(program:String) {
-    println!("Usage : {} -g FILE -r FILE -w FILE",program.as_str());
-    println!("-g FILE or --generate FILE : Generate a template file in the location FILE for creating a scene");
-    println!("-r FILE or --read FILE : Read FILE to load the scene before rendering. Needed for rendering, without a scene specified, the program will not render.");
+fn show_usage(program: String) {
+    println!("Usage : {} -g FILE -r FILE -w FILE", program.as_str());
+    println!("-g FILE or --generate FILE : Generate a template file in the location FILE for \
+              creating a scene");
+    println!("-r FILE or --read FILE : Read FILE to load the scene before rendering. Needed for \
+              rendering, without a scene specified, the program will not render.");
     println!("-w FILE or --write FILE : Write the output to FILE. The default is 'untitled.png'");
 }
 
@@ -116,9 +127,9 @@ fn test_image() {
 }
 
 // The function that will be called when the programm need to render
-fn render(input:String,output:String) {
+fn render(input: String, output: String) {
     let world = World::load_from_file(input.as_str());
-    println!("{:?}",world);
+    println!("{:?}", world);
 }
 
 fn main() {
