@@ -62,6 +62,11 @@ impl Scene {
 
         }
     }
+
+    pub fn render_to_file(&self, file_path: String) {
+        let image = self.renderer.render(&self.world, self.world.get_camera(0));
+        image.write_to_file(file_path.as_str())
+    }
 }
 
 #[derive(Serialize,Deserialize,Debug)]
@@ -157,6 +162,10 @@ impl World {
     // Ajoute un objet dans le monde
     pub fn add_object(&mut self, color: RGBA8, pos: Vector3f, path: String, name: String) {
         self.objects.push(Object::new(color, pos, path, name));
+    }
+
+    pub fn get_camera(&self, cam_indice: usize) -> &Camera {
+        self.cameras.get(cam_indice).expect("Out of bound camera index")
     }
 }
 

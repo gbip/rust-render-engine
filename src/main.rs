@@ -129,7 +129,7 @@ fn test_image() {
 // The function that will be called when the programm need to render
 fn render(input: String, output: String) {
     let scene = Scene::load_from_file(input);
-    println!("{:?}", scene);
+    scene.render_to_file(output);
 }
 
 fn main() {
