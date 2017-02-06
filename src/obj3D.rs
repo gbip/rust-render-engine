@@ -464,24 +464,4 @@ mod obj_parser {
             Err(e) => panic!("Error while trying to open the file: {} - {}", path, e),
         }
     }
-    #[cfg(test)]
-    mod test {
-        #[test]
-        fn test_extract_indices() {
-            unimplemented!()
-        }
-    }
-}
-
-
-#[cfg(test)]
-mod tests {
-
-    #[test]
-    fn test_triangle_intersects() {
-        unimplemented!();
-    }
-
-    // TESTS DU PARSER
-
 }

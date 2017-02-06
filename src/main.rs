@@ -28,8 +28,11 @@ use std::env;
 // Generate a template file at the location [path]
 fn generate_template(path: String) {
     let mut scene = Scene::new_empty();
+    scene.world.add_camera(Vector3::new(0_f32,0_f32,5_f32),
+                            Vector3::new(10_f32,0_f32,0_f32));
+
     scene.world.add_object(RGBA8::new_black(),
-                           Vector3::new(42_f32, 0.56_f32, 23.2_f32),
+                           Vector3::new(10_f32, 0.56_f32, 2_f32),
                            "models/plane_no_uv.obj".to_string(),
                            "Example".to_string());
 
