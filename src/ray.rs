@@ -68,7 +68,7 @@ impl Surface for Plane {
         else {
             let t = p / m;
 
-            if t < 0.0 || t > ray.max_t {
+            if t < 0.0 || (ray.max_t > 0.0 && t > ray.max_t) {
                 //La surface est "avant" ou "après" le point d'émission du rayon
                 result = None;
             }
@@ -154,7 +154,8 @@ mod tests {
                 x : 1.0,
                 y : 0.0,
                 z : 0.0,
-            }
+            },
+            max_t : -1.0
         };
 
         assert!(match plane.get_intersection(&ray, &RGBA32::new_black()) {
@@ -182,7 +183,8 @@ mod tests {
                 x : 0.0,
                 y : 1.0,
                 z : 0.0,
-            }
+            },
+            max_t : -1.0
         };
 
         let intersection = plane.get_intersection(&ray,&RGBA32::new_black());
@@ -211,7 +213,8 @@ mod tests {
                 x : 0.0,
                 y : -1.0,
                 z : 0.0,
-            }
+            },
+            max_t : -1.0
         };
 
         let intersection = plane.get_intersection(&ray,&RGBA32::new_black());
