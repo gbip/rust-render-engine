@@ -1,16 +1,16 @@
 use scene;
 use img::Image;
-use color::RGBA32;
+use color::{RGBA8, RGBA32};
 use color;
 use math::Vector3f;
 use ray::{Ray, Fragment, Surface};
-
 
 #[derive(Serialize,Deserialize,Debug)]
 pub struct Renderer {
     res_x: usize,
     res_y: usize,
     ratio: f32,
+    background_color: RGBA8,
 }
 
 
@@ -20,6 +20,7 @@ impl Renderer {
             res_x: res_x,
             res_y: res_y,
             ratio: (res_x as f32 / res_y as f32),
+            background_color: RGBA8::new_black(),
         }
     }
 
@@ -83,7 +84,7 @@ impl Renderer {
                                                             z: 0.0,
                                                         },
                                                         0.0,
-                                                        RGBA32::new_black()))
+                                                        self.background_color.to_rgba32()))
                 } // TODO changer le fragment par défaut
             }
         }
