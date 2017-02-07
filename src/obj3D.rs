@@ -21,7 +21,7 @@ struct RawTriangle(RawPoint, RawPoint, RawPoint);
 
 
 
-#[derive(Clone,Debug,Copy)]
+#[derive(Clone,Debug,Copy,PartialEq)]
 pub struct GeoPoint {
     norm: Vector3f,
     tex: Option<Vector2f>,
@@ -38,7 +38,7 @@ impl GeoPoint {
     }
 }
 
-#[derive(Clone,Debug,Copy)]
+#[derive(Clone,Debug,Copy,PartialEq)]
 pub struct Triangle {
     u: GeoPoint,
     v: GeoPoint,
@@ -88,7 +88,7 @@ impl Surface for Triangle {
     }
 }
 
-#[derive(Clone,Debug)]
+#[derive(Clone,Debug,PartialEq)]
 pub struct Mesh {
     triangles: Vec<Triangle>,
 }
@@ -462,6 +462,35 @@ mod obj_parser {
         match File::open(path) {
             Ok(t) => t,
             Err(e) => panic!("Error while trying to open the file: {} - {}", path, e),
+        }
+    }
+
+    #[cfg(test)]
+    mod test {
+        use math::{Vector3, Vector3f};
+        use super::super::*;
+
+        #[test]
+        fn test_obj_parsing_plane() {
+            let a: f32 = 8.555269;
+            let b: f32 = 5.030090;
+            let c: f32 = 4.669442;
+            let d: f32 = 10.555269;
+            let e: f32 = 2.669442;
+
+            let norm1: Vector3f = Vector3::new(0.0, 1.0, 0.0);
+            let p1 = GeoPoint::new(Vector3::new(a, b, c), norm1, None);
+            let p2 = GeoPoint::new(Vector3::new(d, b, c), norm1, None);
+            let p3 = GeoPoint::new(Vector3::new(a, b, e), norm1, None);
+            let p4 = GeoPoint::new(Vector3::new(d, b, e), norm1, None);
+
+            let t1 = Triangle::new(p2, p4, p3);
+            let t2 = Triangle::new(p1, p2, p3);
+
+            let expected_result = Mesh { triangles: vec![t1, t2] };
+
+            assert_eq!(obj_parser::open_obj("models/plane_no_uv.obj"),
+                       expected_result);
         }
     }
 }
