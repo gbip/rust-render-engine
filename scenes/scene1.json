@@ -1,0 +1,70 @@
+{
+  "world": {
+    "base_vector": [
+      {
+        "x": 1.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "x": 0.0,
+        "y": 1.0,
+        "z": 0.0
+      },
+      {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 1.0
+      }
+    ],
+    "cameras": [
+      {
+        "world_position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 5.0
+        },
+        "target_position": {
+          "x": 10.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "up": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 1.0
+        },
+        "fov": 70.0,
+        "clip": 0.1
+      }
+    ],
+    "objects": [
+      {
+        "color": {
+          "r": 0,
+          "g": 250,
+          "b": 0,
+          "a": 255
+        },
+        "position": {
+          "x": 10.0,
+          "y": 0.56,
+          "z": 2.0
+        },
+        "obj_path": "models/plane_no_uv.obj",
+        "name": "Example"
+      }
+    ]
+  },
+  "renderer": {
+    "res_x": 960,
+    "res_y": 540,
+    "ratio": 1.7777778,
+    "background_color": {
+      "r": 7,
+      "g": 7,
+      "b": 7,
+      "a": 255
+    }
+  }
+}
