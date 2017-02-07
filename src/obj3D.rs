@@ -36,6 +36,10 @@ impl GeoPoint {
             pos: pos,
         }
     }
+
+    pub fn add_position(&mut self, position: &Vector3f) {
+        self.pos = &self.pos + position;
+    }
 }
 
 #[derive(Clone,Debug,Copy,PartialEq)]
@@ -48,6 +52,12 @@ pub struct Triangle {
 impl Triangle {
     pub fn new(u: GeoPoint, v: GeoPoint, w: GeoPoint) -> Triangle {
         Triangle { u: u, v: v, w: w }
+    }
+
+    pub fn add_position(&mut self, position: &Vector3f) {
+        self.u.add_position(position);
+        self.v.add_position(position);
+        self.w.add_position(position);
     }
 }
 
@@ -191,10 +201,17 @@ impl Object {
         self.mesh = obj_parser::open_obj(&self.obj_path);
     }
 
+    fn apply_position(&mut self) {
+        for tri in &mut self.mesh.triangles {
+            tri.add_position(&self.position);
+        }
+    }
+
     // Initialise un objet. Pour l'instant cela ne fait que charger le mesh, mais on peut imaginer
     // d'autres traitements.
     pub fn initialize(&mut self) {
         self.load_mesh();
+        self.apply_position();
     }
     // Crée un objet vide
     pub fn new_empty() -> Object {
