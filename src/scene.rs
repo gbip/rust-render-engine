@@ -64,6 +64,7 @@ impl Scene {
     }
 
     pub fn render_to_file(&self, file_path: String) {
+        println!("Starting to render");
         let image = self.renderer.render(&self.world, self.world.get_camera(0));
         image.write_to_file(file_path.as_str())
     }
