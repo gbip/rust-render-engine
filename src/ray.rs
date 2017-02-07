@@ -19,7 +19,7 @@ pub struct Plane {
     d: f32,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Fragment {
     pub position: Vector3f,
     pub normal: Vector3f,
@@ -38,7 +38,7 @@ pub trait Surface {
 
 
 impl Ray {
-    fn new(origin: Vector3f, slope: Vector3f) -> Ray {
+    pub fn new(origin: Vector3f, slope: Vector3f) -> Ray {
         Ray {
             origin: origin,
             slope: slope,

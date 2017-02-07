@@ -73,19 +73,19 @@ impl Scene {
 pub struct Camera {
     /// The position fo the camera exprimed in the standard word space coordinates (where {0,0,0} is the
     /// center of the world)
-    world_position: Vector3f,
+    pub world_position: Vector3f,
 
     /// The position of the point at which the camera is aiming, in world space coordinates
     target_position: Vector3f,
+
+    // The vector that represents the up direction
+    up: Vector3f,
 
     // The horizontal field of view, exprimed in degrees.
     fov: f32,
 
     // La distance entre le canvas et l'origine de la caméra.
     clip: f32,
-
-    // The vector that represents the up direction
-    up: Vector3f,
 }
 
 const DEFAULT_FOV: f32 = 70.0;
@@ -166,6 +166,10 @@ impl World {
 
     pub fn get_camera(&self, cam_indice: usize) -> &Camera {
         self.cameras.get(cam_indice).expect("Out of bound camera index")
+    }
+
+    pub fn objects(& self) -> & Vec<obj3D::Object> {
+        &self.objects
     }
 }
 
