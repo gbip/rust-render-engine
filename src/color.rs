@@ -21,12 +21,14 @@ pub struct RGBA8 {
 }
 
 fn u32_to_u8(v: u32) -> u8 {
-    let conversion_factor = ((u32::max_value() as u64 + 1u64) / (u8::max_value() as u64 + 1u64)) as u32;
+    let conversion_factor = ((u32::max_value() as u64 + 1u64) /
+                             (u8::max_value() as u64 + 1u64)) as u32;
     (v / conversion_factor) as u8
 }
 
 fn u8_to_u32(v: u8) -> u32 {
-    let conversion_factor = ((u32::max_value() as u64 + 1u64) / (u8::max_value() as u64 + 1u64)) as u32;
+    let conversion_factor = ((u32::max_value() as u64 + 1u64) /
+                             (u8::max_value() as u64 + 1u64)) as u32;
     (v as u32 * conversion_factor)
 }
 
@@ -38,7 +40,7 @@ pub fn make_average_color(colors: Vec<RGBA32>) -> RGBA32 {
 
     let number_of_colors = colors.len();
     let squared_colors: Vec<(u64, u64, u64)> =
-        colors.into_iter().map(|color| color.square()).collect();
+        colors.into_iter().map(|color| (color.r as u64, color.g as u64, color.b as u64)).collect();
     let mut acc: (u64, u64, u64) = (0, 0, 0);
     for c in squared_colors {
         acc.0 += c.0;
@@ -49,9 +51,9 @@ pub fn make_average_color(colors: Vec<RGBA32>) -> RGBA32 {
     acc.1 /= number_of_colors as u64;
     acc.2 /= number_of_colors as u64;
 
-    let r = (acc.0 as f64).sqrt();
-    let g = (acc.1 as f64).sqrt();
-    let b = (acc.2 as f64).sqrt();
+    let r = acc.0;
+    let g = acc.1;
+    let b = acc.2;
 
     // Calcul de la transparence
     // A FAIRE
