@@ -125,7 +125,7 @@ impl Renderer {
             .map(|line| line.into_iter().map(|frag| frag.get_average_color()).collect())
             .collect();
 
-        Image::from_vec(temp_result)
+        Image::<RGBA32>::from_vec_vec(&temp_result)
 
     }
 }

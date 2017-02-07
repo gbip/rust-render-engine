@@ -3,7 +3,7 @@ use std::vec;
 use std::path::Path;
 use color::RGBA32;
 
-pub trait Pixel : Copy {
+pub trait Pixel: Copy {
     fn to_rgb_pixel(&self) -> (u8, u8, u8);
     fn to_rgba_pixel(&self) -> (u8, u8, u8, u8);
 }
@@ -15,10 +15,9 @@ pub struct Image<T: Pixel> {
 }
 
 impl<T: Pixel> Image<T> {
-
     /** Convertit une liste de lignes de pixels en image exportable.  */
-    pub fn from_vec_vec(vec_vec : &Vec<Vec<T>>) -> Image<T> {
-        let mut pixels : Vec<T> = vec![];
+    pub fn from_vec_vec(vec_vec: &Vec<Vec<T>>) -> Image<T> {
+        let mut pixels: Vec<T> = vec![];
 
         for vec in vec_vec {
             for t in vec {
@@ -26,7 +25,11 @@ impl<T: Pixel> Image<T> {
             }
         }
 
-        Image {width : vec_vec[0].len(), height : vec_vec.len(), pixels : pixels}
+        Image {
+            width: vec_vec[0].len(),
+            height: vec_vec.len(),
+            pixels: pixels,
+        }
     }
 
     pub fn write_to_file(&self, pathname: &str) {
@@ -56,8 +59,5 @@ impl Image<RGBA32> {
             height: sizey,
             pixels: px,
         }
-    }
-    pub fn from_vec(color: Vec<Vec<RGBA32>>) -> Image<RGBA32> {
-        unimplemented!()
     }
 }
