@@ -26,7 +26,7 @@ fn u32_to_u8(v: u32) -> u8 {
 
 // TODO : Verifier les histoires d'espace de couleur linéaire et tout et tout
 // /!\ On ne gère pas la transparence !!!!
-fn average_color(colors: Vec<RGBA32>) -> RGBA32 {
+pub fn make_average_color(colors: Vec<RGBA32>) -> RGBA32 {
 
     // Calcul de la couleur moyenne
 
