@@ -114,7 +114,7 @@ fn parse_arg() {
     }
 }
 
-// Print in the console how to use the program
+// Affiche dans la console comment effectuer le rendu
 fn show_usage(program: String) {
     println!("Usage : {} -g FILE -r FILE -w FILE", program.as_str());
     println!("-g FILE or --generate FILE : Generate a template file in the location FILE for \
@@ -129,7 +129,7 @@ fn test_image() {
     image.write_to_file("object.png");
 }
 
-// The function that will be called when the programm need to render
+// La fonction que l'on appelle pour effectuer le rendu.
 fn render(input: String, output: String) {
     let scene = Scene::load_from_file(input);
     scene.render_to_file(output);
