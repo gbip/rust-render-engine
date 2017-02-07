@@ -24,6 +24,11 @@ fn u32_to_u8(v: u32) -> u8 {
     (v / (u32::max_value() / u8::max_value() as u32)) as u8
 }
 
+fn u8_to_u32(v: u8) -> u32 {
+
+    (v as u32 * (u32::max_value() / u8::max_value() as u32))
+}
+
 // TODO : Verifier les histoires d'espace de couleur linéaire et tout et tout
 // /!\ On ne gère pas la transparence !!!!
 pub fn make_average_color(colors: Vec<RGBA32>) -> RGBA32 {
@@ -91,8 +96,10 @@ impl RGBA8 {
     }
 
     pub fn to_rgba32(&self) -> RGBA32 {
-        unimplemented!()
-
+        RGBA32::new(&u8_to_u32(self.r),
+                    &u8_to_u32(self.g),
+                    &u8_to_u32(self.b),
+                    &u8_to_u32(self.a))
     }
 }
 
