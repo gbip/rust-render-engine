@@ -21,3 +21,7 @@ It is totally normal because we are still basically running a hello world progra
 #Running the test
 Running the test is as simple as typing `cargo test`.
 
+#Example 
+```
+target/debug/render-engine -r models/scene1.json -w test.png
+```
