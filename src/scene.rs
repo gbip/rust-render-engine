@@ -28,7 +28,7 @@ fn open_file_as_string(file: &str) -> String {
 #[derive(Serialize,Deserialize,Debug)]
 pub struct Scene {
     pub world: World,
-    renderer: Renderer,
+    pub renderer: Renderer,
 }
 
 impl Scene {

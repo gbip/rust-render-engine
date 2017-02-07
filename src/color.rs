@@ -89,6 +89,11 @@ impl RGBA8 {
             a: *a,
         }
     }
+
+    pub fn to_rgba32(&self) -> RGBA32 {
+        unimplemented!()
+
+    }
 }
 
 impl RGBA32 {
