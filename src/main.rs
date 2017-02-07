@@ -145,6 +145,7 @@ mod test {
     use super::*;
 
     // Generate a template, render it, and then remove it.
+    #[ignore]
     #[test]
     fn test_template_generation_and_loading() {
         generate_template("test".to_string());
