@@ -61,7 +61,7 @@ impl Renderer {
 
             for object in world.objects() {
                 let points : Vec<Option<Fragment>> = object.triangles()
-                                .map(|tri| tri.get_intersection(&ray, &object.color().to_rgba32())) // TODO changer en la couleur de l'objet
+                                .map(|tri| tri.get_intersection(&ray, &object.color().to_rgba32()))
                                 .filter(|point| point.is_some())
                                 .collect();
 
