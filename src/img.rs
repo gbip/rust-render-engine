@@ -57,4 +57,7 @@ impl Image<RGBA32> {
             pixels: px,
         }
     }
+    pub fn from_vec(color: Vec<Vec<RGBA32>>) -> Image<RGBA32> {
+        unimplemented!()
+    }
 }

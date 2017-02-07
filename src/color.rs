@@ -12,7 +12,7 @@ pub struct RGBA32 {
 
 // A struct to support the classic 8 bit color values that is used to : write to a .png file,
 // manage object color through textures.
-#[derive(Clone,Debug,Copy,Serialize,Deserialize)]
+#[derive(Clone,Debug,Copy,Serialize,Deserialize,PartialEq)]
 pub struct RGBA8 {
     r: u8,
     g: u8,
@@ -22,6 +22,41 @@ pub struct RGBA8 {
 
 fn u32_to_u8(v: u32) -> u8 {
     (v / (u32::max_value() / u8::max_value() as u32)) as u8
+}
+
+fn u8_to_u32(v: u8) -> u32 {
+
+    (v as u32 * (u32::max_value() / u8::max_value() as u32))
+}
+
+// TODO : Verifier les histoires d'espace de couleur linéaire et tout et tout
+// /!\ On ne gère pas la transparence !!!!
+pub fn make_average_color(colors: Vec<RGBA32>) -> RGBA32 {
+
+    // Calcul de la couleur moyenne
+
+    let number_of_colors = colors.len();
+    let squared_colors: Vec<(u64, u64, u64)> =
+        colors.into_iter().map(|color| color.square()).collect();
+    let mut acc: (u64, u64, u64) = (0, 0, 0);
+    for c in squared_colors {
+        acc.0 += c.0;
+        acc.1 += c.1;
+        acc.2 += c.2;
+    }
+    acc.0 /= number_of_colors as u64;
+    acc.1 /= number_of_colors as u64;
+    acc.2 /= number_of_colors as u64;
+
+    let r = (acc.0 as f64).sqrt();
+    let g = (acc.1 as f64).sqrt();
+    let b = (acc.2 as f64).sqrt();
+
+    // Calcul de la transparence
+    // A FAIRE
+
+    RGBA32::new(&(r as u32), &(g as u32), &(b as u32), &u32::max_value())
+
 }
 
 impl RGBA8 {
@@ -58,6 +93,13 @@ impl RGBA8 {
             b: *b,
             a: *a,
         }
+    }
+
+    pub fn to_rgba32(&self) -> RGBA32 {
+        RGBA32::new(&u8_to_u32(self.r),
+                    &u8_to_u32(self.g),
+                    &u8_to_u32(self.b),
+                    &u8_to_u32(self.a))
     }
 }
 
@@ -96,6 +138,19 @@ impl RGBA32 {
             a: *a,
         }
     }
+
+    // /!\ On ne gère pas la transparence !
+    pub fn square(self) -> (u64, u64, u64) {
+        ((self.r as u64).pow(2), (self.g as u64).pow(2), (self.b as u64).pow(2))
+    }
+
+    pub fn to_rgba8(&self) -> RGBA8 {
+        RGBA8::new(&u32_to_u8(self.r),
+                   &u32_to_u8(self.g),
+                   &u32_to_u8(self.b),
+                   &u32_to_u8(self.a))
+
+    }
 }
 
 impl img::Pixel for RGBA32 {
@@ -105,5 +160,54 @@ impl img::Pixel for RGBA32 {
 
     fn to_rgba_pixel(&self) -> (u8, u8, u8, u8) {
         (u32_to_u8(self.r), u32_to_u8(self.g), u32_to_u8(self.b), u32_to_u8(self.a))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::{RGBA8, RGBA32};
+    #[test]
+    fn test_simple_color_conversion() {
+        let a = RGBA8::new(&0, &0, &0, &0);
+        assert_eq!(a, a.to_rgba32().to_rgba8());
+
+        let b = RGBA8::new(&128, &128, &128, &128);
+        assert_eq!(b, b.to_rgba32().to_rgba8());
+
+        let c = RGBA8::new(&255, &255, &255, &255);
+        assert_eq!(c, c.to_rgba32().to_rgba8());
+
+        let d = RGBA32::new(&0, &0, &0, &0);
+        assert_eq!(d, d.to_rgba8().to_rgba32());
+
+        let e = RGBA32::new(&65536, &65536, &65536, &65536);
+        assert_eq!(e, e.to_rgba8().to_rgba32());
+
+        let f = RGBA32::new(&4294967295, &4294967295, &4294967295, &4294967295);
+        assert_eq!(f, f.to_rgba8().to_rgba32());
+    }
+
+    #[test]
+    fn test_advanced_color_conversion() {
+        // Test des arrondis :
+        // Ici on doit arrondir à 0.
+        let a = RGBA32::new(&1, &1, &1, &1);
+        assert_eq!(a.to_rgba8(), RGBA8::new(&0, &0, &0, &0));
+
+        // Ici on doit arrondir à 0.
+        let b = RGBA32::new(&8388607, &8388607, &8388607, &8388607);
+        assert_eq!(b.to_rgba8(), RGBA8::new(&0, &0, &0, &0));
+
+        // Ici on doit arrondir à 1.
+        let c = RGBA32::new(&8388609, &8388609, &8388609, &8388609);
+        assert_eq!(c.to_rgba8(), RGBA8::new(&1, &1, &1, &1));
+
+        // Ici on doit arrondir à 254 => 2^32 - 2^12 - 1
+        let d = RGBA32::new(&4294963199, &4294963199, &4294963199, &4294963199);
+        assert_eq!(d.to_rgba8(), RGBA8::new(&254, &254, &254, &254));
+
+        // Ici on oit arrondir à 255
+        let e = RGBA32::new(&4294963200, &4294963200, &4294963200, &4294963200);
+        assert_eq!(e.to_rgba8(), RGBA8::new(&255, &255, &255, &255));
     }
 }

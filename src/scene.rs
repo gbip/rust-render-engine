@@ -28,7 +28,7 @@ fn open_file_as_string(file: &str) -> String {
 #[derive(Serialize,Deserialize,Debug)]
 pub struct Scene {
     pub world: World,
-    renderer: Renderer,
+    pub renderer: Renderer,
 }
 
 impl Scene {
@@ -106,7 +106,7 @@ impl Camera {
         self.fov = fov;
     }
 
-    pub fn get_canvas_basis(&self, ratio: f32) -> (Vector3f, Vector3f, Vector3f) {
+    pub fn get_canvas_base(&self, ratio: f32) -> (Vector3f, Vector3f, Vector3f) {
         let cam_vector = self.target_position - self.world_position;
         let e1_not_norm = cam_vector.cross_product(&self.up);
 
@@ -168,7 +168,7 @@ impl World {
         self.cameras.get(cam_indice).expect("Out of bound camera index")
     }
 
-    pub fn objects(& self) -> & Vec<obj3D::Object> {
+    pub fn objects(&self) -> &Vec<obj3D::Object> {
         &self.objects
     }
 }
@@ -179,7 +179,7 @@ mod test {
     use math::{Vector3f, VectorialOperations};
 
     #[test]
-    fn test_canvas_basis() {
+    fn test_camera_canvas_base() {
         let cam: Camera = Camera {
             world_position: Vector3f {
                 x: 4.0,
@@ -200,7 +200,7 @@ mod test {
             clip: 2.0_f32.sqrt(),
         };
 
-        let (origin, vec1, vec2) = cam.get_canvas_basis(1.0);
+        let (origin, vec1, vec2) = cam.get_canvas_base(1.0);
 
         assert!((origin -
                  Vector3f {
