@@ -12,6 +12,7 @@ pub struct Renderer {
     ratio: f32,
 }
 
+
 impl Renderer {
     pub fn new(res_x: usize, res_y: usize) -> Self {
         Renderer {
@@ -50,12 +51,17 @@ impl Renderer {
         // On emet les rayons
 
         // Post process
-        //for ray in rays {
-        //    points=world.objects.iter().map(|obj| obj.triangles().map(|tri| tri.get_intersection_point(ray,&obj.color()))
-        //                                                        .collect())
-        //                               .collect();
-        //                                 }
-        // Chaque pixel est recomposé suivant les rayons qui en ont été émis
+/*        for ray in rays {
+            points = world.objects
+                .iter()
+                .map(|obj| {
+                    obj.triangles()
+                        .map(|tri| tri.get_intersection_point(ray, &obj.color()))
+                        .collect()
+                })
+                .collect();
+        }
+  */      // Chaque pixel est recomposé suivant les rayons qui en ont été émis
 
         //result
         unimplemented!();
