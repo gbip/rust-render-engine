@@ -82,17 +82,11 @@ impl Renderer {
         }
     }
 
-    #[allow(unused_variables)]
-    pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA32> {
-        // Création de l'image qui résulte du rendu
-        let result = Image::<RGBA32>::new(self.res_x, self.res_y);
-
+    pub fn create_canvas(&self, camera: &scene::Camera) -> Vec<Vec<Canvas>> {
         let mut canvas: Vec<Vec<Canvas>> = vec![];
-        let rays: Vec<Ray> = vec![];
-        let points: Vec<Fragment> = vec![];
 
         // On crée les "canvas"
-        let (origin, vec1, vec2) = camera.get_canvas_basis(self.ratio);
+        let (origin, vec1, vec2) = camera.get_canvas_base(self.ratio);
         let e1 = vec1 / self.res_x as f32;
         let e2 = vec2 / self.res_y as f32;
 
@@ -106,10 +100,17 @@ impl Renderer {
             }
             canvas.push(line);
         }
+        canvas
+
+    }
+
+    pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA32> {
+
+        let mut canvas: Vec<Vec<Canvas>> = self.create_canvas(camera);
 
         for line in &mut canvas {
-            for mut pixel in line {
-                self.emit_rays(world, camera, &mut pixel, 512, 512);
+            for pixel in &mut line.iter_mut() {
+                self.emit_rays(world, camera, pixel, 512, 512);
             }
         }
 
