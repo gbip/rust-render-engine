@@ -162,7 +162,6 @@ impl Canvas {
 mod test {
     use scene::Scene;
     use math::Vector3;
-    use super::Canvas;
     #[test]
     // Cas simple :
     // On met une caméra à l'origine, la cible en (1,1,1) et on génére des canvas pour une caméra

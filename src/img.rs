@@ -16,7 +16,7 @@ pub struct Image<T: Pixel> {
 
 impl<T: Pixel> Image<T> {
     /** Convertit une liste de lignes de pixels en image exportable.  */
-    pub fn from_vec_vec(vec_vec: &Vec<Vec<T>>) -> Image<T> {
+    pub fn from_vec_vec(vec_vec: &[Vec<T>]) -> Image<T> {
         let mut pixels: Vec<T> = vec![];
 
         for vec in vec_vec {
