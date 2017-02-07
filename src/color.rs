@@ -21,12 +21,13 @@ pub struct RGBA8 {
 }
 
 fn u32_to_u8(v: u32) -> u8 {
-    (v / (u32::max_value() / u8::max_value() as u32)) as u8
+    let conversion_factor = ((u32::max_value() as u64 + 1u64) / (u8::max_value() as u64 + 1u64)) as u32;
+    (v / conversion_factor) as u8
 }
 
 fn u8_to_u32(v: u8) -> u32 {
-
-    (v as u32 * (u32::max_value() / u8::max_value() as u32))
+    let conversion_factor = ((u32::max_value() as u64 + 1u64) / (u8::max_value() as u64 + 1u64)) as u32;
+    (v as u32 * conversion_factor)
 }
 
 // TODO : Verifier les histoires d'espace de couleur linéaire et tout et tout
@@ -166,6 +167,7 @@ impl img::Pixel for RGBA32 {
 #[cfg(test)]
 mod test {
     use super::{RGBA8, RGBA32};
+
     #[test]
     fn test_simple_color_conversion() {
         let a = RGBA8::new(&0, &0, &0, &0);
@@ -180,10 +182,10 @@ mod test {
         let d = RGBA32::new(&0, &0, &0, &0);
         assert_eq!(d, d.to_rgba8().to_rgba32());
 
-        let e = RGBA32::new(&65536, &65536, &65536, &65536);
+        let e = RGBA32::new(&16777216, &16777216, &16777216, &16777216);
         assert_eq!(e, e.to_rgba8().to_rgba32());
 
-        let f = RGBA32::new(&4294967295, &4294967295, &4294967295, &4294967295);
+        let f = RGBA32::new(&4278190080, &4278190080, &4278190080, &4278190080);
         assert_eq!(f, f.to_rgba8().to_rgba32());
     }
 
@@ -195,19 +197,19 @@ mod test {
         assert_eq!(a.to_rgba8(), RGBA8::new(&0, &0, &0, &0));
 
         // Ici on doit arrondir à 0.
-        let b = RGBA32::new(&8388607, &8388607, &8388607, &8388607);
+        let b = RGBA32::new(&16777215, &16777215, &16777215, &16777215);
         assert_eq!(b.to_rgba8(), RGBA8::new(&0, &0, &0, &0));
 
         // Ici on doit arrondir à 1.
-        let c = RGBA32::new(&8388609, &8388609, &8388609, &8388609);
+        let c = RGBA32::new(&16777217, &16777217, &16777217, &16777217);
         assert_eq!(c.to_rgba8(), RGBA8::new(&1, &1, &1, &1));
 
-        // Ici on doit arrondir à 254 => 2^32 - 2^12 - 1
-        let d = RGBA32::new(&4294963199, &4294963199, &4294963199, &4294963199);
+        // Ici on doit arrondir à 254 => 2^32 - 2^24 - 1
+        let d = RGBA32::new(&4278190079, &4278190079, &4278190079, &4278190079);
         assert_eq!(d.to_rgba8(), RGBA8::new(&254, &254, &254, &254));
 
         // Ici on oit arrondir à 255
-        let e = RGBA32::new(&4294963200, &4294963200, &4294963200, &4294963200);
+        let e = RGBA32::new(&4278190080, &4278190080, &4278190080, &4278190080);
         assert_eq!(e.to_rgba8(), RGBA8::new(&255, &255, &255, &255));
     }
 }
