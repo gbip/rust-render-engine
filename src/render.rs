@@ -5,11 +5,17 @@ use color;
 use math::Vector3f;
 use ray::{Ray, Fragment, Surface};
 
+// Le ratio n'est pas enregistré à la deserialization, il faut penser à appeler compute_ratio()
+// pour avoir un ratio autre que 0.
 #[derive(Serialize,Deserialize,Debug)]
 pub struct Renderer {
     res_x: usize,
     res_y: usize,
+
+    #[serde(skip_serializing)]
+    #[serde(skip_deserializing)]
     ratio: f32,
+
     background_color: RGBA8,
 }
 
@@ -29,6 +35,14 @@ impl Renderer {
         self.res_y = res_y;
         self.ratio = res_x as f32 / res_y as f32;
 
+    }
+
+    pub fn compute_ratio(&mut self) {
+        self.ratio = self.res_x as f32 / self.res_y as f32;
+    }
+
+    pub fn show_information(&self) {
+        println!("Resolution is : {} x {}", self.res_x, self.res_y);
     }
 
     /** Calcule les rayons à lancer pour le canvas passé en paramètres.
@@ -60,10 +74,10 @@ impl Renderer {
             let mut result: Option<Fragment> = None;
 
             for object in world.objects() {
-                let points : Vec<Option<Fragment>> = object.triangles()
-                                .map(|tri| tri.get_intersection(&ray, &object.color().to_rgba32()))
-                                .filter(|point| point.is_some())
-                                .collect();
+                let points: Vec<Option<Fragment>> = object.triangles()
+                    .map(|tri| tri.get_intersection(&ray, &object.color().to_rgba32()))
+                    .filter(|point| point.is_some())
+                    .collect();
 
                 match points.len() {
                     0 => {}

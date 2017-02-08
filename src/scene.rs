@@ -41,6 +41,7 @@ impl Scene {
             Err(e) => panic!("Error while loading world. Serde error is : {}", e),
         };
         scene.world.load_objects();
+        scene.renderer.compute_ratio();
         scene
     }
 
@@ -64,8 +65,10 @@ impl Scene {
     }
 
     pub fn render_to_file(&self, file_path: String) {
-        println!("Starting to render");
+        self.renderer.show_information();
+        println!("Starting to render...");
         let image = self.renderer.render(&self.world, self.world.get_camera(0));
+        println!("Render done, writting result to file {}", &file_path);
         image.write_to_file(file_path.as_str())
     }
 }
