@@ -1,7 +1,10 @@
 use image;
+// Conflit avec notre trait pixel...
+use image::Pixel as ImgPixel;
 use std::vec;
 use std::path::Path;
 use color::RGBA32;
+use std::fs::File;
 
 pub trait Pixel: Copy {
     fn to_rgb_pixel(&self) -> (u8, u8, u8);
@@ -11,49 +14,39 @@ pub trait Pixel: Copy {
 pub struct Image<T: Pixel> {
     width: usize,
     height: usize,
-    pub pixels: Vec<T>,
+    pub pixels: Vec<Vec<T>>,
 }
 
 impl<T: Pixel> Image<T> {
     /** Convertit une liste de lignes de pixels en image exportable.  */
     pub fn from_vec_vec(vec_vec: &[Vec<T>]) -> Image<T> {
-        let mut pixels: Vec<T> = vec![];
 
-        for vec in vec_vec {
-            for t in vec {
-                pixels.push(*t);
-            }
-        }
 
         Image {
-            width: vec_vec[0].len(),
-            height: vec_vec.len(),
-            pixels: pixels,
+            width: vec_vec.len(),
+            height: vec_vec[0].len(),
+            pixels: vec_vec.to_vec(),
         }
     }
 
     pub fn write_to_file(&self, pathname: &str) {
-        let mut buffer = vec![];
+        println!("Image is : {} x {}", self.width, self.height);
+        let mut buffer = image::ImageBuffer::new(self.width as u32, self.height as u32);
 
-        for color in &self.pixels {
-            let (r, g, b) = color.to_rgb_pixel();
-            buffer.push(r);
-            buffer.push(g);
-            buffer.push(b);
+        for (col, line, pixel) in buffer.enumerate_pixels_mut() {
+            let render_pix = self.pixels[col as usize][line as usize].to_rgb_pixel();
+            *pixel = image::Rgb::from_channels(render_pix.0, render_pix.1, render_pix.2, 0);
         }
 
-        image::save_buffer(&Path::new(pathname),
-                           buffer.as_slice(),
-                           self.width as u32,
-                           self.height as u32,
-                           image::RGB(8))
-            .unwrap();
+        let file_output = &mut File::create(&Path::new(pathname)).unwrap();
+        println!("File res is : {} x {} ", buffer.width(), buffer.height());
+        image::ImageRgb8(buffer).save(file_output, image::PNG);
     }
 }
 
 impl Image<RGBA32> {
     pub fn new(sizex: usize, sizey: usize) -> Self {
-        let px: Vec<RGBA32> = vec![RGBA32::new_black(); sizex * sizey];
+        let px: Vec<Vec<RGBA32>> = vec![vec![RGBA32::new_black();sizex]; sizey];
         Image {
             width: sizex,
             height: sizey,

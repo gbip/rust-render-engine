@@ -9,7 +9,10 @@ use ray::{Ray, Fragment, Surface};
 // pour avoir un ratio autre que 0.
 #[derive(Serialize,Deserialize,Debug)]
 pub struct Renderer {
+    // Colonne
     res_x: usize,
+
+    // Ligne
     res_y: usize,
 
     #[serde(skip_serializing)]
@@ -112,9 +115,10 @@ impl Renderer {
         let e1 = vec1 / self.res_x as f32;
         let e2 = vec2 / self.res_y as f32;
 
-        for x in 0..(self.res_x - 1) {
+        // Pas besoin du -1 car Rust s'arrête tout seul à -1.
+        for x in 0..(self.res_x) {
             let mut line: Vec<Canvas> = vec![];
-            for y in 0..(self.res_y - 1) {
+            for y in 0..(self.res_y) {
                 let x1 = x as f32 / self.res_x as f32;
                 let y1 = y as f32 / self.res_y as f32;
 
@@ -141,7 +145,6 @@ impl Renderer {
             .collect();
 
         Image::<RGBA32>::from_vec_vec(&temp_result)
-
     }
 }
 
