@@ -49,6 +49,31 @@ impl GeoPoint {
     pub fn add_position(&mut self, position: &Vector3f) {
         self.pos = &self.pos + position;
     }
+
+    pub fn rotate_around(&mut self, u: &Vector3f, angle : f32) {
+        let c = angle.cos();
+        let mc = 1.0 - c;
+        let s = angle.sin();
+
+        let uxy = u.x * u.y;
+        let uyz = u.y * u.z;
+        let uzx = u.z * u.x;
+
+        // Formule tirée de Wikipedia : https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
+        self.pos = Vector3f::new(
+            (u.x * u.x * mc + c) * self.pos.x + (uxy * mc - u.z * s) * self.pos.y + (uzx * mc + u.y * s) * self.pos.z,
+            (uxy * mc + u.z * s) * self.pos.x + (u.y * u.y * mc + c) * self.pos.y + (uyz * mc - u.x * s) * self.pos.z,
+            (uzx * mc - u.y * s) * self.pos.x + (uyz * mc + u.x * s) * self.pos.y + (u.z * u.z * mc + c) * self.pos.z,
+        );
+    }
+
+    // déplace le géopoint de manière à ce que la distance qui le sépare de l'origine
+    // soit multipliée par les trois composantes du vecteur scale.
+    pub fn scale_from(&mut self, origin : &Vector3f, scale : &Vector3f) {
+        let dist = &self.pos - origin;
+
+        self.pos = *origin + &dist * scale;
+    }
 }
 
 #[derive(Clone,Debug,Copy,PartialEq)]
@@ -67,6 +92,20 @@ impl Triangle {
         self.u.add_position(position);
         self.v.add_position(position);
         self.w.add_position(position);
+    }
+
+    pub fn rotate_around(&mut self, axis: &Vector3f, angle: f32) {
+        self.u.rotate_around(axis, angle);
+        self.v.rotate_around(axis, angle);
+        self.w.rotate_around(axis, angle);
+    }
+
+    // Echelonne le triangle à partir du point d'origine, selon les trois axes
+    // x, y et z.
+    pub fn scale_from(&mut self, origin: &Vector3f, scale: &Vector3f) {
+        self.u.scale_from(origin, scale);
+        self.v.scale_from(origin, scale);
+        self.w.scale_from(origin, scale);
     }
 }
 
@@ -101,11 +140,17 @@ impl Surface for Triangle {
                 return None;
             }
 
-            let globalArea : f32 = vecAB.cross_product(&vecBC).norm() / 2.0;
+            let global_area_x2 : f32 = vecAB.cross_product(&vecBC).norm();
+            let u = cpA.norm() / global_area_x2;
+            let v = cpB.norm() / global_area_x2;
+            let w = cpC.norm() / global_area_x2;
 
             // Interpolation des normales et textures
-
-            // TODO textures et normales
+            point.normal = self.u.norm * u + self.v.norm * v + self.w.norm * w;
+            point.tex = match (self.u.tex, self.v.tex, self.w.tex) {
+                (Some(ref texu), Some(ref texv), Some(ref texw)) => Some(texu * u + texv * v + texw * w),
+                _ => None
+            }
         }
         result
     }
@@ -190,6 +235,12 @@ pub struct Object {
     // La position de l'objet (offset qui se propagera ensuite aux triangles)
     position: Vector3f,
 
+    // L'échelle de l'objet selon les trois axes
+    scale: Vector3f,
+
+    // La rotation de l'objet selon les trois axes
+    rotation: Vector3f,
+
     // Le chemin vers un .obj qui permettra de charger l'objet
     obj_path: String,
 
@@ -232,8 +283,11 @@ impl Object {
             mesh: Mesh::new_empty(),
             color: RGBA8::new_black(),
             position: Vector3::new(0_f32, 0_f32, 0_f32),
+            scale: Vector3f::new(1f32, 1f32, 1f32),
+            rotation : Vector3f {x : 0.0, y :0.0, z :0.0},
             obj_path: "".to_string(),
             name: "untitled".to_string(),
+
         }
     }
 

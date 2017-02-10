@@ -1,4 +1,4 @@
-use math::Vector3f;
+use math::{Vector3f, Vector2f};
 use math::VectorialOperations;
 use color::RGBA32;
 
@@ -25,7 +25,7 @@ pub struct Plane {
 pub struct Fragment {
     pub position: Vector3f,
     pub normal: Vector3f,
-    pub tex: Option<Vector3f>,
+    pub tex: Option<Vector2f>,
     pub param: f32,
     pub color: RGBA32,
 }

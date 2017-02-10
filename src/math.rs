@@ -145,8 +145,8 @@ macro_rules! impl_operations {
                             z: other.z*self}
                     }
                 }
-            // Again, the reference version            
-            impl<'a,T> Mul<&'a Vector3<T>> for $K where 
+            // Again, the reference version
+            impl<'a,T> Mul<&'a Vector3<T>> for $K where
             T : Mul<$K, Output=T> + Copy {
                 type Output = Vector3<T>;
             fn mul(self, other : &'a Vector3<T>) -> Self::Output {
@@ -157,7 +157,7 @@ macro_rules! impl_operations {
                 }
 
 
-            
+
             // Implementation of the division of a vector by a real number
             impl<T> Div<$K> for Vector3<T> where
                 T : Div<$K, Output=T> {
@@ -177,7 +177,47 @@ macro_rules! impl_operations {
                             y: self.y/other,
                             z: self.z/other}
                 }
-            } 
+            }
+
+            // Implementation of the multiplication of a vector2 by a real number
+            impl<T> Mul<$K> for Vector2<T> where
+                T : Mul<$K, Output=T> {
+                type Output = Vector2<T>;
+                fn mul(self, other : $K) -> Self::Output {
+                    Vector2{x: self.x*other,
+                            y: self.y*other}
+                    }
+                }
+
+            // Same but for reference
+            impl<'a,T> Mul<$K> for &'a Vector2<T> where
+                T : Mul<$K, Output=T> + Copy {
+                type Output = Vector2<T>;
+                fn mul(self, other : $K) -> Self::Output {
+                    Vector2{x: self.x*other,
+                            y: self.y*other}
+                    }
+                }
+
+            // Since the trait std::ops::Mul is not reflexive, we have to implement the k*v(x,y)
+            // and v(x,y)*k
+            impl<T> Mul<Vector2<T>> for $K where
+            T : Mul<$K, Output=T> {
+                type Output = Vector2<T>;
+                fn mul(self, other : Vector2<T>) -> Self::Output {
+                    Vector2{x: other.x*self,
+                            y: other.y*self}
+                    }
+                }
+            // Again, the reference version
+            impl<'a,T> Mul<&'a Vector2<T>> for $K where
+            T : Mul<$K, Output=T> + Copy {
+                type Output = Vector2<T>;
+            fn mul(self, other : &'a Vector2<T>) -> Self::Output {
+                    Vector2{x: other.x*self,
+                            y: other.y*self}
+                }
+            }
         }
     }
 
@@ -257,6 +297,87 @@ impl<'a, T> Sub<&'a Vector3<T>> for &'a Vector3<T>
     }
 }
 
+impl<T> Mul<Vector3<T>> for Vector3<T>
+    where T : Mul<T, Output = T> {
+
+    type Output = Vector3<T>;
+    fn mul(self, other: Vector3<T>) -> Self::Output {
+        Vector3 {
+            x : self.x * other.x,
+            y : self.y * other.y,
+            z : self.z * other.z,
+        }
+    }
+}
+
+impl<'a, T> Mul<&'a Vector3<T>> for &'a Vector3<T>
+    where T : Mul<T, Output = T> + Copy {
+
+    type Output = Vector3<T>;
+    fn mul(self, other: &'a Vector3<T>) -> Self::Output {
+        Vector3 {
+            x : self.x * other.x,
+            y : self.y * other.y,
+            z : self.z * other.z,
+        }
+    }
+}
+
+
+// Implementation of the addition of two vectors
+impl<T> Add<Vector2<T>> for Vector2<T>
+    where T: Add<Output = T>
+{
+    type Output = Vector2<T>;
+
+    fn add(self, other: Vector2<T>) -> Self::Output {
+
+        Vector2 {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+
+// Reference version
+impl<'a, T> Add<&'a Vector2<T>> for &'a Vector2<T>
+    where T: Add<Output = T> + Copy
+{
+    type Output = Vector2<T>;
+
+    fn add(self, other: &'a Vector2<T>) -> Self::Output {
+        Vector2 {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+
+// Basic implementation for the substraction
+impl<T> Sub<Vector2<T>> for Vector2<T>
+    where T: Sub<Output = T>
+{
+    type Output = Vector2<T>;
+    fn sub(self, other: Vector2<T>) -> Vector2<T> {
+        Vector2 {
+            x: self.x - other.x,
+            y: self.y - other.y,
+        }
+    }
+}
+// Same implementation but for reference
+impl<'a, T> Sub<&'a Vector2<T>> for &'a Vector2<T>
+    where T: Sub<Output = T> + Copy
+{
+    type Output = Vector2<T>;
+    fn sub(self, other: &'a Vector2<T>) -> Vector2<T> {
+        Vector2 {
+            x: self.x - other.x,
+            y: self.y - other.y,
+        }
+    }
+}
+
 // A trait for basic vectorial arithmetic
 pub trait VectorialOperations<T> {
     fn norm(self) -> f32;
@@ -271,11 +392,11 @@ pub trait VectorialOperations<T> {
 // a macro.
 macro_rules! impl_vec_operations {
     ($K:tt) => {
-        impl<T> VectorialOperations<T> for Vector3<T> where 
+        impl<T> VectorialOperations<T> for Vector3<T> where
             T: Copy + Mul<Output = T> + Add<Output = T> + Into<$K> + Sub<Output = T> {
-    
-    
-    
+
+
+
             fn norm(self) -> $K {
                 ((self.x * self.x) + (self.y * self.y) + (self.z * self.z)).into().sqrt()
             }
@@ -289,7 +410,7 @@ macro_rules! impl_vec_operations {
             }
             // The formula comes from https://fr.wikipedia.org/wiki/Produit_vectoriel
             fn cross_product(self, other: &Vector3<T>) -> Vector3<T> where
-                T : Copy { 
+                T : Copy {
                 Vector3 {
                     x: self.y * other.z - self.z * other.y,
                     y: self.z * other.x - self.x * other.z,
@@ -298,7 +419,7 @@ macro_rules! impl_vec_operations {
             }
             fn cross_product_ref(&self, other : &Vector3<T>) -> Vector3<T> {
                 Self::cross_product(self.clone(), other)
-            }   
+            }
 
             fn dot_product(self, other : &Vector3<T>) -> $K {
                 (self.x*other.x + self.y*other.y + self.z*other.z).into()
@@ -421,6 +542,31 @@ mod tests {
             z: 0_f32,
         };
         assert_eq!(&v2 * 2_f32, v2);
+    }
+
+    #[test]
+    fn test_vec_vec_mul() {
+        let v1 = Vector3 {
+            x : 2_f32,
+            y : 2_f32,
+            z : 2_f32
+        };
+        let v2 = Vector3 {
+            x : 0_f32,
+            y : 1_f32,
+            z : 2_f32
+        };
+
+        assert!((v1 * v2).aeq(&Vector3 {
+            x : 0_f32,
+            y : 2_f32,
+            z : 4_f32,
+        }));
+        assert!((&v1 * &v2).aeq(&Vector3 {
+            x : 0_f32,
+            y : 2_f32,
+            z : 4_f32,
+        }));
     }
 
     #[test]
