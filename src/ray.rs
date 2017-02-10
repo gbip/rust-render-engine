@@ -4,7 +4,9 @@ use color::RGBA32;
 
 #[derive(Debug, PartialEq)]
 pub struct Ray {
+    // Le vecteur directeur du rayon
     slope: Vector3f,
+    // L'origine du rayon
     origin: Vector3f,
     // Un paramètre qui indique l'extrémité du rayon. Par exemple, lorsque le rayon est arrêté par
     // une surface il ne se propage pas sur les surfaces situées derrière.
@@ -38,6 +40,7 @@ pub trait Surface {
 
 
 impl Ray {
+    /** Crée un rayon à partir de son origine et d'un vecteur directeur. */
     pub fn new(origin: Vector3f, slope: Vector3f) -> Ray {
         Ray {
             origin: origin,
@@ -48,6 +51,7 @@ impl Ray {
 }
 
 impl Plane {
+    // Crée un plan à partir d'une origine et de deux vecteurs directeurs
     pub fn new(vec1: &Vector3f, vec2: &Vector3f, origin: &Vector3f) -> Plane {
         let cross = vec1.cross_product_ref(vec2);
         Plane {
@@ -56,6 +60,10 @@ impl Plane {
             c: cross.z,
             d: -origin.dot_product(&cross),
         }
+    }
+
+    pub fn normal(&self) -> Vector3f {
+        Vector3f {x : self.a, y : self.b, z : self.c}
     }
 }
 

@@ -73,35 +73,39 @@ impl Triangle {
 
 impl Surface for Triangle {
     fn get_intersection(&self, ray: &Ray, color: &RGBA32) -> Option<Fragment> {
-        let u = self.u.pos;
-        let v = self.v.pos;
-        let w = self.w.pos;
+        let ptA = self.u.pos;
+        let ptB = self.v.pos;
+        let ptC = self.w.pos;
 
         // Calcul des vecteurs du repère barycentrique
-        let vecA = &v - &u;
-        let vecB = &w - &u;
-        let plane = Plane::new(&vecA, &vecB, &u);
+        let vecAB = &ptB - &ptA;
+        let vecBC = &ptC - &ptB;
+        let vecCA = &ptA - &ptC;
+
+        let plane = Plane::new(&vecAB, &vecBC, &ptA);
 
         let mut result = plane.get_intersection(ray, color);
 
         if let Some(ref mut point) = result {
             // On calcule si le point appartient à la face triangle
-            let vecP = point.position - u;
-            let a: f32 = vecA.norm();
-            let b: f32 = vecB.norm();
-            let ap: f32 = vecP.dot_product(&vecA) / a;
-            let bp: f32 = vecP.dot_product(&vecB) / b;
+            let vecAP = point.position - ptA;
+            let vecBP = point.position - ptB;
+            let vecCP = point.position - ptC;
 
-            if !(a >= 0.0 && b >= 0.0 && bp / b < 1.0 - ap / a) {
+            let cpA = vecAB.cross_product(&vecAP);
+            let cpB = vecBC.cross_product(&vecBP);
+            let cpC = vecCA.cross_product(&vecCP);
+            let N = vecAB.cross_product(&vecCA);
+
+            if !(N.dot_product(&cpA) <= 0.0 && N.dot_product(&cpB) <= 0.0 && N.dot_product(&cpC) <= 0.0) {
                 return None;
             }
 
-            // Interpolation des normales et textures
-            let na = &self.v.norm - &self.u.norm;
-            let nb = &self.w.norm - &self.u.norm;
-            point.normal = self.u.norm + (na * (ap / a)) + (nb * (bp / b));
+            let globalArea : f32 = vecAB.cross_product(&vecBC).norm() / 2.0;
 
-            // TODO textures
+            // Interpolation des normales et textures
+
+            // TODO textures et normales
         }
         result
     }
@@ -537,20 +541,20 @@ mod test {
         let tri1 = Triangle::new(p1, p2, p3);
 
         // Ce rayon doit intersecter le triangle en (0,0,0)
-        let r1 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.0, 0.0, 0.0));
+        let r1 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.0, 1.0, 0.0));
 
         let frag1 = tri1.get_intersection(&r1, &RGBA32::new_black());
         assert!(frag1 != None);
 
         // Normalement, l'intersection du triangle est en (0.5,0,0), donc ce rayon ne doit pas
         // intersecter avec le triangle
-        let r2 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.51, 0.0, 0.0));
+        let r2 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.51, 1.0, 0.0));
 
         let frag2 = tri1.get_intersection(&r2, &RGBA32::new_black());
         assert!(frag2 == None);
 
         // Celui là par contre devrait :
-        let r3 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.5, 0.0, 0.0));
+        let r3 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.5, 1.0, 0.0));
 
         let frag3 = tri1.get_intersection(&r3, &RGBA32::new_black());
         assert!(frag3 != None);
