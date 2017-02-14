@@ -63,7 +63,11 @@ impl Plane {
     }
 
     pub fn normal(&self) -> Vector3f {
-        Vector3f {x : self.a, y : self.b, z : self.c}
+        Vector3f {
+            x: self.a,
+            y: self.b,
+            z: self.c,
+        }
     }
 }
 

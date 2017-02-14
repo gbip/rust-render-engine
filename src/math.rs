@@ -298,27 +298,27 @@ impl<'a, T> Sub<&'a Vector3<T>> for &'a Vector3<T>
 }
 
 impl<T> Mul<Vector3<T>> for Vector3<T>
-    where T : Mul<T, Output = T> {
-
+    where T: Mul<T, Output = T>
+{
     type Output = Vector3<T>;
     fn mul(self, other: Vector3<T>) -> Self::Output {
         Vector3 {
-            x : self.x * other.x,
-            y : self.y * other.y,
-            z : self.z * other.z,
+            x: self.x * other.x,
+            y: self.y * other.y,
+            z: self.z * other.z,
         }
     }
 }
 
 impl<'a, T> Mul<&'a Vector3<T>> for &'a Vector3<T>
-    where T : Mul<T, Output = T> + Copy {
-
+    where T: Mul<T, Output = T> + Copy
+{
     type Output = Vector3<T>;
     fn mul(self, other: &'a Vector3<T>) -> Self::Output {
         Vector3 {
-            x : self.x * other.x,
-            y : self.y * other.y,
-            z : self.z * other.z,
+            x: self.x * other.x,
+            y: self.y * other.y,
+            z: self.z * other.z,
         }
     }
 }
@@ -547,25 +547,25 @@ mod tests {
     #[test]
     fn test_vec_vec_mul() {
         let v1 = Vector3 {
-            x : 2_f32,
-            y : 2_f32,
-            z : 2_f32
+            x: 2_f32,
+            y: 2_f32,
+            z: 2_f32,
         };
         let v2 = Vector3 {
-            x : 0_f32,
-            y : 1_f32,
-            z : 2_f32
+            x: 0_f32,
+            y: 1_f32,
+            z: 2_f32,
         };
 
         assert!((v1 * v2).aeq(&Vector3 {
-            x : 0_f32,
-            y : 2_f32,
-            z : 4_f32,
+            x: 0_f32,
+            y: 2_f32,
+            z: 4_f32,
         }));
         assert!((&v1 * &v2).aeq(&Vector3 {
-            x : 0_f32,
-            y : 2_f32,
-            z : 4_f32,
+            x: 0_f32,
+            y: 2_f32,
+            z: 4_f32,
         }));
     }
 
