@@ -107,6 +107,10 @@ impl Triangle {
         self.v.scale_from(origin, scale);
         self.w.scale_from(origin, scale);
     }
+
+    pub fn get_barycenter(&self) -> Vector3f {
+        (self.u.pos + self.v.pos + self.w.pos) / 3.0
+    }
 }
 
 
@@ -269,6 +273,45 @@ impl Object {
         for tri in &mut self.mesh.triangles {
             tri.add_position(&self.position);
         }
+
+        // On réinitialise car ça n'a aucun sens de l'appliquer deux fois
+        self.position = Vector3f::new(0.0, 0.0, 0.0);
+    }
+
+    fn apply_rotation(&mut self) {
+        for tri in &mut self.mesh.triangles {
+            tri.rotate_around(&Vector3f::new(1.0, 0.0, 0.0), self.rotation.x);
+            tri.rotate_around(&Vector3f::new(0.0, 1.0, 0.0), self.rotation.y);
+            tri.rotate_around(&Vector3f::new(0.0, 0.0, 1.0), self.rotation.z);
+        }
+
+        // On réinitialise car ça n'a aucun sens de l'appliquer deux fois
+        self.rotation = Vector3f::new(0.0, 0.0, 0.0);
+    }
+
+    //TODO La rotation autour d'un point (même si c'est un peu plus compliqué)
+
+    fn apply_scale(&mut self) {
+        for tri in &mut self.mesh.triangles {
+            tri.scale_from(&Vector3f::new(0.0, 0.0, 0.0), &self.scale);
+        }
+
+        // On réinitialise car ça n'a aucun sens de l'appliquer deux fois
+        self.scale = Vector3f::new(1.0, 1.0, 1.0);
+    }
+
+    // TODO Migrer cette méthode vers le mesh
+    fn get_barycenter(&self) -> Vector3f {
+        let mut sum = Vector3f::new(0.0, 0.0, 0.0);
+        let mut count = 0;
+
+        for tri in &self.mesh.triangles {
+            //TODO gérer les problèmes de perte de précision lorsqu'on a des objets comportant de nombreux points.
+            sum = sum + tri.get_barycenter();
+            count += 1;
+        }
+
+        sum / count as f32
     }
 
     // Initialise un objet. Pour l'instant cela ne fait que charger le mesh, mais on peut imaginer
