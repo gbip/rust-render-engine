@@ -51,14 +51,24 @@
           "y": 0.56,
           "z": 2.0
         },
+	"scale": {
+	  "x": 1.0,
+	  "y": 1.0,
+	  "z": 1.0
+	},
+	"rotation": {
+	   "x": 0.0,
+	   "y": 0.0,
+	   "z": 0.0
+	},
         "obj_path": "models/plane_no_uv.obj",
         "name": "Example"
       }
     ]
   },
   "renderer": {
-    "res_x": 100,
-    "res_y": 100,
+    "res_x": 400,
+    "res_y": 400,
     "background_color": {
       "r": 0,
       "g": 0,
