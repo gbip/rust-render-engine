@@ -43,6 +43,7 @@ pub trait AlmostEq<T> {
 }
 
 impl<T> Vector3<T> {
+    #[inline]
     pub fn new(x: T, y: T, z: T) -> Vector3<T> {
         Vector3 { x: x, y: y, z: z }
     }
@@ -57,6 +58,7 @@ impl<T> fmt::Display for Vector3<T>
 }
 
 impl<T> Vector2<T> {
+    #[inline]
     pub fn new(x: T, y: T) -> Vector2<T> {
         Vector2 { x: x, y: y }
     }
