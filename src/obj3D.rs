@@ -232,6 +232,28 @@ impl Mesh {
     pub fn triangles(&self) -> Iter<Triangle> {
         self.triangles.iter()
     }
+
+    #[allow(float_cmp)]
+    fn get_barycenter(&self, name: &str) -> Vector3f {
+        let mut sum = Vector3f::new(0.0, 0.0, 0.0);
+        let mut count = 0;
+
+        for tri in &self.triangles {
+            //TODO gérer les problèmes de perte de précision lorsqu'on a des objets comportant de nombreux points.
+            sum = sum + tri.get_barycenter();
+            count += 1;
+        }
+
+        // On vérifie si on a atteinds la valeur maximale d'un f32, auquel notre barycentre ne veut
+        // certainement plus rien dire.
+        if sum.x == f32::MAX || sum.y == f32::MAX || sum.z == f32::MAX {
+            println!("There might be a float overflow while calculating the barycenter of the \
+                      object named {}, raw data is : {:?}",
+                     name,
+                     sum);
+        }
+        sum / count as f32
+    }
 }
 
 #[derive(Serialize,Deserialize)]
@@ -317,27 +339,8 @@ impl Object {
         self.scale = Vector3f::new(1.0, 1.0, 1.0);
     }
 
-    // TODO Migrer cette méthode vers le mesh
-    #[allow(float_cmp)]
     fn get_barycenter(&self) -> Vector3f {
-        let mut sum = Vector3f::new(0.0, 0.0, 0.0);
-        let mut count = 0;
-
-        for tri in &self.mesh.triangles {
-            //TODO gérer les problèmes de perte de précision lorsqu'on a des objets comportant de nombreux points.
-            sum = sum + tri.get_barycenter();
-            count += 1;
-        }
-
-        // On vérifie si on a atteinds la valeur maximale d'un f32, auquel notre barycentre ne veut
-        // certainement plus rien dire.
-        if sum.x == f32::MAX || sum.y == f32::MAX || sum.z == f32::MAX {
-            println!("There might be a float overflow while calculating the barycenter of the \
-                      object named {}, raw data is : {:?}",
-                     self.name,
-                     sum);
-        }
-        sum / count as f32
+        self.mesh.get_barycenter(&self.name)
     }
 
     // Initialise un objet. Pour l'instant cela ne fait que charger le mesh, mais on peut imaginer

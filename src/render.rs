@@ -175,19 +175,3 @@ impl Canvas {
 
     }
 }
-
-#[cfg(test)]
-mod test {
-    use scene::Scene;
-    use math::Vector3;
-    #[test]
-    // Cas simple :
-    // On met une caméra à l'origine, la cible en (1,1,1) et on génére des canvas pour une caméra
-    // avec une résolution de 4x4
-    fn test_simple_canvas_generation() {
-        let mut scene = Scene::new_empty();
-        scene.renderer.set_resolution(4, 4);
-        scene.world.add_camera(Vector3::new(0.0, 0.0, 0.0), Vector3::new(1.0, 1.0, 1.0));
-        unimplemented!()
-    }
-}
