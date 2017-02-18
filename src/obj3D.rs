@@ -1,10 +1,11 @@
 use std::vec::Vec;
 use std::fmt;
+use std::f32;
 use math::{Vector3, Vector3f, Vector2f, VectorialOperations};
 use color::{RGBA8, RGBA32};
 use ray::{Ray, Plane, Surface, Fragment};
 use std::slice::Iter;
-
+use angle::Deg;
 // The Raw Point represents a triangle point where each coordinate is an index to the real value
 // stored in a vector
 #[derive(Debug)]
@@ -234,6 +235,15 @@ impl Mesh {
 }
 
 #[derive(Serialize,Deserialize)]
+pub enum RotationType {
+    // Rotation autour de l'origine
+    Scene,
+
+    // Rotation autour du barycentre d'un objet
+    Object { name: String },
+}
+
+#[derive(Serialize,Deserialize)]
 pub struct Object {
     #[serde(skip_serializing,skip_deserializing,default = "Mesh::new_empty")]
     mesh: Mesh,
@@ -248,7 +258,10 @@ pub struct Object {
     scale: Vector3f,
 
     // La rotation de l'objet selon les trois axes
-    rotation: Vector3f,
+    rotation: Vector3<Deg<f32>>,
+
+    // Le type de rotation
+    rotation_type: RotationType,
 
     // Le chemin vers un .obj qui permettra de charger l'objet
     obj_path: String,
@@ -285,17 +298,16 @@ impl Object {
 
     fn apply_rotation(&mut self) {
         for tri in &mut self.mesh.triangles {
-            tri.rotate_around(&Vector3f::new(1.0, 0.0, 0.0), self.rotation.x);
-            tri.rotate_around(&Vector3f::new(0.0, 1.0, 0.0), self.rotation.y);
-            tri.rotate_around(&Vector3f::new(0.0, 0.0, 1.0), self.rotation.z);
+            tri.rotate_around(&Vector3f::new(1.0, 0.0, 0.0), self.rotation.x.0);
+            tri.rotate_around(&Vector3f::new(0.0, 1.0, 0.0), self.rotation.y.0);
+            tri.rotate_around(&Vector3f::new(0.0, 0.0, 1.0), self.rotation.z.0);
         }
 
         // On réinitialise car ça n'a aucun sens de l'appliquer deux fois
-        self.rotation = Vector3f::new(0.0, 0.0, 0.0);
+        self.rotation = Vector3::new(deg!(0.0f32), deg!(0.0f32), deg!(0.0f32));
     }
 
     //TODO La rotation autour d'un point (même si c'est un peu plus compliqué)
-
     fn apply_scale(&mut self) {
         for tri in &mut self.mesh.triangles {
             tri.scale_from(&Vector3f::new(0.0, 0.0, 0.0), &self.scale);
@@ -306,6 +318,7 @@ impl Object {
     }
 
     // TODO Migrer cette méthode vers le mesh
+    #[allow(float_cmp)]
     fn get_barycenter(&self) -> Vector3f {
         let mut sum = Vector3f::new(0.0, 0.0, 0.0);
         let mut count = 0;
@@ -316,6 +329,14 @@ impl Object {
             count += 1;
         }
 
+        // On vérifie si on a atteinds la valeur maximale d'un f32, auquel notre barycentre ne veut
+        // certainement plus rien dire.
+        if sum.x == f32::MAX || sum.y == f32::MAX || sum.z == f32::MAX {
+            println!("There might be a float overflow while calculating the barycenter of the \
+                      object named {}, raw data is : {:?}",
+                     self.name,
+                     sum);
+        }
         sum / count as f32
     }
 
@@ -332,13 +353,14 @@ impl Object {
             color: RGBA8::new_black(),
             position: Vector3::new(0_f32, 0_f32, 0_f32),
             scale: Vector3f::new(1f32, 1f32, 1f32),
-            rotation: Vector3f {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
+            rotation: Vector3 {
+                x: deg!(0.0f32),
+                y: deg!(0.0f32),
+                z: deg!(0.0f32),
             },
             obj_path: "".to_string(),
             name: "untitled".to_string(),
+            rotation_type: RotationType::Scene,
         }
     }
 

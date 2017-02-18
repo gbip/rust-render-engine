@@ -3,6 +3,10 @@
 #![cfg_attr(feature="clippy", feature(plugin))]
 #![cfg_attr(feature="clippy", plugin(clippy))]
 mod math;
+
+
+#[macro_use] // Il faut charger angle.rs dans les premiers modules, car sinon obj3D n'aura pas la visibilité sur les macros définies dans angle.
+mod angle;
 #[allow(non_snake_case)]
 mod obj3D;
 mod scene;
@@ -17,6 +21,7 @@ extern crate serde_json;
 extern crate serde;
 extern crate image;
 extern crate getopts;
+extern crate num;
 
 use scene::Scene;
 use img::Image;

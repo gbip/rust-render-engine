@@ -9,6 +9,7 @@ serde_json = "0.9.*"
 image = "*"
 clippy = {version = "*", optional = true}
 getopts = "0.2"
+num = "0.1"
 
 [dependencies.serde]
 version = "0.9.*"
