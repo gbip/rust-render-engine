@@ -35,7 +35,7 @@
           "z": 1.0
         },
         "fov": 70.0,
-        "clip": 0.000001
+        "clip": 0.001
       }
     ],
     "objects": [
@@ -47,9 +47,9 @@
           "a": 255
         },
         "position": {
-          "x": 9.0,
-          "y": 2.0,
-          "z": 0.9 
+          "x": 2.0,
+          "y": 0.0,
+          "z": 0.6 
         },
         "scale": {
           "x": 1.0,
@@ -59,10 +59,11 @@
         "rotation": {
           "x": 0.0,
           "y": 0.0,
-          "z": 45.0
+          "z": 0.0
         },
         "obj_path": "models/plane_no_uv.obj",
-        "name": "Example"
+        "name": "Example",
+	"visible":true
       },
       {
         "color": {
@@ -77,17 +78,18 @@
           "z": 1.0
         },
         "scale": {
-          "x": 2.0,
-          "y": 2.0,
-          "z": 1.0
+          "x": 1.0,
+          "y": 10.0,
+          "z": 3.0
         },
         "rotation": {
-          "x": 90.0,
-          "y": 90.0,
-          "z": -90.0
+          "x": 0.0,
+          "y": 0.0,
+          "z": 90.0
         },
         "obj_path": "models/plane_no_uv.obj",
-        "name": "Example"
+        "name": "Example",
+	"visible": false
       }
  
     ]

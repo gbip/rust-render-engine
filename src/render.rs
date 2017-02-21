@@ -4,6 +4,7 @@ use color::{RGBA8, RGBA32};
 use color;
 use math::Vector3f;
 use ray::{Ray, Fragment, Surface};
+use obj3D::Object;
 
 // Le ratio n'est pas enregistré à la deserialization, il faut penser à appeler compute_ratio()
 // pour avoir un ratio autre que 0.
@@ -71,12 +72,13 @@ impl Renderer {
         }
 
         canvas.fragments.clear();
-
+        let objects =
+            world.objects().iter().filter(|obj| obj.is_visible()).collect::<Vec<&Object>>();
         // On calcule chaque point d'intersection
         for ray in rays {
             let mut result: Option<Fragment> = None;
 
-            for object in world.objects() {
+            for object in &objects {
                 let points: Vec<Option<Fragment>> = object.triangles()
                     .map(|tri| tri.get_intersection(&ray, &object.color().to_rgba32()))
                     .filter(|point| point.is_some())

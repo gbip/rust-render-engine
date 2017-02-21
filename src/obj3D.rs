@@ -285,6 +285,9 @@ pub struct Object {
     // Le barycentre
     #[serde(skip_serializing,skip_deserializing,default = "Vector3f::zero")]
     barycenter: Vector3f,
+
+    // La visibilité de l'objet
+    visible: bool,
 }
 
 impl Object {
@@ -375,6 +378,7 @@ impl Object {
             obj_path: "".to_string(),
             name: "untitled".to_string(),
             barycenter: Vector3f::zero(),
+            visible: true,
         }
     }
 
@@ -385,6 +389,10 @@ impl Object {
 
     pub fn color(&self) -> RGBA8 {
         self.color
+    }
+
+    pub fn is_visible(&self) -> bool {
+        self.visible
     }
 }
 
