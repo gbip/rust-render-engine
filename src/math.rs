@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Mul, Div};
+use std::ops::{Add, Sub, Mul, Div, Neg};
 use std::cmp::PartialEq;
 use std::fmt;
 use std::f32;
@@ -75,6 +75,12 @@ impl<T> fmt::Display for Vector2<T>
 pub type Vector3f = Vector3<f32>;
 pub type Vector2f = Vector2<f32>;
 
+impl Vector3f {
+    pub fn zero() -> Self {
+        Vector3f::new(0_f32, 0_f32, 0_f32)
+    }
+}
+
 impl AlmostEq<f32> for Vector3<f32> {
     fn equal_with_threshold(&self, other: &Self, threshold: Option<f32>) -> bool {
         let new_threshold = match threshold {
@@ -105,6 +111,19 @@ impl<T> PartialEq<Vector3<T>> for Vector3<T>
 {
     fn eq(&self, other: &Vector3<T>) -> bool {
         (self.x == other.x) && (self.y == other.y) && (self.z == other.z)
+    }
+}
+
+impl<T> Neg for Vector3<T>
+    where T: Neg<Output = T>
+{
+    type Output = Vector3<T>;
+    fn neg(self) -> Self::Output {
+        Vector3 {
+            x: Neg::neg(self.x),
+            y: Neg::neg(self.y),
+            z: Neg::neg(self.z),
+        }
     }
 }
 
