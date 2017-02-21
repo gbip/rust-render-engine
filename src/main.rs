@@ -79,7 +79,10 @@ fn parse_arg() {
 
     let matches = match options.parse(args) {
         Ok(val) => val,
-        Err(e) => panic!(e.to_string()),
+        Err(e) => {
+            show_usage(program);
+            panic!(e.to_string());
+        }
     };
 
     let at_least_one_option = matches.opt_present("g") || matches.opt_present("w") ||

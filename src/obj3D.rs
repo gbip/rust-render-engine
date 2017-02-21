@@ -238,8 +238,11 @@ impl Mesh {
         let mut sum = Vector3f::new(0.0, 0.0, 0.0);
         let mut count = 0;
 
+        if self.triangles.is_empty() {
+            println!("Warning, you are trying to compute the barycenter for an object that is \
+                      not yet loaded");
+        }
         for tri in &self.triangles {
-            //TODO gérer les problèmes de perte de précision lorsqu'on a des objets comportant de nombreux points.
             sum = sum + tri.get_barycenter();
             count += 1;
         }
@@ -254,15 +257,6 @@ impl Mesh {
         }
         sum / count as f32
     }
-}
-
-#[derive(Serialize,Deserialize)]
-pub enum RotationType {
-    // Rotation autour de l'origine
-    Scene,
-
-    // Rotation autour du barycentre d'un objet
-    Object { name: String },
 }
 
 #[derive(Serialize,Deserialize)]
@@ -281,9 +275,6 @@ pub struct Object {
 
     // La rotation de l'objet selon les trois axes
     rotation: Vector3<Deg<f32>>,
-
-    // Le type de rotation
-    rotation_type: RotationType,
 
     // Le chemin vers un .obj qui permettra de charger l'objet
     obj_path: String,
@@ -343,14 +334,17 @@ impl Object {
         self.scale = Vector3f::new(1.0, 1.0, 1.0);
     }
 
-    fn get_barycenter(&self) -> Vector3f {
+    fn compute_barycenter(&self) -> Vector3f {
         self.mesh.get_barycenter(&self.name)
     }
 
     // Initialise un objet. Pour l'instant cela ne fait que charger le mesh, mais on peut imaginer
     // d'autres traitements.
     pub fn initialize(&mut self) {
-        let barycenter = self.get_barycenter();
+        // Important, on charge le mesh avant de commencer à rendre car sinon le calcul du
+        // barycentre est débile.
+        self.load_mesh();
+        let barycenter = self.compute_barycenter();
         let old_pos: Vector3f = self.position;
         if !barycenter.aeq(&Vector3f::zero()) {
             println!("Warning, the object {} is not centered in (0,0,0) but in {}",
@@ -361,7 +355,7 @@ impl Object {
             self.apply_position();
             self.position = old_pos;
         }
-        self.load_mesh();
+        self.barycenter = barycenter;
         self.apply_rotation();
         self.apply_scale();
         self.apply_position();
@@ -380,7 +374,6 @@ impl Object {
             },
             obj_path: "".to_string(),
             name: "untitled".to_string(),
-            rotation_type: RotationType::Scene,
             barycenter: Vector3f::zero(),
         }
     }

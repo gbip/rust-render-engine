@@ -35,21 +35,21 @@
           "z": 1.0
         },
         "fov": 70.0,
-        "clip": 0.1
+        "clip": 0.000001
       }
     ],
     "objects": [
       {
         "color": {
-          "r": 0,
+          "r": 255,
           "g": 0,
           "b": 0,
           "a": 255
         },
         "position": {
-          "x": 10.0,
-          "y": 0.56,
-          "z": 2.0
+          "x": 9.0,
+          "y": 2.0,
+          "z": 0.9 
         },
         "scale": {
           "x": 1.0,
@@ -59,12 +59,37 @@
         "rotation": {
           "x": 0.0,
           "y": 0.0,
-          "z": 0.0
+          "z": 45.0
         },
-        "rotation_type": "Scene",
+        "obj_path": "models/plane_no_uv.obj",
+        "name": "Example"
+      },
+      {
+        "color": {
+          "r": 0,
+          "g": 0,
+          "b": 255,
+          "a": 255
+        },
+        "position": {
+          "x": 10.0,
+          "y": 0.0,
+          "z": 1.0
+        },
+        "scale": {
+          "x": 2.0,
+          "y": 2.0,
+          "z": 1.0
+        },
+        "rotation": {
+          "x": 90.0,
+          "y": 90.0,
+          "z": -90.0
+        },
         "obj_path": "models/plane_no_uv.obj",
         "name": "Example"
       }
+ 
     ]
   },
   "renderer": {

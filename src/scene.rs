@@ -8,6 +8,7 @@ use std;
 use serde_json;
 use color::RGBA8;
 use render::Renderer;
+use std::time::Instant;
 
 fn write_string_to_file(j: &str, file_name: String) -> std::io::Result<()> {
     let mut file = File::create(file_name).unwrap();
@@ -67,8 +68,11 @@ impl Scene {
     pub fn render_to_file(&self, file_path: String) {
         self.renderer.show_information();
         println!("Starting to render...");
+        let now = Instant::now();
         let image = self.renderer.render(&self.world, self.world.get_camera(0));
-        println!("Render done, writting result to file {}", &file_path);
+        println!("Render done in {} seconds, writting result to file {}",
+                 now.elapsed().as_secs(),
+                 &file_path);
         image.write_to_file(file_path.as_str())
     }
 }
