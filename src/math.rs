@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Mul, Div, Neg};
+use std::ops::{Add, Sub, Mul, Div, Neg, AddAssign};
 use std::cmp::PartialEq;
 use std::fmt;
 use std::f32;
@@ -124,6 +124,16 @@ impl<T> Neg for Vector3<T>
             y: Neg::neg(self.y),
             z: Neg::neg(self.z),
         }
+    }
+}
+
+impl<T> AddAssign for Vector3<T>
+    where T: AddAssign
+{
+    fn add_assign(&mut self, other: Vector3<T>) {
+        self.x += other.x;
+        self.y += other.y;
+        self.z += other.z;
     }
 }
 

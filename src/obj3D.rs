@@ -1,7 +1,7 @@
 use std::vec::Vec;
 use std::fmt;
 use std::f32;
-use math::{Vector3, Vector3f, Vector2f, VectorialOperations};
+use math::{Vector3, Vector3f, Vector2f, VectorialOperations, AlmostEq};
 use color::{RGBA8, RGBA32};
 use ray::{Ray, Plane, Surface, Fragment};
 use std::slice::Iter;
@@ -290,6 +290,10 @@ pub struct Object {
 
     // Le nom de l'objet
     name: String,
+
+    // Le barycentre
+    #[serde(skip_serializing,skip_deserializing,default = "Vector3f::zero")]
+    barycenter: Vector3f,
 }
 
 impl Object {
@@ -300,7 +304,7 @@ impl Object {
         result.position = position;
         result.obj_path = path;
         result.name = name;
-        result.load_mesh();
+        result.initialize();
         result
     }
 
@@ -346,7 +350,20 @@ impl Object {
     // Initialise un objet. Pour l'instant cela ne fait que charger le mesh, mais on peut imaginer
     // d'autres traitements.
     pub fn initialize(&mut self) {
+        let barycenter = self.get_barycenter();
+        let old_pos: Vector3f = self.position;
+        if !barycenter.aeq(&Vector3f::zero()) {
+            println!("Warning, the object {} is not centered in (0,0,0) but in {}",
+                     self.name,
+                     &barycenter);
+            // On centre l'objet à l'origine.
+            self.position = -barycenter;
+            self.apply_position();
+            self.position = old_pos;
+        }
         self.load_mesh();
+        self.apply_rotation();
+        self.apply_scale();
         self.apply_position();
     }
     // Crée un objet vide
@@ -364,6 +381,7 @@ impl Object {
             obj_path: "".to_string(),
             name: "untitled".to_string(),
             rotation_type: RotationType::Scene,
+            barycenter: Vector3f::zero(),
         }
     }
 
