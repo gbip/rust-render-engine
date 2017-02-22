@@ -138,7 +138,7 @@ impl Renderer {
 
         for line in &mut canvas {
             for pixel in &mut line.iter_mut() {
-                self.emit_rays(world, camera, pixel, 5, 5);
+                self.emit_rays(world, camera, pixel, 2, 2);
             }
         }
 
