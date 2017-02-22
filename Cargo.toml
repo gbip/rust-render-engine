@@ -10,6 +10,7 @@ image = "*"
 clippy = {version = "*", optional = true}
 getopts = "0.2"
 num = "0.1"
+rayon = "*"
 
 [dependencies.serde]
 version = "0.9.*"

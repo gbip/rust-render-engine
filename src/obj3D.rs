@@ -5,7 +5,7 @@ use math::{Vector3, Vector3f, Vector2f, VectorialOperations, AlmostEq};
 use color::{RGBA8, RGBA32};
 use ray::{Ray, Plane, Surface, Fragment};
 use std::slice::Iter;
-use angle::Deg;
+use angle::{Rad, Deg};
 // The Raw Point represents a triangle point where each coordinate is an index to the real value
 // stored in a vector
 #[derive(Debug)]
@@ -97,10 +97,10 @@ impl Triangle {
         self.w.add_position(position);
     }
 
-    pub fn rotate_around(&mut self, axis: &Vector3f, angle: f32) {
-        self.u.rotate_around(axis, angle);
-        self.v.rotate_around(axis, angle);
-        self.w.rotate_around(axis, angle);
+    pub fn rotate_around(&mut self, axis: &Vector3f, angle: Rad<f32>) {
+        self.u.rotate_around(axis, angle.0);
+        self.v.rotate_around(axis, angle.0);
+        self.w.rotate_around(axis, angle.0);
     }
 
     // Echelonne le triangle à partir du point d'origine, selon les trois axes
@@ -118,7 +118,7 @@ impl Triangle {
 
 
 impl Surface for Triangle {
-    fn get_intersection(&self, ray: &Ray, color: &RGBA32) -> Option<Fragment> {
+    fn get_intersection(&self, ray: &mut Ray, color: &RGBA32) -> Option<Fragment> {
         let ptA = self.u.pos;
         let ptB = self.v.pos;
         let ptC = self.w.pos;
@@ -147,6 +147,8 @@ impl Surface for Triangle {
                  N.dot_product(&cpC) <= 0.0) {
                 return None;
             }
+
+            ray.max_t = point.param;
 
             let global_area_x2: f32 = vecAB.cross_product(&vecBC).norm();
             let u = cpA.norm() / global_area_x2;
@@ -318,9 +320,9 @@ impl Object {
 
     fn apply_rotation(&mut self) {
         for tri in &mut self.mesh.triangles {
-            tri.rotate_around(&Vector3f::new(1.0, 0.0, 0.0), self.rotation.x.0);
-            tri.rotate_around(&Vector3f::new(0.0, 1.0, 0.0), self.rotation.y.0);
-            tri.rotate_around(&Vector3f::new(0.0, 0.0, 1.0), self.rotation.z.0);
+            tri.rotate_around(&Vector3f::new(1.0, 0.0, 0.0), (&self.rotation.x).into());
+            tri.rotate_around(&Vector3f::new(0.0, 1.0, 0.0), (&self.rotation.y).into());
+            tri.rotate_around(&Vector3f::new(0.0, 0.0, 1.0), (&self.rotation.z).into());
         }
 
         // On réinitialise car ça n'a aucun sens de l'appliquer deux fois
@@ -359,8 +361,8 @@ impl Object {
             self.position = old_pos;
         }
         self.barycenter = barycenter;
-        self.apply_rotation();
         self.apply_scale();
+        self.apply_rotation();
         self.apply_position();
     }
     // Crée un objet vide

@@ -27,7 +27,7 @@
         "target_position": {
           "x": 10.0,
           "y": 0.0,
-          "z": 0.0
+          "z": 5.0
         },
         "up": {
           "x": 0.0,
@@ -47,23 +47,23 @@
           "a": 255
         },
         "position": {
-          "x": 2.0,
+          "x": 15.0,
           "y": 0.0,
-          "z": 0.6 
+          "z": 5.0 
         },
         "scale": {
-          "x": 1.0,
+          "x": 2.0,
           "y": 1.0,
-          "z": 1.0
+          "z": 2.0
         },
         "rotation": {
           "x": 0.0,
           "y": 0.0,
-          "z": 0.0
+          "z": 90.0
         },
         "obj_path": "models/plane_no_uv.obj",
         "name": "Example",
-	"visible":true
+	"visible":false
       },
       {
         "color": {
@@ -73,23 +73,23 @@
           "a": 255
         },
         "position": {
-          "x": 10.0,
+          "x": 15.0,
           "y": 0.0,
-          "z": 1.0
+          "z": 5.0
         },
         "scale": {
           "x": 1.0,
           "y": 10.0,
-          "z": 3.0
+          "z": 1.0
         },
         "rotation": {
           "x": 0.0,
           "y": 0.0,
-          "z": 90.0
+          "z": 25.0
         },
         "obj_path": "models/plane_no_uv.obj",
         "name": "Example",
-	"visible": false
+	"visible": true
       }
  
     ]

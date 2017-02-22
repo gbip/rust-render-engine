@@ -22,6 +22,7 @@ extern crate serde;
 extern crate image;
 extern crate getopts;
 extern crate num;
+extern crate rayon;
 
 use scene::Scene;
 use img::Image;

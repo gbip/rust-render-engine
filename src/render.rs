@@ -75,12 +75,12 @@ impl Renderer {
         let objects =
             world.objects().iter().filter(|obj| obj.is_visible()).collect::<Vec<&Object>>();
         // On calcule chaque point d'intersection
-        for ray in rays {
+        for mut ray in rays {
             let mut result: Option<Fragment> = None;
 
             for object in &objects {
                 let points: Vec<Option<Fragment>> = object.triangles()
-                    .map(|tri| tri.get_intersection(&ray, &object.color().to_rgba32()))
+                    .map(|tri| tri.get_intersection(&mut ray, &object.color().to_rgba32()))
                     .filter(|point| point.is_some())
                     .collect();
 

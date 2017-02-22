@@ -10,7 +10,7 @@ pub struct Ray {
     origin: Vector3f,
     // Un paramètre qui indique l'extrémité du rayon. Par exemple, lorsque le rayon est arrêté par
     // une surface il ne se propage pas sur les surfaces situées derrière.
-    max_t: f32,
+    pub max_t: f32,
 }
 
 #[derive(Debug, Clone)]
@@ -35,7 +35,7 @@ pub struct Fragment {
 pub trait Surface {
     /** @returns the intersection point between the surface and
     the ray given. */
-    fn get_intersection(&self, ray: &Ray, color: &RGBA32) -> Option<Fragment>;
+    fn get_intersection(&self, ray: &mut Ray, color: &RGBA32) -> Option<Fragment>;
 }
 
 
@@ -72,7 +72,7 @@ impl Plane {
 }
 
 impl Surface for Plane {
-    fn get_intersection(&self, ray: &Ray, color: &RGBA32) -> Option<Fragment> {
+    fn get_intersection(&self, ray: &mut Ray, color: &RGBA32) -> Option<Fragment> {
 
         let slope: &Vector3f = &ray.slope;
         let origin: &Vector3f = &ray.origin;
