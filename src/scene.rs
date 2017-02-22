@@ -114,13 +114,16 @@ impl Camera {
         self.fov = fov;
     }
 
+    /* Donne un repère pour placer le cadre de la caméra. Le premier point
+    correspond à l'origine en haut à gauche, les deux autres aux vecteurs
+    x et y qui définissent les dimensions et orientations du cadre respectivement */
     pub fn get_canvas_base(&self, ratio: f32) -> (Vector3f, Vector3f, Vector3f) {
         let cam_vector = self.target_position - self.world_position;
         let e1_not_norm = cam_vector.cross_product(&self.up);
 
         let e1 = e1_not_norm / e1_not_norm.norm();
         let e3 = cam_vector / cam_vector.norm();
-        let e2 = e1.cross_product(&e3);
+        let e2 = e3.cross_product(&e1);
 
         let fov_tan = (self.fov / 2.0).to_radians().tan();
 
