@@ -692,22 +692,22 @@ mod test {
         let tri1 = Triangle::new(p1, p2, p3);
 
         // Ce rayon doit intersecter le triangle en (0,0,0)
-        let r1 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.0, 1.0, 0.0));
+        let mut r1 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.0, 1.0, 0.0));
 
-        let frag1 = tri1.get_intersection(&r1, &RGBA32::new_black());
+        let frag1 = tri1.get_intersection(&mut r1, &RGBA32::new_black());
         assert!(frag1 != None);
 
         // Normalement, l'intersection du triangle est en (0.5,0,0), donc ce rayon ne doit pas
         // intersecter avec le triangle
-        let r2 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.51, 1.0, 0.0));
+        let mut r2 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.51, 1.0, 0.0));
 
-        let frag2 = tri1.get_intersection(&r2, &RGBA32::new_black());
+        let frag2 = tri1.get_intersection(&mut r2, &RGBA32::new_black());
         assert!(frag2 == None);
 
         // Celui là par contre devrait :
-        let r3 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.5, 1.0, 0.0));
+        let mut r3 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.5, 1.0, 0.0));
 
-        let frag3 = tri1.get_intersection(&r3, &RGBA32::new_black());
+        let frag3 = tri1.get_intersection(&mut r3, &RGBA32::new_black());
         assert!(frag3 != None);
     }
 

@@ -167,7 +167,7 @@ mod tests {
             d: 35.0,
         };
 
-        let ray = Ray {
+        let mut ray = Ray {
             origin: Vector3f {
                 x: 8.0,
                 y: 7.0,
@@ -181,7 +181,7 @@ mod tests {
             max_t: -1.0,
         };
 
-        assert!(match plane.get_intersection(&ray, &RGBA32::new_black()) {
+        assert!(match plane.get_intersection(&mut ray, &RGBA32::new_black()) {
             None => true,
             _ => false,
         });
@@ -196,7 +196,7 @@ mod tests {
             d: 35.0,
         };
 
-        let ray = Ray {
+        let mut ray = Ray {
             origin: Vector3f {
                 x: 0.0,
                 y: 0.0,
@@ -210,7 +210,7 @@ mod tests {
             max_t: -1.0,
         };
 
-        let intersection = plane.get_intersection(&ray, &RGBA32::new_black());
+        let intersection = plane.get_intersection(&mut ray, &RGBA32::new_black());
         assert!(match intersection {
             None => true,
             Some(_) => false,
@@ -226,7 +226,7 @@ mod tests {
             d: 35.0,
         };
 
-        let ray = Ray {
+        let mut ray = Ray {
             origin: Vector3f {
                 x: 0.0,
                 y: 0.0,
@@ -240,7 +240,7 @@ mod tests {
             max_t: -1.0,
         };
 
-        let intersection = plane.get_intersection(&ray, &RGBA32::new_black());
+        let intersection = plane.get_intersection(&mut ray, &RGBA32::new_black());
         assert!(match intersection {
             None => false,
             Some(point) => {
