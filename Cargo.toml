@@ -3,6 +3,11 @@ name = "render_engine"
 version = "0.1.0"
 authors = ["Paul Florence <florencepaul@hotmail.fr>"]
 
+
+[lib]
+name = "lib_render"
+path = "src/lib.rs"
+
 [dependencies]
 serde_derive = "0.9.*"
 serde_json = "0.9.*"

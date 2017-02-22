@@ -40,7 +40,7 @@ impl<T: Pixel> Image<T> {
 
         let file_output = &mut File::create(&Path::new(pathname)).unwrap();
         println!("File res is : {} x {} ", buffer.width(), buffer.height());
-        image::ImageRgb8(buffer).save(file_output, image::PNG);
+        image::ImageRgb8(buffer).save(file_output, image::PNG).expect("Error while saving file");
     }
 }
 

@@ -2,34 +2,9 @@
 #![allow(dead_code)]
 #![cfg_attr(feature="clippy", feature(plugin))]
 #![cfg_attr(feature="clippy", plugin(clippy))]
-mod math;
 
-
-#[macro_use] // Il faut charger angle.rs dans les premiers modules, car sinon obj3D n'aura pas la visibilité sur les macros définies dans angle.
-mod angle;
-#[allow(non_snake_case)]
-mod obj3D;
-mod scene;
-mod render;
-mod ray;
-mod color;
-mod img;
-
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_json;
-extern crate serde;
-extern crate image;
-extern crate getopts;
-extern crate num;
-extern crate rayon;
-
-use scene::Scene;
-use img::Image;
-use color::{RGBA8, RGBA32};
-use math::Vector3;
-use getopts::Options;
-use std::env;
+extern crate lib_render;
+use lib_render::*;
 
 // Generate a template file at the location [path]
 fn generate_template(path: String) {

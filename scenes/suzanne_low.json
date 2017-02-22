@@ -1,0 +1,238 @@
+{
+  "world": {
+    "base_vector": [
+      {
+        "x": 1.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "x": 0.0,
+        "y": 1.0,
+        "z": 0.0
+      },
+      {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 1.0
+      }
+    ],
+    "cameras": [
+      {
+        "world_position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 5.0
+        },
+        "target_position": {
+          "x": 10.0,
+          "y": 0.0,
+          "z": 5.0
+        },
+        "up": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 1.0
+        },
+        "fov": 70.0,
+        "clip": 0.001
+      }
+    ],
+    "objects": [
+      {
+        "color": {
+          "r": 255,
+          "g": 0,
+          "b": 0,
+          "a": 255
+        },
+        "position": {
+          "x": 15.0,
+          "y": 0.0,
+          "z": 5.0 
+        },
+        "scale": {
+          "x": 2.0,
+          "y": 1.0,
+          "z": 2.0
+        },
+        "rotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 90.0
+        },
+        "obj_path": "models/plane_no_uv.obj",
+        "name": "Example",
+	"visible":false
+      },
+      {
+        "color": {
+          "r": 32,
+          "g": 204,
+          "b": 18,
+          "a": 255
+        },
+        "position": {
+          "x": 15.0,
+          "y": -4.0,
+          "z": 5.0
+        },
+        "scale": {
+          "x": 10.0,
+          "y": 10.0,
+          "z": 10.0
+        },
+        "rotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "obj_path": "models/plane_no_uv.obj",
+        "name": "Green Wall",
+	"visible": true
+      },
+ 	
+      {
+        "color": {
+          "r": 204,
+          "g": 29,
+          "b": 20,
+          "a": 255
+        },
+        "position": {
+          "x": 15.0,
+          "y": 4.0,
+          "z": 5.0
+        },
+        "scale": {
+          "x": 10.0,
+          "y": 10.0,
+          "z": 10.0
+        },
+        "rotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "obj_path": "models/plane_no_uv.obj",
+        "name": "Red Wall",
+	"visible": true
+      },
+	{
+        "color": {
+          "r": 200,
+          "g": 200,
+          "b": 200,
+          "a": 255
+        },
+        "position": {
+          "x": 15.0,
+          "y": 0.0,
+          "z": 9.0
+        },
+        "scale": {
+          "x": 10.0,
+          "y": 10.0,
+          "z": 10.0
+        },
+        "rotation": {
+          "x": 90.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "obj_path": "models/plane_no_uv.obj",
+        "name": "White Roof",
+	"visible": true
+      },
+{
+        "color": {
+          "r": 200,
+          "g": 200,
+          "b": 200,
+          "a": 255
+        },
+        "position": {
+          "x": 15.0,
+          "y": 0.0,
+          "z": 1.0
+        },
+        "scale": {
+          "x": 10.0,
+          "y": 10.0,
+          "z": 10.0
+        },
+        "rotation": {
+          "x": 90.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "obj_path": "models/plane_no_uv.obj",
+        "name": "White Floor",
+	"visible": true
+      },
+{
+        "color": {
+          "r": 200,
+          "g": 200,
+          "b": 200,
+          "a": 255
+        },
+        "position": {
+          "x": 25.0,
+          "y": 0.0,
+          "z": 1.0
+        },
+        "scale": {
+          "x": 10.0,
+          "y": 10.0,
+          "z": 10.0
+        },
+        "rotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 90.0
+        },
+        "obj_path": "models/plane_no_uv.obj",
+        "name": "Back Wall",
+	"visible": true
+      },
+{
+        "color": {
+          "r": 108,
+          "g": 163,
+          "b": 227,
+          "a": 255
+        },
+        "position": {
+          "x": 15.0,
+          "y": 0.0,
+          "z": 3.0
+        },
+        "scale": {
+          "x": 1.0,
+          "y": 1.0,
+          "z": 1.0
+        },
+        "rotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 90.0
+        },
+        "obj_path": "models/suzanne_low.obj",
+        "name": "Suzanne",
+	"visible": true
+      }
+
+    ]
+  },
+  "renderer": {
+    "res_x": 960,
+    "res_y": 540,
+    "background_color": {
+      "r": 0,
+      "g": 0,
+      "b": 0,
+      "a": 255
+    }
+  }
+}
