@@ -51,15 +51,14 @@ impl Renderer {
     }
 
     pub fn load_textures(&self, world: &scene::World) -> HashMap<String, Image<RGBA8>> {
-        let mut textures : HashMap<String, Image<RGBA8>> = HashMap::new();
+        let mut textures: HashMap<String, Image<RGBA8>> = HashMap::new();
 
         for object in world.objects() {
             let texture_paths = object.material().get_texture_paths();
 
             for path in texture_paths {
                 let path_str = String::from(path.as_str());
-                textures
-                    .entry(path)
+                textures.entry(path)
                     .or_insert_with(|| Image::<RGBA8>::read_from_file(path_str.as_str()));
             }
         }
