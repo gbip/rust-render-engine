@@ -217,7 +217,7 @@ mod test {
                  Vector3f {
                 x: 4.0,
                 y: 2.0,
-                z: 4.0 - 2.0_f32.sqrt(),
+                z: 4.0 + 2.0_f32.sqrt(),
             })
             .norm() < 0.001);
         assert!((vec1 -
@@ -230,8 +230,8 @@ mod test {
         assert!((vec2 -
                  Vector3f {
                 x: 0.0,
-                y: -0.0,
-                z: 2.0 * 2.0_f32.sqrt(),
+                y: 0.0,
+                z: - 2.0 * 2.0_f32.sqrt(),
             })
             .norm() < 0.001);
     }

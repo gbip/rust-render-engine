@@ -166,6 +166,16 @@ impl img::Pixel for RGBA32 {
     }
 }
 
+impl img::Pixel for RGBA8 {
+    fn to_rgb_pixel(&self) -> (u8, u8, u8) {
+        (self.r, self.g, self.b)
+    }
+
+    fn to_rgba_pixel(&self) -> (u8, u8, u8, u8) {
+        (self.r, self.g, self.b, self.a)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::{RGBA8, RGBA32};
