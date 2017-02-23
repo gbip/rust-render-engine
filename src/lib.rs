@@ -14,6 +14,8 @@ pub mod render;
 pub mod ray;
 pub mod color;
 pub mod img;
+pub mod material;
+pub mod io_utils;
 
 #[macro_use]
 pub extern crate serde_derive;

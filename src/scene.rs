@@ -2,28 +2,11 @@ use std::vec::Vec;
 use math::{Vector3, Vector3f, VectorialOperations};
 use obj3D;
 use obj3D::Object;
-use std::fs::File;
-use std::io::{Write, Read};
-use std;
+use io_utils;
 use serde_json;
 use color::RGBA8;
 use render::Renderer;
 use std::time::Instant;
-
-fn write_string_to_file(j: &str, file_name: String) -> std::io::Result<()> {
-    let mut file = File::create(file_name).unwrap();
-    file.write_all(j.as_bytes())
-}
-
-#[allow(unused_must_use)]
-fn open_file_as_string(file: &str) -> String {
-    let mut result: String = "".to_string();
-    match File::open(file) {
-        Ok(mut val) => val.read_to_string(&mut result),
-        Err(e) => panic!("Error could not open file {}, the error is : {}", file, e),
-    };
-    result
-}
 
 // Une simple scène
 #[derive(Serialize,Deserialize,Debug)]
@@ -36,7 +19,7 @@ impl Scene {
     // Charge la scène depuis un fichier "file"
     pub fn load_from_file(file: String) -> Self {
         println!("Loading scene from file : {} ", file);
-        let file = open_file_as_string(file.as_str());
+        let file = io_utils::open_file_as_string(file.as_str());
         let mut scene: Scene = match serde_json::from_str(file.as_str()) {
             Ok(val) => val,
             Err(e) => panic!("Error while loading world. Serde error is : {}", e),
@@ -56,7 +39,7 @@ impl Scene {
 
     // Ecris la structure de la scène dans le fichier "file" en JSON sans la géomètrie
     pub fn save_to_file(&self, file: String) {
-        match write_string_to_file(&serde_json::to_string_pretty(&self).unwrap(), file) {
+        match io_utils::write_string_to_file(&serde_json::to_string_pretty(&self).unwrap(), file) {
 
             Err(e) => println!("Could not save world. Error : {}", e),
 
@@ -231,7 +214,7 @@ mod test {
                  Vector3f {
                 x: 0.0,
                 y: 0.0,
-                z: - 2.0 * 2.0_f32.sqrt(),
+                z: -2.0 * 2.0_f32.sqrt(),
             })
             .norm() < 0.001);
     }

@@ -5,10 +5,12 @@ use color;
 use math::Vector3f;
 use ray::{Ray, Fragment, Surface};
 use obj3D::Object;
+use std::collections::HashMap;
+use std::fmt;
 
 // Le ratio n'est pas enregistré à la deserialization, il faut penser à appeler compute_ratio()
 // pour avoir un ratio autre que 0.
-#[derive(Serialize,Deserialize,Debug)]
+#[derive(Serialize,Deserialize)]
 pub struct Renderer {
     // Colonne
     res_x: usize,
@@ -16,11 +18,13 @@ pub struct Renderer {
     // Ligne
     res_y: usize,
 
-    #[serde(skip_serializing)]
-    #[serde(skip_deserializing)]
+    #[serde(skip_serializing,skip_deserializing)]
     ratio: f32,
 
     background_color: RGBA8,
+
+    #[serde(skip_serializing, skip_deserializing, default = "HashMap::new")]
+    textures: HashMap<String, Image<RGBA8>>,
 }
 
 
@@ -31,6 +35,7 @@ impl Renderer {
             res_y: res_y,
             ratio: (res_x as f32 / res_y as f32),
             background_color: RGBA8::new_black(),
+            textures: HashMap::new(),
         }
     }
 
@@ -43,6 +48,27 @@ impl Renderer {
 
     pub fn compute_ratio(&mut self) {
         self.ratio = self.res_x as f32 / self.res_y as f32;
+    }
+
+    pub fn load_textures(&self, world: &scene::World) -> HashMap<String, Image<RGBA8>> {
+        let mut textures : HashMap<String, Image<RGBA8>> = HashMap::new();
+
+        for object in world.objects() {
+            let texture_paths = object.material().get_texture_paths();
+
+            for path in texture_paths {
+                let path_str = String::from(path.as_str());
+                textures
+                    .entry(path)
+                    .or_insert_with(|| Image::<RGBA8>::read_from_file(path_str.as_str()));
+            }
+        }
+
+        textures
+    }
+
+    pub fn free_textures(&mut self) {
+        self.textures = HashMap::new();
     }
 
     pub fn show_information(&self) {
@@ -134,6 +160,7 @@ impl Renderer {
 
     pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA32> {
 
+        // let textures = self.load_textures(world);
         let mut canvas: Vec<Vec<Canvas>> = self.create_canvas(camera);
 
         for line in &mut canvas {
@@ -147,6 +174,16 @@ impl Renderer {
             .collect();
 
         Image::<RGBA32>::from_vec_vec(&temp_result)
+    }
+}
+
+impl fmt::Debug for Renderer {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f,
+               "Renderer : resolution = {}x{}, background_color = {:?}",
+               self.res_x,
+               self.res_y,
+               self.background_color)
     }
 }
 

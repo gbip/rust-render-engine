@@ -1,5 +1,5 @@
 use image;
-use image::{GenericImage};
+use image::GenericImage;
 // Conflit avec notre trait pixel...
 use image::Pixel as ImgPixel;
 use std::vec;
@@ -53,10 +53,14 @@ impl Image<RGBA8> {
 
         let width = dims.0 as usize;
         let height = dims.1 as usize;
-        let mut result = Image::<RGBA8> {width : width, height : height, pixels : vec![]};
+        let mut result = Image::<RGBA8> {
+            width: width,
+            height: height,
+            pixels: vec![],
+        };
 
         for x in 0..dims.0 {
-            let mut line : Vec<RGBA8> = vec![];
+            let mut line: Vec<RGBA8> = vec![];
             for y in 0..dims.1 {
                 let pix = img.get_pixel(x, y);
                 line.push(RGBA8::new(&pix.data[0], &pix.data[1], &pix.data[2], &pix.data[3]));
