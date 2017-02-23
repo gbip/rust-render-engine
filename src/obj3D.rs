@@ -361,7 +361,15 @@ impl Object {
         let barycenter = self.compute_barycenter();
 
         // Lecture du matériau
-        // TODO lire le materiau
+        if self.material_path != "" {
+            self.material = match Material::read_from_file(self.material_path.as_str()) {
+                Ok(value) => value,
+                Err(e) => {
+                    println!("Can't load the material {} due to error : {:?}", self.material_path, e);
+                    Material::new_empty()
+                }
+            }
+        }
 
         // Application des transformations
         let old_pos: Vector3f = self.position;

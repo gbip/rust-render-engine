@@ -19,10 +19,12 @@ impl Scene {
     // Charge la scène depuis un fichier "file"
     pub fn load_from_file(file: String) -> Self {
         println!("Loading scene from file : {} ", file);
-        let file = io_utils::open_file_as_string(file.as_str());
-        let mut scene: Scene = match serde_json::from_str(file.as_str()) {
-            Ok(val) => val,
-            Err(e) => panic!("Error while loading world. Serde error is : {}", e),
+        let mut scene: Scene = match io_utils::open_file_as_string(file.as_str()) {
+            Ok(file) => match serde_json::from_str(file.as_str()) {
+                Ok(val) => val,
+                Err(e) => panic!("Error while loading world. Serde error is : {}", e),
+            },
+            Err(e) => panic!("Error while reading file {} : {}", file, e),
         };
         scene.world.load_objects();
         scene.renderer.compute_ratio();

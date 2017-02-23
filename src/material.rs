@@ -1,4 +1,6 @@
 use color::RGBA8;
+use io_utils;
+use serde_json;
 
 #[derive(Serialize,Deserialize)]
 pub struct Material {
@@ -26,5 +28,15 @@ impl Material {
         }
 
         result
+    }
+
+    pub fn read_from_file(pathname: &str) -> Result<Material, String> {
+        match io_utils::open_file_as_string(pathname) {
+            Ok(file_str) => match serde_json::from_str(file_str.as_str()) {
+                    Ok(val) => Ok(val),
+                    Err(_) => Err("Serde Error !".to_string()),
+            },
+            Err(_) => Err("IO Error".to_string()), // TODO personaliser les messages d'erreur
+        }
     }
 }
