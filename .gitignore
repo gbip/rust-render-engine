@@ -3,3 +3,4 @@ Cargo.lock
 /obj
 /*.swp
 **/*.rs.bk
+/bench_output/*

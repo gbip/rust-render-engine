@@ -14,7 +14,7 @@ pub fn open_file_as_string(file: &str) -> Result<String, Error> {
         Ok(mut val) => {
             val.read_to_string(&mut result);
             Ok(result)
-        },
+        }
         Err(e) => Err(e),
     }
 }

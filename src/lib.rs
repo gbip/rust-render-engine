@@ -14,9 +14,8 @@ pub mod render;
 pub mod ray;
 pub mod color;
 pub mod img;
-pub mod material;
 pub mod io_utils;
-
+pub mod material;
 #[macro_use]
 pub extern crate serde_derive;
 pub extern crate serde_json;
@@ -32,3 +31,4 @@ pub use color::{RGBA8, RGBA32};
 pub use math::Vector3;
 pub use getopts::Options;
 pub use std::env;
+pub use io_utils::*;
