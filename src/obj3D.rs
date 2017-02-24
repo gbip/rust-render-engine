@@ -492,7 +492,7 @@ mod obj_parser {
                             vec.push(Vector2f::new(u, v));
                         }
                         None => {
-                            tex = Some(vec![]);
+                            tex = Some(vec![Vector2f::new(u, v)]);
                         }
                     }
                 }
@@ -578,8 +578,8 @@ mod obj_parser {
             match elem.len() {
                 3 => {
                     id_pos.push(elem[0]);
-                    id_norm.push(elem[1]);
-                    id_tex.push(elem[2])
+                    id_tex.push(elem[1]);
+                    id_norm.push(elem[2])
                 }
                 2 => {
                     id_pos.push(elem[0]);

@@ -1,0 +1,21 @@
+{
+  "diffuse": {
+    "r": 200,
+    "g": 200,
+    "b": 200,
+    "a": 200
+  },
+  "specular": {
+    "r": 255,
+    "g": 255,
+    "b": 255,
+    "a": 255
+  },
+  "ambient": {
+    "r": 0,
+    "g": 0,
+    "b": 0,
+    "a": 0
+  },
+  "map_diffuse": "scenes/materials/texture.jpg"
+}

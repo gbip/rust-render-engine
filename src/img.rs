@@ -61,21 +61,21 @@ impl Image<RGBA8> {
         let dims = img.dimensions();
         println!("Image at {} : resolution is {:?}", pathname, dims);
 
-        let width = dims.0 as usize;
-        let height = dims.1 as usize;
+        let width = dims.0;
+        let height = dims.1;
         let mut result = Image::<RGBA8> {
-            width: width,
-            height: height,
+            width: width as usize,
+            height: height as usize,
             pixels: vec![],
         };
 
-        for x in 0..dims.0 {
-            let mut line: Vec<RGBA8> = vec![];
-            for y in 0..dims.1 {
+        for x in 0..width {
+            let mut col: Vec<RGBA8> = vec![];
+            for y in 0..height {
                 let pix = img.get_pixel(x, y);
-                line.push(RGBA8::new(&pix.data[0], &pix.data[1], &pix.data[2], &pix.data[3]));
+                col.push(RGBA8::new(&pix.data[0], &pix.data[1], &pix.data[2], &pix.data[3]));
             }
-            result.pixels.push(line);
+            result.pixels.push(col);
         }
 
         result
