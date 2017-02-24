@@ -70,9 +70,9 @@ impl Scene {
         println!("Starting to render...");
         let now = Instant::now();
         let image = self.renderer.render(&self.world, self.world.get_camera(0));
-        println!("Render done in {} seconds, writting result to file {}",
-                 now.elapsed().as_secs(),
-                 &file_path);
+        println!("Render done in {} s, writting result to file {}",
+                 now.elapsed().as_secs() as f64 + (now.elapsed().subsec_nanos() as f64 * (1.0/1_000_000_000_f64)),
+                 &file_path,);
         image.write_to_file(file_path.as_str())
     }
 }

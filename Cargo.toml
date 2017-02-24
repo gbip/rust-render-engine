@@ -3,6 +3,9 @@ name = "render_engine"
 version = "0.1.0"
 authors = ["Paul Florence <florencepaul@hotmail.fr>"]
 
+[[bin]]
+name = "bench"
+path = "bench/bench.rs"
 
 [lib]
 name = "lib_render"
@@ -16,6 +19,7 @@ clippy = {version = "*", optional = true}
 getopts = "0.2"
 num = "0.1"
 rayon = "*"
+colored="*"
 
 [dependencies.serde]
 version = "0.9.*"
