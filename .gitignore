@@ -4,3 +4,4 @@ Cargo.lock
 /*.swp
 **/*.rs.bk
 /bench_output/*
+template.json
