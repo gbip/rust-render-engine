@@ -4,10 +4,10 @@ use serde_json;
 
 #[derive(Serialize,Deserialize)]
 pub struct Material {
-    diffuse: RGBA8,
-    specular: RGBA8,
-    ambient: RGBA8,
-    map_diffuse: String,
+    pub diffuse: RGBA8,
+    pub specular: RGBA8,
+    pub ambient: RGBA8,
+    pub map_diffuse: String,
 }
 
 impl Material {

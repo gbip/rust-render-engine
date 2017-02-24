@@ -74,12 +74,39 @@ impl Renderer {
         println!("Resolution is : {} x {}", self.res_x, self.res_y);
     }
 
+    pub fn calculate_ray_intersection<'a>(&self,
+                                        objects : &[&'a Object], // TODO Changer en raytree
+                                        mut ray : &mut Ray)
+        -> (Option<Fragment>, Option<&'a Object>) {
+
+        let mut fragment: Option<Fragment> = None;
+        let mut obj: Option<&Object> = None;
+
+        for object in objects {
+            let points: Vec<Option<Fragment>> = object.triangles()
+                .map(|tri| tri.get_intersection(&mut ray))
+                .filter(|point| point.is_some())
+                .collect();
+
+            match points.len() {
+                0 => {}
+                n => {
+                    fragment = points[n - 1]; // TODO ici le fragment est copié. Chercher une façon de juste le déplacer.
+                    obj = Some(object);
+                },
+            }
+        }
+
+        (fragment, obj)
+    }
+
     /** Calcule les rayons à lancer pour le canvas passé en paramètres.
     Calcule ensuite la couleur finale de chaque rayon et stocke le résultat dans
     le canvas passé en paramètres. */
     pub fn emit_rays(&self,
                      world: &scene::World,
                      camera: &scene::Camera,
+                     textures : &HashMap<String, Image<RGBA8>>,
                      canvas: &mut Canvas,
                      ray_density_x: u32,
                      ray_density_y: u32) {
@@ -87,8 +114,8 @@ impl Renderer {
         // On crée les rayons à emmettre
         let mut rays: Vec<Ray> = vec![];
 
-        for x in 0..(ray_density_x - 1) {
-            for y in 0..(ray_density_y - 1) {
+        for x in 0..ray_density_x {
+            for y in 0..ray_density_y {
                 let target = canvas.origin + canvas.e1 * ((x as f32 + 0.5) / ray_density_x as f32) +
                              canvas.e2 * ((y as f32 + 0.5) / ray_density_y as f32);
 
@@ -96,40 +123,34 @@ impl Renderer {
             }
         }
 
-        canvas.fragments.clear();
+        canvas.colors.clear();
         let objects =
             world.objects().iter().filter(|obj| obj.is_visible()).collect::<Vec<&Object>>();
+
         // On calcule chaque point d'intersection
         for mut ray in rays {
-            let mut result: Option<Fragment> = None;
-
-            for object in &objects {
-                let points: Vec<Option<Fragment>> = object.triangles()
-                    .map(|tri| tri.get_intersection(&mut ray, &object.color().to_rgba32()))
-                    .filter(|point| point.is_some())
-                    .collect();
-
-                match points.len() {
-                    0 => {}
-                    n => result = points[n - 1], // TODO ici le fragment est copié. Chercher une façon de juste le déplacer.
-                }
-            }
+            let (opt_frag, opt_obj) = self.calculate_ray_intersection(&objects, &mut ray);
 
             // Comme pour chaque rayon on ajoute un unique fragment, l'ordre est conservé et on peut retrouver la position de chaque fragment
             // dans l'espace à partir de sa position dans la liste.
             // A faire peut-être : stocker les fragments directement en fonction de leur position dans l'image.
-            match result {
+            match (opt_frag, opt_obj) {
                 // Le dernier fragment trouvé est celui qui correspond à l'objet le plus en avant de la scène par rapport à la caméra
-                Some(fragment) => canvas.fragments.push(fragment),
-                None => {
-                    canvas.fragments.push(Fragment::new(Vector3f {
-                                                            x: 0.0,
-                                                            y: 0.0,
-                                                            z: 0.0,
-                                                        },
-                                                        0.0,
-                                                        self.background_color.to_rgba32()))
-                } // TODO changer le fragment par défaut
+                (Some(fragment), Some(object)) => {
+                    let mut color = object.material().diffuse.to_rgba32();
+                    if let Some(tex_coord) = fragment.tex {
+                        if let Some(texture) = textures.get(object.material().map_diffuse.as_str()) {
+                            color = color * texture.get_pixel_at(
+                                    (tex_coord.x * texture.width() as f32) as u32 % texture.width(),
+                                    (tex_coord.y * texture.height() as f32) as u32 % texture.height(),
+                            ).to_rgba32();
+                        }
+                    }
+                    canvas.colors.push(color);
+                },
+                _ => {
+                    canvas.colors.push(self.background_color.to_rgba32());
+                }
             }
         }
     }
@@ -159,12 +180,12 @@ impl Renderer {
 
     pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA32> {
 
-        // let textures = self.load_textures(world);
+        let textures = self.load_textures(world);
         let mut canvas: Vec<Vec<Canvas>> = self.create_canvas(camera);
 
         for line in &mut canvas {
             for pixel in &mut line.iter_mut() {
-                self.emit_rays(world, camera, pixel, 2, 2);
+                self.emit_rays(world, camera, &textures, pixel, 2, 2);
             }
         }
 
@@ -193,7 +214,7 @@ pub struct Canvas {
     origin: Vector3f,
     e1: Vector3f,
     e2: Vector3f,
-    fragments: Vec<Fragment>,
+    colors: Vec<RGBA32>,
 }
 
 
@@ -203,13 +224,10 @@ impl Canvas {
             origin: origin,
             e1: e1,
             e2: e2,
-            fragments: vec![],
+            colors: vec![],
         }
     }
     pub fn get_average_color(&self) -> RGBA32 {
-
-        let colors = self.fragments.iter().map(|f| f.color).collect();
-        color::make_average_color(colors)
-
+        color::make_average_color(&self.colors)
     }
 }

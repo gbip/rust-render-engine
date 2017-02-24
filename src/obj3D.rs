@@ -119,7 +119,7 @@ impl Triangle {
 
 
 impl Surface for Triangle {
-    fn get_intersection(&self, ray: &mut Ray, color: &RGBA32) -> Option<Fragment> {
+    fn get_intersection(&self, ray: &mut Ray) -> Option<Fragment> {
         let ptA = self.u.pos;
         let ptB = self.v.pos;
         let ptC = self.w.pos;
@@ -131,7 +131,7 @@ impl Surface for Triangle {
 
         let plane = Plane::new(&vecAB, &vecBC, &ptA);
 
-        let mut result = plane.get_intersection(ray, color);
+        let mut result = plane.get_intersection(ray);
 
         if let Some(ref mut point) = result {
             // On calcule si le point appartient à la face triangle
@@ -370,6 +370,9 @@ impl Object {
                 }
             }
         }
+
+        //TODO temporaire
+        self.material.diffuse = self.color;
 
         // Application des transformations
         let old_pos: Vector3f = self.position;
@@ -722,20 +725,20 @@ mod test {
         // Ce rayon doit intersecter le triangle en (0,0,0)
         let mut r1 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.0, 1.0, 0.0));
 
-        let frag1 = tri1.get_intersection(&mut r1, &RGBA32::new_black());
+        let frag1 = tri1.get_intersection(&mut r1);
         assert!(frag1 != None);
 
         // Normalement, l'intersection du triangle est en (0.5,0,0), donc ce rayon ne doit pas
         // intersecter avec le triangle
         let mut r2 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.51, 1.0, 0.0));
 
-        let frag2 = tri1.get_intersection(&mut r2, &RGBA32::new_black());
+        let frag2 = tri1.get_intersection(&mut r2);
         assert!(frag2 == None);
 
         // Celui là par contre devrait :
         let mut r3 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.5, 1.0, 0.0));
 
-        let frag3 = tri1.get_intersection(&mut r3, &RGBA32::new_black());
+        let frag3 = tri1.get_intersection(&mut r3);
         assert!(frag3 != None);
     }
 
