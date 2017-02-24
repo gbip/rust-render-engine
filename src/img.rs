@@ -1,9 +1,10 @@
 use image;
+use image::GenericImage;
 // Conflit avec notre trait pixel...
 use image::Pixel as ImgPixel;
 use std::vec;
 use std::path::Path;
-use color::RGBA32;
+use color::{RGBA32, RGBA8};
 use std::fs::File;
 
 pub trait Pixel: Copy {
@@ -41,6 +42,33 @@ impl<T: Pixel> Image<T> {
         let file_output = &mut File::create(&Path::new(pathname)).unwrap();
         println!("File res is : {} x {} ", buffer.width(), buffer.height());
         image::ImageRgb8(buffer).save(file_output, image::PNG).expect("Error while saving file");
+    }
+}
+
+impl Image<RGBA8> {
+    pub fn read_from_file(pathname: &str) -> Image<RGBA8> {
+        let img = image::open(&Path::new(pathname)).unwrap();
+        let dims = img.dimensions();
+        println!("Image at {} : resolution is {:?}", pathname, dims);
+
+        let width = dims.0 as usize;
+        let height = dims.1 as usize;
+        let mut result = Image::<RGBA8> {
+            width: width,
+            height: height,
+            pixels: vec![],
+        };
+
+        for x in 0..dims.0 {
+            let mut line: Vec<RGBA8> = vec![];
+            for y in 0..dims.1 {
+                let pix = img.get_pixel(x, y);
+                line.push(RGBA8::new(&pix.data[0], &pix.data[1], &pix.data[2], &pix.data[3]));
+            }
+            result.pixels.push(line);
+        }
+
+        result
     }
 }
 

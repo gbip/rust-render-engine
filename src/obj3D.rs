@@ -3,6 +3,7 @@ use std::fmt;
 use std::f32;
 use math::{Vector3, Vector3f, Vector2f, VectorialOperations, AlmostEq};
 use color::{RGBA8, RGBA32};
+use material::Material;
 use ray::{Ray, Plane, Surface, Fragment};
 use std::slice::Iter;
 use angle::{Rad, Deg};
@@ -266,6 +267,10 @@ pub struct Object {
     #[serde(skip_serializing,skip_deserializing,default = "Mesh::new_empty")]
     mesh: Mesh,
 
+    // Le materiau de l'objet
+    #[serde(skip_serializing, skip_deserializing,default = "Material::new_empty")]
+    material: Material,
+
     // La couleur (diffus) de l'objet. Deviendra certainement par la suite le shadeR.
     color: RGBA8,
 
@@ -280,6 +285,10 @@ pub struct Object {
 
     // Le chemin vers un .obj qui permettra de charger l'objet
     obj_path: String,
+
+    // Le chemin vers le materiau
+    #[serde(default = "String::new")]
+    material_path: String,
 
     // Le nom de l'objet
     name: String,
@@ -350,6 +359,19 @@ impl Object {
         // barycentre est débile.
         self.load_mesh();
         let barycenter = self.compute_barycenter();
+
+        // Lecture du matériau
+        if self.material_path != "" {
+            self.material = match Material::read_from_file(self.material_path.as_str()) {
+                Ok(value) => value,
+                Err(e) => {
+                    println!("Can't load the material {} due to error : {:?}", self.material_path, e);
+                    Material::new_empty()
+                }
+            }
+        }
+
+        // Application des transformations
         let old_pos: Vector3f = self.position;
         if !barycenter.aeq(&Vector3f::zero()) {
             println!("Warning, the object {} is not centered in (0,0,0) but in {}",
@@ -369,6 +391,7 @@ impl Object {
     pub fn new_empty() -> Object {
         Object {
             mesh: Mesh::new_empty(),
+            material: Material::new_empty(),
             color: RGBA8::new_black(),
             position: Vector3::new(0_f32, 0_f32, 0_f32),
             scale: Vector3f::new(1f32, 1f32, 1f32),
@@ -378,6 +401,7 @@ impl Object {
                 z: deg!(0.0f32),
             },
             obj_path: "".to_string(),
+            material_path: "".to_string(),
             name: "untitled".to_string(),
             barycenter: Vector3f::zero(),
             visible: true,
@@ -391,6 +415,10 @@ impl Object {
 
     pub fn color(&self) -> RGBA8 {
         self.color
+    }
+
+    pub fn material(&self) -> &Material {
+        &self.material
     }
 
     pub fn is_visible(&self) -> bool {
