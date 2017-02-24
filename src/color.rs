@@ -1,5 +1,6 @@
 use img;
 use std::u8;
+use std::ops::Mul;
 
 // A struct for all internal color management, but not for textures and objecs colors.
 #[derive(Clone,Debug,Copy,Serialize,Deserialize,PartialEq)]
@@ -34,7 +35,7 @@ fn u8_to_u32(v: u8) -> u32 {
 
 // TODO : Verifier les histoires d'espace de couleur linéaire et tout et tout
 // /!\ On ne gère pas la transparence !!!!
-pub fn make_average_color(colors: Vec<RGBA32>) -> RGBA32 {
+pub fn make_average_color(colors: &[RGBA32]) -> RGBA32 {
 
     // Calcul de la couleur moyenne
 
@@ -173,6 +174,18 @@ impl img::Pixel for RGBA8 {
 
     fn to_rgba_pixel(&self) -> (u8, u8, u8, u8) {
         (self.r, self.g, self.b, self.a)
+    }
+}
+
+impl Mul<RGBA32> for RGBA32 {
+    type Output = RGBA32;
+    fn mul(self, other : RGBA32) -> Self::Output {
+        RGBA32 {
+            r : (self.r as u64 * other.r as u64 / u32::max_value() as u64) as u32,
+            g : (self.g as u64 * other.g as u64 / u32::max_value() as u64) as u32,
+            b : (self.b as u64 * other.b as u64 / u32::max_value() as u64) as u32,
+            a : (self.a as u64 * other.a as u64 / u32::max_value() as u64) as u32,
+        }
     }
 }
 

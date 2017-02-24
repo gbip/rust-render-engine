@@ -21,8 +21,6 @@ pub struct Image<T: Pixel> {
 impl<T: Pixel> Image<T> {
     /** Convertit une liste de lignes de pixels en image exportable.  */
     pub fn from_vec_vec(vec_vec: &[Vec<T>]) -> Image<T> {
-
-
         Image {
             width: vec_vec.len(),
             height: vec_vec[0].len(),
@@ -42,6 +40,18 @@ impl<T: Pixel> Image<T> {
         let file_output = &mut File::create(&Path::new(pathname)).unwrap();
         println!("File res is : {} x {} ", buffer.width(), buffer.height());
         image::ImageRgb8(buffer).save(file_output, image::PNG).expect("Error while saving file");
+    }
+
+    pub fn get_pixel_at(&self, x : u32, y : u32) -> T {
+        self.pixels[x as usize][y as usize]
+    }
+
+    pub fn width(&self) -> u32 {
+        self.width as u32
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height as u32
     }
 }
 

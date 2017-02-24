@@ -1,6 +1,5 @@
 use math::{Vector3f, Vector2f};
 use math::VectorialOperations;
-use color::RGBA32;
 
 #[derive(Debug, PartialEq)]
 pub struct Ray {
@@ -27,7 +26,6 @@ pub struct Fragment {
     pub normal: Vector3f,
     pub tex: Option<Vector2f>,
     pub param: f32,
-    pub color: RGBA32,
 }
 
 
@@ -35,7 +33,7 @@ pub struct Fragment {
 pub trait Surface {
     /** @returns the intersection point between the surface and
     the ray given. */
-    fn get_intersection(&self, ray: &mut Ray, color: &RGBA32) -> Option<Fragment>;
+    fn get_intersection(&self, ray: &mut Ray) -> Option<Fragment>;
 }
 
 
@@ -72,7 +70,7 @@ impl Plane {
 }
 
 impl Surface for Plane {
-    fn get_intersection(&self, ray: &mut Ray, color: &RGBA32) -> Option<Fragment> {
+    fn get_intersection(&self, ray: &mut Ray) -> Option<Fragment> {
 
         let slope: &Vector3f = &ray.slope;
         let origin: &Vector3f = &ray.origin;
@@ -96,8 +94,7 @@ impl Surface for Plane {
                                                 y: slope.y * t + origin.y,
                                                 z: slope.z * t + origin.z,
                                             },
-                                            t,
-                                            *color));
+                                            t));
             }
         }
 
@@ -106,7 +103,7 @@ impl Surface for Plane {
 }
 
 impl Fragment {
-    pub fn new(position: Vector3f, param: f32, color: RGBA32) -> Fragment {
+    pub fn new(position : Vector3f, param: f32) -> Fragment {
         Fragment {
             position: position,
             normal: Vector3f {
@@ -116,7 +113,6 @@ impl Fragment {
             },
             tex: None,
             param: param,
-            color: color,
         }
     }
 }
@@ -181,7 +177,7 @@ mod tests {
             max_t: -1.0,
         };
 
-        assert!(match plane.get_intersection(&mut ray, &RGBA32::new_black()) {
+        assert!(match plane.get_intersection(&mut ray) {
             None => true,
             _ => false,
         });
@@ -210,7 +206,7 @@ mod tests {
             max_t: -1.0,
         };
 
-        let intersection = plane.get_intersection(&mut ray, &RGBA32::new_black());
+        let intersection = plane.get_intersection(&mut ray);
         assert!(match intersection {
             None => true,
             Some(_) => false,
@@ -240,7 +236,7 @@ mod tests {
             max_t: -1.0,
         };
 
-        let intersection = plane.get_intersection(&mut ray, &RGBA32::new_black());
+        let intersection = plane.get_intersection(&mut ray);
         assert!(match intersection {
             None => false,
             Some(point) => {
