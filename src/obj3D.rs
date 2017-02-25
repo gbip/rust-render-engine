@@ -2,11 +2,12 @@ use std::vec::Vec;
 use std::fmt;
 use std::f32;
 use math::{Vector3, Vector3f, Vector2f, VectorialOperations, AlmostEq};
-use color::{RGBA8, RGBA32};
+use color::RGBA8;
 use material::Material;
 use ray::{Ray, Plane, Surface, Fragment};
 use std::slice::Iter;
 use angle::{Rad, Deg};
+use colored::*;
 // The Raw Point represents a triangle point where each coordinate is an index to the real value
 // stored in a vector
 #[derive(Debug)]
@@ -353,15 +354,8 @@ impl Object {
         self.mesh.get_barycenter(&self.name)
     }
 
-    // Initialise un objet. Pour l'instant cela ne fait que charger le mesh, mais on peut imaginer
-    // d'autres traitements.
-    pub fn initialize(&mut self) {
-        // Important, on charge le mesh avant de commencer à rendre car sinon le calcul du
-        // barycentre est débile.
-        self.load_mesh();
-        let barycenter = self.compute_barycenter();
-
-        // Lecture du matériau
+    // Chargement du matériau
+    fn load_material(&mut self) {
         if self.material_path != "" {
             self.material = match Material::read_from_file(self.material_path.as_str()) {
                 Ok(value) => value,
@@ -372,26 +366,45 @@ impl Object {
                     Material::new_empty()
                 }
             }
-        }
-        else {
+        } else {
+            println!("{}",
+                     format!("No material found for object {}", self.name).red().bold());
             self.material.diffuse = self.color;
         }
+    }
 
+    // Calcule le barycentre de l'objet, le compare à (0,0,0) et recentre l'objet en fonction
+    // /!\ Réinitialise la position de l'objet !!!!
+    fn center(&mut self) {
+        let barycenter = self.compute_barycenter();
         // Application des transformations
         let old_pos: Vector3f = self.position;
         if !barycenter.aeq(&Vector3f::zero()) {
-            println!("Warning, the object {} is not centered in (0,0,0) but in {}",
-                     self.name,
-                     &barycenter);
+            println!("{} ",
+                     format!("Warning, the object {} is not centered in (0,0,0) but in {}",
+                             self.name,
+                             &barycenter)
+                         .yellow()
+                         .dimmed());
             // On centre l'objet à l'origine.
             self.position = -barycenter;
             self.apply_position();
             self.position = old_pos;
         }
         self.barycenter = barycenter;
+    }
+
+    // Initialise un objet. Pour l'instant cela ne fait que charger le mesh, mais on peut imaginer
+    // d'autres traitements.
+    pub fn initialize(&mut self) {
+        // Important, on charge le mesh avant de commencer à rendre car sinon le calcul du
+        // barycentre est débile.
+        self.load_mesh();
+        self.center();
         self.apply_scale();
         self.apply_rotation();
         self.apply_position();
+        self.load_material();
     }
     // Crée un objet vide
     pub fn new_empty() -> Object {

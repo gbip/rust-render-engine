@@ -21,6 +21,8 @@ pub struct Renderer {
     #[serde(skip_serializing,skip_deserializing)]
     ratio: f32,
 
+    subdivision_sampling: u32,
+
     background_color: RGBA8,
 
     #[serde(skip_serializing, skip_deserializing, default = "HashMap::new")]
@@ -36,6 +38,7 @@ impl Renderer {
             ratio: (res_x as f32 / res_y as f32),
             background_color: RGBA8::new_black(),
             textures: HashMap::new(),
+            subdivision_sampling: 1,
         }
     }
 
@@ -50,20 +53,20 @@ impl Renderer {
         self.ratio = self.res_x as f32 / self.res_y as f32;
     }
 
-    pub fn load_textures(&self, world: &scene::World) -> HashMap<String, Image<RGBA8>> {
+    pub fn load_textures(&mut self, world: &scene::World) {
         let mut textures: HashMap<String, Image<RGBA8>> = HashMap::new();
-
         for object in world.objects() {
             let texture_paths = object.material().get_texture_paths();
 
             for path in texture_paths {
                 let path_str = String::from(path.as_str());
+                println!("Ajout de la texture {}", path);
                 textures.entry(path)
                     .or_insert_with(|| Image::<RGBA8>::read_from_file(path_str.as_str()));
             }
         }
 
-        textures
+        self.textures = textures;
     }
 
     pub fn free_textures(&mut self) {
@@ -75,9 +78,9 @@ impl Renderer {
     }
 
     pub fn calculate_ray_intersection<'a>(&self,
-                                        objects : &[&'a Object], // TODO Changer en raytree
-                                        mut ray : &mut Ray)
-        -> (Option<Fragment>, Option<&'a Object>) {
+                                          objects: &[&'a Object], // TODO Changer en raytree
+                                          mut ray: &mut Ray)
+                                          -> (Option<Fragment>, Option<&'a Object>) {
 
         let mut fragment: Option<Fragment> = None;
         let mut obj: Option<&Object> = None;
@@ -93,7 +96,7 @@ impl Renderer {
                 n => {
                     fragment = points[n - 1]; // TODO ici le fragment est copié. Chercher une façon de juste le déplacer.
                     obj = Some(object);
-                },
+                }
             }
         }
 
@@ -106,7 +109,6 @@ impl Renderer {
     pub fn emit_rays(&self,
                      world: &scene::World,
                      camera: &scene::Camera,
-                     textures : &HashMap<String, Image<RGBA8>>,
                      canvas: &mut Canvas,
                      ray_density_x: u32,
                      ray_density_y: u32) {
@@ -139,15 +141,20 @@ impl Renderer {
                 (Some(fragment), Some(object)) => {
                     let mut color = object.material().diffuse.to_rgba32();
                     if let Some(tex_coord) = fragment.tex {
-                        if let Some(texture) = textures.get(object.material().map_diffuse.as_str()) {
-                            color = color * texture.get_pixel_at(
-                                    (tex_coord.x * texture.width() as f32) as u32 % texture.width(),
-                                    (tex_coord.y * texture.height() as f32) as u32 % texture.height(),
-                            ).to_rgba32();
+                        if let Some(texture) = self.textures
+                            .get(object.material().map_diffuse.get_map_path().as_str()) {
+                            color =
+                                color *
+                                texture.get_pixel_at((tex_coord.x * texture.width() as f32) as u32 %
+                                                  texture.width(),
+                                                  (tex_coord.y * texture.height() as f32) as u32 %
+                                                  texture.height())
+                                    .to_rgba32();
+                        } else {
                         }
                     }
                     canvas.colors.push(color);
-                },
+                }
                 _ => {
                     canvas.colors.push(self.background_color.to_rgba32());
                 }
@@ -178,14 +185,22 @@ impl Renderer {
 
     }
 
+    pub fn initialize(&mut self, world: &scene::World) {
+        self.compute_ratio();
+        self.load_textures(world);
+    }
+
     pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA32> {
 
-        let textures = self.load_textures(world);
         let mut canvas: Vec<Vec<Canvas>> = self.create_canvas(camera);
 
         for line in &mut canvas {
             for pixel in &mut line.iter_mut() {
-                self.emit_rays(world, camera, &textures, pixel, 3, 3);
+                self.emit_rays(world,
+                               camera,
+                               pixel,
+                               self.subdivision_sampling,
+                               self.subdivision_sampling);
             }
         }
 

@@ -24,6 +24,7 @@ pub extern crate image;
 pub extern crate getopts;
 pub extern crate num;
 pub extern crate rayon;
+pub extern crate colored;
 
 pub use scene::Scene;
 pub use img::Image;

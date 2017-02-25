@@ -42,7 +42,7 @@ impl<T: Pixel> Image<T> {
         image::ImageRgb8(buffer).save(file_output, image::PNG).expect("Error while saving file");
     }
 
-    pub fn get_pixel_at(&self, x : u32, y : u32) -> T {
+    pub fn get_pixel_at(&self, x: u32, y: u32) -> T {
         self.pixels[x as usize][y as usize]
     }
 

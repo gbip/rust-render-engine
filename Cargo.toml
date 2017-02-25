@@ -7,6 +7,10 @@ authors = ["Paul Florence <florencepaul@hotmail.fr>"]
 name = "bench"
 path = "bench/bench.rs"
 
+[[bin]]
+name = "render_engine"
+path = "src/main.rs"
+
 [lib]
 name = "lib_render"
 path = "src/lib.rs"

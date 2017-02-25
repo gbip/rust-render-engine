@@ -18,6 +18,10 @@ fn generate_template(path: String) {
                            "Example".to_string());
 
     scene.save_to_file(path);
+
+    let material = material::Material::new_empty();
+    material.save_to_file("template_material.json");
+
 }
 
 

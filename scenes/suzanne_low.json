@@ -162,13 +162,14 @@
           "z": 10.0
         },
         "rotation": {
-          "x": 90.0,
+          "x": 0.0,
           "y": 0.0,
           "z": 0.0
         },
-        "obj_path": "models/plane_no_uv.obj",
+        "obj_path": "models/uv_plane.obj",
         "name": "White Floor",
-	"visible": true
+	"visible": true,
+	"material_path": "scenes/materials/material1.json"
       },
 {
         "color": {
@@ -228,6 +229,7 @@
   "renderer": {
     "res_x": 960,
     "res_y": 540,
+    "subdivision_sampling" : 1,
     "background_color": {
       "r": 0,
       "g": 0,

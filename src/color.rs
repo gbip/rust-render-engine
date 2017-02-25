@@ -179,12 +179,12 @@ impl img::Pixel for RGBA8 {
 
 impl Mul<RGBA32> for RGBA32 {
     type Output = RGBA32;
-    fn mul(self, other : RGBA32) -> Self::Output {
+    fn mul(self, other: RGBA32) -> Self::Output {
         RGBA32 {
-            r : (self.r as u64 * other.r as u64 / u32::max_value() as u64) as u32,
-            g : (self.g as u64 * other.g as u64 / u32::max_value() as u64) as u32,
-            b : (self.b as u64 * other.b as u64 / u32::max_value() as u64) as u32,
-            a : (self.a as u64 * other.a as u64 / u32::max_value() as u64) as u32,
+            r: (self.r as u64 * other.r as u64 / u32::max_value() as u64) as u32,
+            g: (self.g as u64 * other.g as u64 / u32::max_value() as u64) as u32,
+            b: (self.b as u64 * other.b as u64 / u32::max_value() as u64) as u32,
+            a: (self.a as u64 * other.a as u64 / u32::max_value() as u64) as u32,
         }
     }
 }

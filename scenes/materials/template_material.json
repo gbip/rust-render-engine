@@ -3,7 +3,7 @@
     "r": 200,
     "g": 200,
     "b": 200,
-    "a": 200
+    "a": 255
   },
   "specular": {
     "r": 255,
@@ -15,12 +15,11 @@
     "r": 0,
     "g": 0,
     "b": 0,
-    "a": 0
+    "a": 255
   },
-  "map_diffuse": 
-  { 
-	  "map_path" : "scenes/textures/checker_2k.jpg",
-	  "tiling_x": 1.0,
-	  "tiling_y": 1.0
+  "map_diffuse": {
+    "map_path": "",
+    "tiling_x": 1.0,
+    "tiling_y": 1.0
   }
 }

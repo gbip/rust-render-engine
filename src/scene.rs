@@ -29,7 +29,7 @@ impl Scene {
             Err(e) => panic!("Error while reading file {} : {}", file, e),
         };
         scene.world.load_objects();
-        scene.renderer.compute_ratio();
+        scene.renderer.initialize(&scene.world);
         scene
     }
 

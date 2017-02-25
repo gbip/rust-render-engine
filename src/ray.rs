@@ -103,7 +103,7 @@ impl Surface for Plane {
 }
 
 impl Fragment {
-    pub fn new(position : Vector3f, param: f32) -> Fragment {
+    pub fn new(position: Vector3f, param: f32) -> Fragment {
         Fragment {
             position: position,
             normal: Vector3f {
