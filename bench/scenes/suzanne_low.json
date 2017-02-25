@@ -164,7 +164,7 @@
         "rotation": {
           "x": 0.0,
           "y": 0.0,
-          "z": 0.0
+          "z": 90.0
         },
         "obj_path": "models/uv_plane.obj",
         "name": "White Floor",

@@ -152,15 +152,16 @@ impl Surface for Triangle {
             ray.max_t = point.param;
 
             let global_area_x2: f32 = vecAB.cross_product(&vecBC).norm();
-            let u = cpA.norm() / global_area_x2;
-            let v = cpB.norm() / global_area_x2;
-            let w = cpC.norm() / global_area_x2;
+            let u = cpC.norm() / global_area_x2;
+            let v = cpA.norm() / global_area_x2;
+            let w = cpB.norm() / global_area_x2;
 
             // Interpolation des normales et textures
-            point.normal = self.u.norm * u + self.v.norm * v + self.w.norm * w;
+            // P = wA + uB + vC
+            point.normal = self.u.norm * w + self.v.norm * u + self.w.norm * v;
             point.tex = match (self.u.tex, self.v.tex, self.w.tex) {
                 (Some(ref texu), Some(ref texv), Some(ref texw)) => {
-                    Some(texu * u + texv * v + texw * w)
+                    Some(texu * w + texv * u + texw * v)
                 }
                 _ => None,
             }
@@ -372,9 +373,9 @@ impl Object {
                 }
             }
         }
-
-        //TODO temporaire
-        self.material.diffuse = self.color;
+        else {
+            self.material.diffuse = self.color;
+        }
 
         // Application des transformations
         let old_pos: Vector3f = self.position;
