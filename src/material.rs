@@ -1,6 +1,8 @@
 use color::RGBA8;
 use io_utils;
 use serde_json;
+use img::Image;
+use std::collections::HashMap;
 
 #[derive(Serialize,Deserialize)]
 pub struct TextureMap {
@@ -19,6 +21,17 @@ impl TextureMap {
             tiling_x: tiling_x,
             tiling_y: tiling_y,
         }
+    }
+
+    pub fn get_color(&self,
+                     u: f32,
+                     v: f32,
+                     texture_registry: &HashMap<String, Image<RGBA8>>)
+                     -> RGBA8 {
+        let texture = &texture_registry.get(self.map_path.as_str()).unwrap();
+        texture.get_pixel_at(((u *self.tiling_x * texture.width() as f32) as u32 % texture.width()),
+                             ((v * self.tiling_y * texture.height() as f32) as u32 % texture.height()))
+
     }
 }
 #[derive(Serialize,Deserialize)]

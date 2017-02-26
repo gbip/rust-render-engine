@@ -141,17 +141,10 @@ impl Renderer {
                 (Some(fragment), Some(object)) => {
                     let mut color = object.material().diffuse.to_rgba32();
                     if let Some(tex_coord) = fragment.tex {
-                        if let Some(texture) = self.textures
-                            .get(object.material().map_diffuse.get_map_path().as_str()) {
-                            color =
-                                color *
-                                texture.get_pixel_at((tex_coord.x * texture.width() as f32) as u32 %
-                                                  texture.width(),
-                                                  (tex_coord.y * texture.height() as f32) as u32 %
-                                                  texture.height())
-                                    .to_rgba32();
-                        } else {
-                        }
+                        color = object.material()
+                            .map_diffuse
+                            .get_color(tex_coord.x, tex_coord.y, &self.textures)
+                            .to_rgba32();
                     }
                     canvas.colors.push(color);
                 }
