@@ -728,7 +728,6 @@ mod test {
     use math::{Vector3, Vector3f};
     use ray::{Surface, Ray};
     use super::{GeoPoint, Triangle};
-    use color::RGBA32;
 
     #[test]
     fn test_triangle_ray_intersection() {

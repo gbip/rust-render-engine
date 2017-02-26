@@ -139,7 +139,7 @@ impl Renderer {
             match (opt_frag, opt_obj) {
                 // Le dernier fragment trouvé est celui qui correspond à l'objet le plus en avant de la scène par rapport à la caméra
                 (Some(fragment), Some(object)) => {
-                    let mut color: RGBA32 = RGBA32::new_black();
+                    let color: RGBA32;
                     match fragment.tex {
                         Some(tex_coord) => {
                             color = object.material()
@@ -154,19 +154,8 @@ impl Renderer {
                                 object.material().diffuse.get_color(None, None, None).to_rgba32();
 
                         }
+                    }
 
-                    }
-                    /*
-                    if let Some(tex_coord) = fragment.tex {
-                        color = object.material()
-                            .diffuse
-                            .get_color(Some(tex_coord.x), Some(tex_coord.y), Some(&self.textures))
-                            .to_rgba32();
-                    }
-                    else {
-
-                    }
-  */
                     canvas.colors.push(color);
                 }
                 _ => {
