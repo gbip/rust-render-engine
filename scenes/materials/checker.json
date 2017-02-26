@@ -1,0 +1,23 @@
+{
+  "diffuse": {
+    "texture": {
+      "map_path": "scenes/textures/checker_2k.jpg",
+      "tiling_x": 10.0,
+      "tiling_y": 10.0
+    }
+  },
+  "specular": {
+    "texture": {
+      "map_path": "scenes/textures/checker_2k.jpg",
+      "tiling_x": 1.0,
+      "tiling_y": 1.0
+    }
+  },
+  "ambient": {
+    "texture": {
+      "map_path": "scenes/textures/checker_2k.jpg",
+      "tiling_x": 1.0,
+      "tiling_y": 1.0
+    }
+  }
+}

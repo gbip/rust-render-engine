@@ -32,3 +32,4 @@ pub use math::Vector3;
 pub use getopts::Options;
 pub use std::env;
 pub use io_utils::*;
+pub use material::{Channel, TextureMap};

@@ -12,8 +12,8 @@ pub struct TextureMap {
 }
 
 impl TextureMap {
-    pub fn get_map_path(&self) -> &String {
-        &self.map_path
+    pub fn get_map_path(&self) -> String {
+        self.map_path.clone()
     }
     pub fn new(texture_path: String, tiling_x: f32, tiling_y: f32) -> Self {
         TextureMap {
@@ -33,31 +33,122 @@ impl TextureMap {
                              ((v * self.tiling_y * texture.height() as f32) as u32 % texture.height()))
 
     }
+    pub fn new_empty() -> Self {
+        Self {
+            tiling_x: 1.0,
+            tiling_y: 1.0,
+            map_path: "/empty/map/path".to_string(),
+        }
+    }
+}
+
+// Représente un canal de couleur : soit c'est une texture, soit c'est une couleur
+#[derive(Serialize,Deserialize)]
+#[serde(untagged)]
+pub enum Channel {
+    Solid { color: RGBA8 },
+    Texture { texture: TextureMap },
+}
+
+impl Channel {
+    // Renvoies la couleur
+    // A faire : personnaliser les messages en fonction de l'erreur de l'utilisateur et reconnaître
+    // les cas où on a un problème dans le json
+    pub fn get_color(&self,
+                     u: Option<f32>,
+                     v: Option<f32>,
+                     texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
+                     -> RGBA8 {
+
+
+        match u {
+            Some(u) => {
+                match v {
+                    Some(v) => {
+                        match texture_registry {
+                            Some(texture_registry) => {
+                                match *self {
+                                    Channel::Solid { .. } => panic!("Erreur get_color"),
+                                    Channel::Texture { ref texture } => {
+                                        texture.get_color(u, v, texture_registry)
+                                    }
+
+                                }
+                            }
+                            None => panic!("Erreur get_color"),
+                        }
+                    }
+                    None => panic!("Erreur get_color"),
+                }
+            }
+            None => {
+                match v {
+                    Some(_) => panic!("Erreur get_color"),
+                    None => {
+                        match texture_registry {
+                            Some(_) => panic!("Erreur get_color"),
+                            None => {
+                                match *self {
+                                    Channel::Solid { color } => color,
+                                    Channel::Texture { .. } => panic!("Erreur get_color"),
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    pub fn is_solid(&self) -> bool {
+        match *self {
+            Channel::Solid { .. } => true,
+            _ => false,
+        }
+    }
+    pub fn is_texture(&self) -> bool {
+        match *self {
+            Channel::Texture { .. } => true,
+            _ => false,
+        }
+    }
+    pub fn get_texture_path(&self) -> String {
+        match *self {
+            Channel::Texture { ref texture } => texture.get_map_path(),
+            _ => panic!("Erreur, ce n'est pas un canal de texture"),
+        }
+    }
 }
 #[derive(Serialize,Deserialize)]
 pub struct Material {
-    pub diffuse: RGBA8,
-    pub specular: RGBA8,
-    pub ambient: RGBA8,
-    pub map_diffuse: TextureMap,
+    pub diffuse: Channel,
+    pub specular: Channel,
+    pub ambient: Channel,
 }
 
 impl Material {
     pub fn new_empty() -> Material {
         Material {
-            diffuse: RGBA8::new(&200u8, &200u8, &200u8, &255u8),
-            specular: RGBA8::new(&255u8, &255u8, &255u8, &255u8),
-            ambient: RGBA8::new_black(),
-            map_diffuse: TextureMap::new("".to_string(), 1.0, 1.0),
+            diffuse: Channel::Solid { color: RGBA8::new(&200u8, &200u8, &200u8, &255u8) },
+            specular: Channel::Solid { color: RGBA8::new(&255u8, &255u8, &255u8, &255u8) },
+            ambient: Channel::Solid { color: RGBA8::new_black() },
         }
     }
 
+    pub fn channels(&self) -> Vec<&Channel> {
+        vec![&self.diffuse, &self.specular, &self.ambient]
+    }
 
     pub fn get_texture_paths(&self) -> Vec<String> {
         let mut result: Vec<String> = vec![];
 
-        if self.map_diffuse.get_map_path() != "" {
-            result.push(self.map_diffuse.get_map_path().clone());
+
+        for chan in &self.channels() {
+            if chan.is_texture() {
+                result.push(chan.get_texture_path());
+            }
+
         }
         result
     }

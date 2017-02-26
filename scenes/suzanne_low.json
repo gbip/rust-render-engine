@@ -63,7 +63,8 @@
         },
         "obj_path": "models/plane_no_uv.obj",
         "name": "Example",
-	"visible":false
+	"visible":false,
+	"material" : "scenes/materials/solid_grey.json"
       },
       {
         "color": {
@@ -89,7 +90,8 @@
         },
         "obj_path": "models/plane_no_uv.obj",
         "name": "Green Wall",
-	"visible": true
+	"visible": true,
+	"material" : "scenes/materials/solid_green.json"
       },
  	
       {
@@ -116,6 +118,7 @@
         },
         "obj_path": "models/plane_no_uv.obj",
         "name": "Red Wall",
+	"material" : "scenes/materials/solid_red.json",
 	"visible": true
       },
 	{
@@ -142,6 +145,7 @@
         },
         "obj_path": "models/plane_no_uv.obj",
         "name": "White Roof",
+	"material" : "scenes/materials/solid_grey.json",
 	"visible": true
       },
 {
@@ -167,9 +171,9 @@
           "z": 0.0
         },
         "obj_path": "models/uv_plane.obj",
-        "name": "White Floor",
+        "name": "Checker Floor",
 	"visible": true,
-	"material_path": "scenes/materials/material1.json"
+	"material_path": "scenes/materials/checker.json"
       },
 {
         "color": {
@@ -195,6 +199,7 @@
         },
         "obj_path": "models/plane_no_uv.obj",
         "name": "Back Wall",
+	"material" : "scenes/materials/solid_grey.json",
 	"visible": true
       },
 {
@@ -221,7 +226,8 @@
         },
         "obj_path": "models/suzanne_low.obj",
         "name": "Suzanne",
-	"visible": true
+	"visible": true ,
+	"material" : "scenes/materials/solid_green.json"
       }
 
     ]

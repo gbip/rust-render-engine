@@ -19,8 +19,14 @@ fn generate_template(path: String) {
 
     scene.save_to_file(path);
 
-    let material = material::Material::new_empty();
-    material.save_to_file("template_material.json");
+    let material_solid = material::Material::new_empty();
+    material_solid.save_to_file("template_material_solid.json");
+
+    let mut material_tex = material::Material::new_empty();
+    material_tex.diffuse = Channel::Texture { texture: TextureMap::new_empty() };
+    material_tex.specular = Channel::Texture { texture: TextureMap::new_empty() };
+    material_tex.ambient = Channel::Texture { texture: TextureMap::new_empty() };
+    material_tex.save_to_file("template_material_texture.json");
 
 }
 

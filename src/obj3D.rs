@@ -3,7 +3,7 @@ use std::fmt;
 use std::f32;
 use math::{Vector3, Vector3f, Vector2f, VectorialOperations, AlmostEq};
 use color::RGBA8;
-use material::Material;
+use material::{Channel, Material};
 use ray::{Ray, Plane, Surface, Fragment};
 use std::slice::Iter;
 use angle::{Rad, Deg};
@@ -369,7 +369,7 @@ impl Object {
         } else {
             println!("{}",
                      format!("No material found for object {}", self.name).red().bold());
-            self.material.diffuse = self.color;
+            self.material.diffuse = Channel::Solid { color: self.color };
         }
     }
 
