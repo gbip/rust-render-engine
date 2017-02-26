@@ -18,12 +18,11 @@ path = "src/lib.rs"
 [dependencies]
 serde_derive = "0.9.*"
 serde_json = "0.9.*"
-image = "*"
+image = "0.12"
 clippy = {version = "*", optional = true}
 getopts = "0.2"
 num = "0.1"
-rayon = "*"
-colored="*"
+colored="1.4.*"
 
 [dependencies.serde]
 version = "0.9.*"
