@@ -139,7 +139,7 @@ impl Renderer {
             match (opt_frag, opt_obj) {
                 // Le dernier fragment trouvé est celui qui correspond à l'objet le plus en avant de la scène par rapport à la caméra
                 (Some(fragment), Some(object)) => {
-                    let mut color: RGBA32 = RGBA32::new_black();
+                    let color: RGBA32;
                     match fragment.tex {
                         Some(tex_coord) => {
                             color = object.material()
@@ -156,6 +156,7 @@ impl Renderer {
                         }
 
                     }
+
                     canvas.colors.push(color);
                 }
                 _ => {
@@ -190,6 +191,7 @@ impl Renderer {
 
     pub fn initialize(&mut self, world: &scene::World) {
         self.compute_ratio();
+        self.free_textures();
         self.load_textures(world);
     }
 

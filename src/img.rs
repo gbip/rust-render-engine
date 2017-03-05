@@ -29,7 +29,6 @@ impl<T: Pixel> Image<T> {
     }
 
     pub fn write_to_file(&self, pathname: &str) {
-        println!("Image is : {} x {}", self.width, self.height);
         let mut buffer = image::ImageBuffer::new(self.width as u32, self.height as u32);
 
         for (col, line, pixel) in buffer.enumerate_pixels_mut() {
@@ -38,7 +37,6 @@ impl<T: Pixel> Image<T> {
         }
 
         let file_output = &mut File::create(&Path::new(pathname)).unwrap();
-        println!("File res is : {} x {} ", buffer.width(), buffer.height());
         image::ImageRgb8(buffer).save(file_output, image::PNG).expect("Error while saving file");
     }
 
@@ -59,7 +57,6 @@ impl Image<RGBA8> {
     pub fn read_from_file(pathname: &str) -> Image<RGBA8> {
         let img = image::open(&Path::new(pathname)).unwrap();
         let dims = img.dimensions();
-        println!("Image at {} : resolution is {:?}", pathname, dims);
 
         let width = dims.0;
         let height = dims.1;

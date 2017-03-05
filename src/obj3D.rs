@@ -1,9 +1,7 @@
 use std::vec::Vec;
-use std::fmt;
 use std::f32;
 use math::{Vector3, Vector3f, Vector2f, VectorialOperations, AlmostEq};
-use color::RGBA8;
-use material::{Channel, Material};
+use material::Material;
 use ray::{Ray, Plane, Surface, Fragment};
 use std::slice::Iter;
 use angle::{Rad, Deg};
@@ -709,7 +707,6 @@ mod test {
     use math::{Vector3, Vector3f};
     use ray::{Surface, Ray};
     use super::{GeoPoint, Triangle};
-    use color::RGBA32;
 
     #[test]
     fn test_triangle_ray_intersection() {

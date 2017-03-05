@@ -7,17 +7,19 @@
     }
   },
   "specular": {
-    "texture": {
-      "map_path": "scenes/textures/checker_2k.jpg",
-      "tiling_x": 1.0,
-      "tiling_y": 1.0
+    "color": {
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a":255
     }
   },
   "ambient": {
-    "texture": {
-      "map_path": "scenes/textures/checker_2k.jpg",
-      "tiling_x": 1.0,
-      "tiling_y": 1.0
+    "color": {
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a":255
     }
   }
 }

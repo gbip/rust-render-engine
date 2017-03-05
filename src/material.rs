@@ -29,7 +29,7 @@ impl TextureMap {
                      texture_registry: &HashMap<String, Image<RGBA8>>)
                      -> RGBA8 {
         let texture = &texture_registry.get(self.map_path.as_str()).unwrap();
-        texture.get_pixel_at(((u *self.tiling_x * texture.width() as f32) as u32 % texture.width()),
+        texture.get_pixel_at(((u * self.tiling_x * texture.width() as f32) as u32 % texture.width()),
                              ((v * self.tiling_y * texture.height() as f32) as u32 % texture.height()))
 
     }
@@ -60,45 +60,13 @@ impl Channel {
                      texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
                      -> RGBA8 {
 
-
-        match u {
-            Some(u) => {
-                match v {
-                    Some(v) => {
-                        match texture_registry {
-                            Some(texture_registry) => {
-                                match *self {
-                                    Channel::Solid { .. } => panic!("Erreur get_color"),
-                                    Channel::Texture { ref texture } => {
-                                        texture.get_color(u, v, texture_registry)
-                                    }
-
-                                }
-                            }
-                            None => panic!("Erreur get_color"),
-                        }
-                    }
-                    None => panic!("Erreur get_color"),
-                }
+        match (u, v, texture_registry, self) {
+            (Some(u), Some(v), Some(texture_registry), &Channel::Texture { ref texture }) => {
+                texture.get_color(u, v, texture_registry)
             }
-            None => {
-                match v {
-                    Some(_) => panic!("Erreur get_color"),
-                    None => {
-                        match texture_registry {
-                            Some(_) => panic!("Erreur get_color"),
-                            None => {
-                                match *self {
-                                    Channel::Solid { color } => color,
-                                    Channel::Texture { .. } => panic!("Erreur get_color"),
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            (None, None, None, &Channel::Solid { color }) => color,
+            _ => panic!("Error get_color"),
         }
-
     }
 
     pub fn is_solid(&self) -> bool {

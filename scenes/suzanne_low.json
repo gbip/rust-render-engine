@@ -40,16 +40,10 @@
     ],
     "objects": [
       {
-        "color": {
-          "r": 255,
-          "g": 0,
-          "b": 0,
-          "a": 255
-        },
-        "position": {
+       "position": {
           "x": 15.0,
           "y": 0.0,
-          "z": 5.0 
+          "z": 5.0
         },
         "scale": {
           "x": 2.0,
@@ -67,13 +61,7 @@
 	"material" : "scenes/materials/solid_grey.json"
       },
       {
-        "color": {
-          "r": 32,
-          "g": 204,
-          "b": 18,
-          "a": 255
-        },
-        "position": {
+         "position": {
           "x": 15.0,
           "y": -4.0,
           "z": 5.0
@@ -93,14 +81,8 @@
 	"visible": true,
 	"material" : "scenes/materials/solid_green.json"
       },
- 	
+
       {
-        "color": {
-          "r": 204,
-          "g": 29,
-          "b": 20,
-          "a": 255
-        },
         "position": {
           "x": 15.0,
           "y": 4.0,
@@ -122,13 +104,7 @@
 	"visible": true
       },
 	{
-        "color": {
-          "r": 200,
-          "g": 200,
-          "b": 200,
-          "a": 255
-        },
-        "position": {
+       "position": {
           "x": 15.0,
           "y": 0.0,
           "z": 9.0
@@ -149,13 +125,7 @@
 	"visible": true
       },
 {
-        "color": {
-          "r": 200,
-          "g": 200,
-          "b": 200,
-          "a": 255
-        },
-        "position": {
+              "position": {
           "x": 15.0,
           "y": 0.0,
           "z": 1.0
@@ -176,14 +146,8 @@
 	"material_path": "scenes/materials/checker.json"
       },
 {
-        "color": {
-          "r": 200,
-          "g": 200,
-          "b": 200,
-          "a": 255
-        },
-        "position": {
-          "x": 25.0,
+              "position": {
+          "x": 20.0,
           "y": 0.0,
           "z": 1.0
         },
@@ -203,16 +167,10 @@
 	"visible": true
       },
 {
-        "color": {
-          "r": 108,
-          "g": 163,
-          "b": 227,
-          "a": 255
-        },
-        "position": {
+               "position": {
           "x": 15.0,
           "y": 0.0,
-          "z": 3.0
+          "z": 2.5
         },
         "scale": {
           "x": 1.0,
@@ -235,7 +193,7 @@
   "renderer": {
     "res_x": 960,
     "res_y": 540,
-    "subdivision_sampling" : 1,
+    "subdivision_sampling" : 4,
     "background_color": {
       "r": 0,
       "g": 0,

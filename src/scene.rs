@@ -4,7 +4,6 @@ use obj3D;
 use obj3D::Object;
 use io_utils;
 use serde_json;
-use color::RGBA8;
 use render::Renderer;
 use std::time::Instant;
 
@@ -158,7 +157,7 @@ impl World {
     }
 
     // Ajoute un objet dans le monde
-    pub fn add_object(&mut self, color: RGBA8, pos: Vector3f, path: String, name: String) {
+    pub fn add_object(&mut self, pos: Vector3f, path: String, name: String) {
         self.objects.push(Object::new(pos, path, name));
     }
 
