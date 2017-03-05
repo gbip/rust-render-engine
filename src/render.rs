@@ -156,17 +156,6 @@ impl Renderer {
                         }
 
                     }
-                    /*
-                    if let Some(tex_coord) = fragment.tex {
-                        color = object.material()
-                            .diffuse
-                            .get_color(Some(tex_coord.x), Some(tex_coord.y), Some(&self.textures))
-                            .to_rgba32();
-                    }
-                    else {
-
-                    }
-  */
                     canvas.colors.push(color);
                 }
                 _ => {

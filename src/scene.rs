@@ -159,7 +159,7 @@ impl World {
 
     // Ajoute un objet dans le monde
     pub fn add_object(&mut self, color: RGBA8, pos: Vector3f, path: String, name: String) {
-        self.objects.push(Object::new(color, pos, path, name));
+        self.objects.push(Object::new(pos, path, name));
     }
 
     pub fn get_camera(&self, cam_indice: usize) -> &Camera {

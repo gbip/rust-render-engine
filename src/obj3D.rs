@@ -264,7 +264,7 @@ impl Mesh {
     }
 }
 
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize,Deserialize,Debug)]
 pub struct Object {
     #[serde(skip_serializing,skip_deserializing,default = "Mesh::new_empty")]
     mesh: Mesh,
@@ -274,7 +274,7 @@ pub struct Object {
     material: Material,
 
     // La couleur (diffus) de l'objet. Deviendra certainement par la suite le shadeR.
-    color: RGBA8,
+    //color: RGBA8,
 
     // La position de l'objet (offset qui se propagera ensuite aux triangles)
     position: Vector3f,
@@ -305,9 +305,9 @@ pub struct Object {
 
 impl Object {
     // Crée un nouvel objet
-    pub fn new(color: RGBA8, position: Vector3f, path: String, name: String) -> Object {
+    pub fn new(position: Vector3f, path: String, name: String) -> Object {
         let mut result = Object::new_empty();
-        result.color = color;
+        //   result.color = color;
         result.position = position;
         result.obj_path = path;
         result.name = name;
@@ -366,10 +366,6 @@ impl Object {
                     Material::new_empty()
                 }
             }
-        } else {
-            println!("{}",
-                     format!("No material found for object {}", self.name).red().bold());
-            self.material.diffuse = Channel::Solid { color: self.color };
         }
     }
 
@@ -411,7 +407,6 @@ impl Object {
         Object {
             mesh: Mesh::new_empty(),
             material: Material::new_empty(),
-            color: RGBA8::new_black(),
             position: Vector3::new(0_f32, 0_f32, 0_f32),
             scale: Vector3f::new(1f32, 1f32, 1f32),
             rotation: Vector3 {
@@ -432,26 +427,12 @@ impl Object {
         self.mesh.triangles()
     }
 
-    pub fn color(&self) -> RGBA8 {
-        self.color
-    }
-
     pub fn material(&self) -> &Material {
         &self.material
     }
 
     pub fn is_visible(&self) -> bool {
         self.visible
-    }
-}
-
-impl fmt::Debug for Object {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,
-               "Object {{color: {:?}, position: {:?}, model : {:?} }}",
-               self.color,
-               self.position,
-               self.obj_path)
     }
 }
 
