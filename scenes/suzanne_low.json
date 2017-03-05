@@ -143,7 +143,7 @@
         "obj_path": "models/uv_plane.obj",
         "name": "Checker Floor",
 	"visible": true,
-	"material_path": "scenes/materials/checker.json"
+	"material": "scenes/materials/checker.json"
       },
 {
               "position": {
@@ -193,7 +193,7 @@
   "renderer": {
     "res_x": 960,
     "res_y": 540,
-    "subdivision_sampling" : 4,
+    "subdivision_sampling" : 1,
     "background_color": {
       "r": 0,
       "g": 0,

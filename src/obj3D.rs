@@ -268,11 +268,8 @@ pub struct Object {
     mesh: Mesh,
 
     // Le materiau de l'objet
-    #[serde(skip_serializing, skip_deserializing,default = "Material::new_empty")]
+    #[serde(skip_serializing, skip_deserializing,default = "Material::new_empty",rename="do_not_use")]
     material: Material,
-
-    // La couleur (diffus) de l'objet. Deviendra certainement par la suite le shadeR.
-    //color: RGBA8,
 
     // La position de l'objet (offset qui se propagera ensuite aux triangles)
     position: Vector3f,
@@ -287,7 +284,7 @@ pub struct Object {
     obj_path: String,
 
     // Le chemin vers le materiau
-    #[serde(default = "String::new")]
+    #[serde(default = "String::new",rename="material")]
     material_path: String,
 
     // Le nom de l'objet
@@ -305,7 +302,6 @@ impl Object {
     // Crée un nouvel objet
     pub fn new(position: Vector3f, path: String, name: String) -> Object {
         let mut result = Object::new_empty();
-        //   result.color = color;
         result.position = position;
         result.obj_path = path;
         result.name = name;
@@ -364,6 +360,10 @@ impl Object {
                     Material::new_empty()
                 }
             }
+        } else {
+            println!("{} has not material, assigning to it a default material.",
+                     self.name);
+
         }
     }
 
