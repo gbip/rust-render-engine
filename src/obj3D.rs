@@ -421,7 +421,7 @@ impl Object {
     }
 
     // Renvoie un iterator sur des refs vers les triangles de l'objet (lecture seule).
-    pub fn triangles(&self) -> Iter<Triangle> {
+    fn triangles(&self) -> Iter<Triangle> {
         self.mesh.triangles()
     }
 
@@ -431,6 +431,21 @@ impl Object {
 
     pub fn is_visible(&self) -> bool {
         self.visible
+    }
+}
+
+impl Surface for Object {
+    fn get_intersection(&self, ray: &mut Ray) -> Option<Fragment> {
+
+        let points: Vec<Option<Fragment>> = self.triangles()
+            .map(|tri| tri.get_intersection(ray))
+            .filter(|point| point.is_some())
+            .collect();
+
+        match points.len() {
+            0 => None,
+            n => points[n - 1],
+        }
     }
 }
 

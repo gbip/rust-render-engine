@@ -86,7 +86,7 @@ impl Renderer {
         let mut obj: Option<&Object> = None;
 
         for object in objects {
-            let points: Vec<Option<Fragment>> = object.triangles()
+            /*    let points: Vec<Option<Fragment>> = object.triangles()
                 .map(|tri| tri.get_intersection(&mut ray))
                 .filter(|point| point.is_some())
                 .collect();
@@ -98,8 +98,13 @@ impl Renderer {
                     obj = Some(object);
                 }
             }
+            */
+            let tmp_frag = object.get_intersection(&mut ray);
+            if tmp_frag.is_some() {
+                fragment = tmp_frag;
+                obj = Some(object);
+            }
         }
-
         (fragment, obj)
     }
 

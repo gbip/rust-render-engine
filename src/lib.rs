@@ -16,6 +16,7 @@ pub mod color;
 pub mod img;
 pub mod io_utils;
 pub mod material;
+pub mod bounding_box;
 #[macro_use]
 pub extern crate serde_derive;
 pub extern crate serde_json;
