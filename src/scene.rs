@@ -1,7 +1,7 @@
 use std::vec::Vec;
 use math::{Vector3, Vector3f, VectorialOperations};
-use obj3D;
 use obj3D::Object;
+use bounding_box::BoundingBox;
 use io_utils;
 use serde_json;
 use render::Renderer;
@@ -28,6 +28,7 @@ impl Scene {
             Err(e) => panic!("Error while reading file {} : {}", file, e),
         };
         scene.world.load_objects();
+        //scene.world = scene.world.generate_bbox();
         scene.renderer.initialize(&scene.world);
         scene
     }
@@ -128,7 +129,10 @@ pub struct World {
     // Les différentes camera du monde
     cameras: Vec<Camera>,
 
-    objects: Vec<obj3D::Object>,
+    //    objects: Vec<obj3D::Object>,
+    //#[serde(skip_serializing,skip_deserializing)]
+    #[serde(rename="objects")]
+    boxed_objects: Vec<BoundingBox>,
 }
 
 impl World {
@@ -139,11 +143,27 @@ impl World {
 
     // Charge la géomètrie de tous les objets. Utilisé uniquement en fin de deserialization.
     fn load_objects(&mut self) {
-        for obj in &mut self.objects {
-            obj.initialize();
+        for bbox in &mut self.boxed_objects {
+            bbox.initialize();
         }
     }
 
+    /*fn generate_bbox(self) -> Self {
+        let mut result = World {
+            base_vector: self.base_vector,
+            cameras: self.cameras,
+            objects: vec![],
+            boxed_obj: vec![],
+        };
+
+        for obj in self.objects {
+            result.boxed_obj.push(BoundingBox::make_bbox(obj));
+        }
+
+        result
+
+    }
+    */
     // Génére un monde vide
     pub fn new_empty() -> World {
         let base_vector = [Vector3::new(1_f32, 0_f32, 0_f32),
@@ -152,21 +172,25 @@ impl World {
         World {
             base_vector: base_vector,
             cameras: vec![],
-            objects: vec![],
+            boxed_objects: vec![],
         }
     }
 
     // Ajoute un objet dans le monde
     pub fn add_object(&mut self, pos: Vector3f, path: String, name: String) {
-        self.objects.push(Object::new(pos, path, name));
+        self.boxed_objects.push(BoundingBox::make_bbox(Object::new(pos, path, name)));
     }
 
     pub fn get_camera(&self, cam_indice: usize) -> &Camera {
         self.cameras.get(cam_indice).expect("Out of bound camera index")
     }
 
-    pub fn objects(&self) -> &Vec<obj3D::Object> {
+    /*pub fn objects(&self) -> &Vec<obj3D::Object> {
         &self.objects
+    }*/
+
+    pub fn boxed_obj(&self) -> &Vec<BoundingBox> {
+        &self.boxed_objects
     }
 }
 

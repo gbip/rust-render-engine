@@ -7,6 +7,8 @@ use ray::{Ray, Fragment, Surface};
 use obj3D::Object;
 use std::collections::HashMap;
 use std::fmt;
+use bounding_box::BoundingBox;
+
 
 // Le ratio n'est pas enregistré à la deserialization, il faut penser à appeler compute_ratio()
 // pour avoir un ratio autre que 0.
@@ -55,8 +57,8 @@ impl Renderer {
 
     pub fn load_textures(&mut self, world: &scene::World) {
         let mut textures: HashMap<String, Image<RGBA8>> = HashMap::new();
-        for object in world.objects() {
-            let texture_paths = object.material().get_texture_paths();
+        for bbox in world.boxed_obj() {
+            let texture_paths = bbox.object().material().get_texture_paths();
 
             for path in texture_paths {
                 let path_str = String::from(path.as_str());
@@ -78,19 +80,19 @@ impl Renderer {
     }
 
     pub fn calculate_ray_intersection<'a>(&self,
-                                          objects: &[&'a Object], // TODO Changer en raytree
+                                          objects: &[&'a BoundingBox], // TODO Changer en raytree
                                           mut ray: &mut Ray)
                                           -> (Option<Fragment>, Option<&'a Object>) {
 
         let mut fragment: Option<Fragment> = None;
         let mut obj: Option<&Object> = None;
-        for object in objects {
-            let tmp_frag = object.get_intersection(&mut ray);
+        for bbox in objects {
+            let tmp_frag = bbox.get_intersection(&mut ray);
             // TODO : Peut être virer le branching ici ?
             // TODO : Regarder le geometry/intersection.rs dans tray
             if tmp_frag.is_some() {
                 fragment = tmp_frag;
-                obj = Some(object);
+                obj = Some(bbox.object());
             }
         }
         (fragment, obj)
@@ -119,8 +121,10 @@ impl Renderer {
         }
 
         canvas.colors.clear();
-        let objects =
-            world.objects().iter().filter(|obj| obj.is_visible()).collect::<Vec<&Object>>();
+        let objects = world.boxed_obj()
+            .iter()
+            .filter(|bbox| bbox.object().is_visible())
+            .collect::<Vec<&BoundingBox>>();
 
         // On calcule chaque point d'intersection
         for mut ray in rays {

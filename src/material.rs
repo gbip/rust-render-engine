@@ -110,8 +110,6 @@ impl Material {
 
     pub fn get_texture_paths(&self) -> Vec<String> {
         let mut result: Vec<String> = vec![];
-
-
         for chan in &self.channels() {
             if chan.is_texture() {
                 result.push(chan.get_texture_path());

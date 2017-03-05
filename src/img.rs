@@ -55,6 +55,7 @@ impl<T: Pixel> Image<T> {
 
 impl Image<RGBA8> {
     pub fn read_from_file(pathname: &str) -> Image<RGBA8> {
+
         let img = image::open(&Path::new(pathname)).unwrap();
         let dims = img.dimensions();
 

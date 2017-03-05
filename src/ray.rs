@@ -46,6 +46,14 @@ impl Ray {
             max_t: -1.0,
         }
     }
+
+    pub fn slope(&self) -> Vector3f {
+        self.slope
+    }
+
+    pub fn origin(&self) -> Vector3f {
+        self.origin
+    }
 }
 
 impl Plane {
