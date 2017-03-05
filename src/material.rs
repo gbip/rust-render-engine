@@ -134,8 +134,7 @@ impl Material {
     }
 
     pub fn save_to_file(&self, path: &str) {
-        io_utils::write_string_to_file(&serde_json::to_string_pretty(&self).unwrap(),
-                                       path.to_string())
+        io_utils::write_string_to_file(&serde_json::to_string_pretty(&self).unwrap(), path)
             .expect("Could not save material");
 
 

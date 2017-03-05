@@ -7,7 +7,7 @@ extern crate lib_render;
 use lib_render::*;
 
 // Generate a template file at the location [path]
-fn generate_template(path: String) {
+fn generate_template(path: &str) {
     let mut scene = Scene::new_empty();
     scene.world.add_camera(Vector3::new(0_f32, 0_f32, 5_f32),
                            Vector3::new(10_f32, 0_f32, 0_f32));
@@ -65,7 +65,7 @@ fn parse_arg() {
     let matches = match options.parse(args) {
         Ok(val) => val,
         Err(e) => {
-            show_usage(program);
+            show_usage(&program);
             panic!(e.to_string());
         }
     };
@@ -74,15 +74,15 @@ fn parse_arg() {
                               matches.opt_present("r");
 
     if !at_least_one_option {
-        show_usage(program);
+        show_usage(&program);
         return;
     }
 
     // Handling the template case
     if matches.opt_present("g") {
         generate_template(match matches.opt_str("g") {
-            Some(path) => path,
-            None => "template.json".to_string(),
+            Some(ref path) => path,
+            None => "template.json",
         });
     }
 
@@ -96,20 +96,20 @@ fn parse_arg() {
             let input_path = match matches.opt_str("r") {
                 Some(path) => path,
                 None => {
-                    show_usage(program);
+                    show_usage(&program);
                     return;
                 }
             };
-            render(input_path, output_path);
+            render(&input_path, &output_path);
         } else {
-            show_usage(program);
+            show_usage(&program);
         }
     }
 }
 
 // Affiche dans la console comment effectuer le rendu
-fn show_usage(program: String) {
-    println!("Usage : {} -g FILE -r FILE -w FILE", program.as_str());
+fn show_usage(program: &str) {
+    println!("Usage : {} -g FILE -r FILE -w FILE", program);
     println!("-g FILE or --generate FILE : Generate a template file in the location FILE for \
               creating a scene");
     println!("-r FILE or --read FILE : Read FILE to load the scene before rendering. Needed for \
@@ -123,7 +123,7 @@ fn test_image() {
 }
 
 // La fonction que l'on appelle pour effectuer le rendu.
-fn render(input: String, output: String) {
+fn render(input: &str, output: &str) {
     let scene = Scene::load_from_file(input);
     scene.render_to_file(output);
 }
@@ -141,8 +141,8 @@ mod test {
     #[ignore]
     #[test]
     fn test_template_generation_and_loading() {
-        generate_template("test".to_string());
-        Scene::load_from_file("test".to_string());
+        generate_template("test");
+        Scene::load_from_file("test");
         Command::new("rm")
             .arg("test")
             .output()

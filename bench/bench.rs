@@ -56,11 +56,11 @@ fn do_bench<F, T>(name: &str, f: F)
 
 fn main() {
     let name_suz = "bench_render_suzanne_low";
-    let scene_suz: Scene = Scene::load_from_file("bench/scenes/suzanne_low.json".to_string());
-    do_bench(name_suz,
-             || scene_suz.render_to_file(OUTPUT_FOLDER.to_owned() + name_suz + ".png"));
+    let scene_suz: Scene = Scene::load_from_file("bench/scenes/suzanne_low.json");
+    let output_path = OUTPUT_FOLDER.to_string() + name_suz + ".png";
+    do_bench(name_suz, || scene_suz.render_to_file(&output_path));
 
     let name_load = "bench_load_1k_sphere";
     do_bench(name_load,
-             || Scene::load_from_file("bench/scenes/sphere_1k.json".to_string()));
+             || Scene::load_from_file("bench/scenes/sphere_1k.json"));
 }

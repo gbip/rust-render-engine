@@ -2,7 +2,7 @@ use std;
 use std::fs::File;
 use std::io::{Write, Read, Error};
 
-pub fn write_string_to_file(j: &str, file_name: String) -> std::io::Result<()> {
+pub fn write_string_to_file(j: &str, file_name: &str) -> std::io::Result<()> {
     let mut file = File::create(file_name).unwrap();
     file.write_all(j.as_bytes())
 }

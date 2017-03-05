@@ -16,9 +16,9 @@ pub struct Scene {
 
 impl Scene {
     // Charge la scène depuis un fichier "file"
-    pub fn load_from_file(file: String) -> Self {
+    pub fn load_from_file(file: &str) -> Self {
         println!("Loading scene from file : {} ", file);
-        let mut scene: Scene = match io_utils::open_file_as_string(file.as_str()) {
+        let mut scene: Scene = match io_utils::open_file_as_string(file) {
             Ok(file) => {
                 match serde_json::from_str(file.as_str()) {
                     Ok(val) => val,
@@ -41,7 +41,7 @@ impl Scene {
     }
 
     // Ecris la structure de la scène dans le fichier "file" en JSON sans la géomètrie
-    pub fn save_to_file(&self, file: String) {
+    pub fn save_to_file(&self, file: &str) {
         match io_utils::write_string_to_file(&serde_json::to_string_pretty(&self).unwrap(), file) {
 
             Err(e) => println!("Could not save world. Error : {}", e),
@@ -51,7 +51,7 @@ impl Scene {
         }
     }
 
-    pub fn render_to_file(&self, file_path: String) {
+    pub fn render_to_file(&self, file_path: &str) {
         self.renderer.show_information();
         println!("Starting to render...");
         let now = Instant::now();
@@ -59,7 +59,7 @@ impl Scene {
         println!("Render done in {} s, writting result to file {}",
                  now.elapsed().as_secs() as f64 + (now.elapsed().subsec_nanos() as f64 * (1.0/1_000_000_000_f64)),
                  &file_path,);
-        image.write_to_file(file_path.as_str())
+        image.write_to_file(file_path)
     }
 }
 

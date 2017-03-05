@@ -19,7 +19,7 @@ path = "src/lib.rs"
 serde_derive = "0.9.*"
 serde_json = "0.9.*"
 image = "0.12"
-clippy = {version = "*", optional = true}
+clippy = {version = "0.0.118", optional = true}
 getopts = "0.2"
 num = "0.1"
 colored="1.4.*"
