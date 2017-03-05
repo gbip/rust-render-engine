@@ -77,6 +77,10 @@ impl GeoPoint {
 
         self.pos = *origin + &dist * scale;
     }
+
+    pub fn pos(&self) -> Vector3f {
+        self.pos
+    }
 }
 
 #[derive(Clone,Debug,Copy,PartialEq)]
@@ -113,6 +117,24 @@ impl Triangle {
 
     pub fn get_barycenter(&self) -> Vector3f {
         (self.u.pos + self.v.pos + self.w.pos) / 3.0
+    }
+
+    pub fn min(&self) -> Vector3f {
+        unimplemented!()
+        //Vector3f::new(f32::min(self.u.pos.x, self.u.pos.x, self.u.pos.x), 0, 0)
+
+    }
+
+    pub fn u_pos(&self) -> Vector3f {
+        self.u.pos()
+    }
+
+    pub fn v_pos(&self) -> Vector3f {
+        self.v.pos()
+    }
+
+    pub fn w_pos(&self) -> Vector3f {
+        self.w.pos()
     }
 }
 
@@ -421,7 +443,7 @@ impl Object {
     }
 
     // Renvoie un iterator sur des refs vers les triangles de l'objet (lecture seule).
-    fn triangles(&self) -> Iter<Triangle> {
+    pub fn triangles(&self) -> Iter<Triangle> {
         self.mesh.triangles()
     }
 

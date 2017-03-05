@@ -84,22 +84,10 @@ impl Renderer {
 
         let mut fragment: Option<Fragment> = None;
         let mut obj: Option<&Object> = None;
-
         for object in objects {
-            /*    let points: Vec<Option<Fragment>> = object.triangles()
-                .map(|tri| tri.get_intersection(&mut ray))
-                .filter(|point| point.is_some())
-                .collect();
-
-            match points.len() {
-                0 => {}
-                n => {
-                    fragment = points[n - 1]; // TODO ici le fragment est copié. Chercher une façon de juste le déplacer.
-                    obj = Some(object);
-                }
-            }
-            */
             let tmp_frag = object.get_intersection(&mut ray);
+            // TODO : Peut être virer le branching ici ?
+            // TODO : Regarder le geometry/intersection.rs dans tray
             if tmp_frag.is_some() {
                 fragment = tmp_frag;
                 obj = Some(object);
