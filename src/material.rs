@@ -4,7 +4,7 @@ use serde_json;
 use img::Image;
 use std::collections::HashMap;
 
-#[derive(Serialize,Deserialize,Debug)]
+#[derive(Serialize,Deserialize,Debug,Clone)]
 pub struct TextureMap {
     map_path: String,
     tiling_x: f32,
@@ -43,7 +43,7 @@ impl TextureMap {
 }
 
 // Représente un canal de couleur : soit c'est une texture, soit c'est une couleur
-#[derive(Serialize,Deserialize,Debug)]
+#[derive(Serialize,Deserialize,Debug,Clone)]
 #[serde(untagged)]
 pub enum Channel {
     Solid { color: RGBA8 },
@@ -88,7 +88,7 @@ impl Channel {
         }
     }
 }
-#[derive(Serialize,Deserialize,Debug)]
+#[derive(Serialize,Deserialize,Debug,Clone)]
 pub struct Material {
     pub diffuse: Channel,
     pub specular: Channel,

@@ -28,7 +28,6 @@ impl Scene {
             Err(e) => panic!("Error while reading file {} : {}", file, e),
         };
         scene.world.load_objects();
-        //scene.world = scene.world.generate_bbox();
         scene.renderer.initialize(&scene.world);
         scene
     }
@@ -148,22 +147,6 @@ impl World {
         }
     }
 
-    /*fn generate_bbox(self) -> Self {
-        let mut result = World {
-            base_vector: self.base_vector,
-            cameras: self.cameras,
-            objects: vec![],
-            boxed_obj: vec![],
-        };
-
-        for obj in self.objects {
-            result.boxed_obj.push(BoundingBox::make_bbox(obj));
-        }
-
-        result
-
-    }
-    */
     // Génére un monde vide
     pub fn new_empty() -> World {
         let base_vector = [Vector3::new(1_f32, 0_f32, 0_f32),
@@ -178,16 +161,14 @@ impl World {
 
     // Ajoute un objet dans le monde
     pub fn add_object(&mut self, pos: Vector3f, path: String, name: String) {
-        self.boxed_objects.push(BoundingBox::make_bbox(Object::new(pos, path, name)));
+        let mut bbox = BoundingBox::new(Object::new(pos, path, name));
+        bbox.initialize();
+        self.boxed_objects.push(bbox);
     }
 
     pub fn get_camera(&self, cam_indice: usize) -> &Camera {
         self.cameras.get(cam_indice).expect("Out of bound camera index")
     }
-
-    /*pub fn objects(&self) -> &Vec<obj3D::Object> {
-        &self.objects
-    }*/
 
     pub fn boxed_obj(&self) -> &Vec<BoundingBox> {
         &self.boxed_objects

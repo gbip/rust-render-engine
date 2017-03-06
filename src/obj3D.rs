@@ -284,7 +284,7 @@ impl Mesh {
     }
 }
 
-#[derive(Serialize,Deserialize,Debug)]
+#[derive(Serialize,Deserialize,Debug,Clone)]
 pub struct Object {
     #[serde(skip_serializing,skip_deserializing,default = "Mesh::new_empty")]
     mesh: Mesh,

@@ -8,10 +8,10 @@ use num::{Float, NumCast};
 const DEG_TO_RAD: f64 = f64::consts::PI / 180.0_f64;
 const RAD_TO_DEG: f64 = 180.0_f64 / f64::consts::PI;
 
-#[derive(Serialize,Deserialize,Debug,PartialEq)]
+#[derive(Serialize,Deserialize,Debug,PartialEq,Clone)]
 pub struct Deg<T>(pub T);
 
-#[derive(Serialize,Deserialize,Debug,PartialEq)]
+#[derive(Serialize,Deserialize,Debug,PartialEq,Clone)]
 pub struct Rad<T>(pub T);
 
 // OPERATEURS DE CONVERSION \\

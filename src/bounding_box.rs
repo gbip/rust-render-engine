@@ -2,16 +2,39 @@ use obj3D::{Object, Triangle};
 use ray::{Surface, Ray, Fragment};
 use math::Vector3f;
 use std::f32;
+use serde::{Serialize, Deserialize, Serializer, Deserializer};
 
-#[derive(Serialize,Deserialize,Debug)]
-#[serde(rename="")]
+#[derive(Debug)]
 pub struct BoundingBox {
     object: Object,
 
-    #[serde(skip_serializing,skip_deserializing,default="new_max")]
     min: Vector3f,
-    #[serde(skip_serializing,skip_deserializing,default="new_max")]
+
     max: Vector3f,
+}
+
+
+
+// Serialization custom afin de cacher la bbox dans le json
+impl Serialize for BoundingBox {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where S: Serializer
+    {
+        self.object.serialize(serializer)
+    }
+}
+
+impl Deserialize for BoundingBox {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: Deserializer
+    {
+
+        Ok(BoundingBox {
+            object: Object::deserialize(deserializer)?,
+            min: new_min(),
+            max: new_max(),
+        })
+    }
 }
 
 fn new_min() -> Vector3f {
@@ -24,6 +47,13 @@ fn new_max() -> Vector3f {
 }
 
 impl BoundingBox {
+    pub fn new(obj: Object) -> Self {
+        BoundingBox {
+            object: obj,
+            min: new_min(),
+            max: new_max(),
+        }
+    }
     // Ajoute un point à une Bounding Box
     fn add_point(&mut self, b: Vector3f) {
 
@@ -44,24 +74,18 @@ impl BoundingBox {
     }
 
     pub fn initialize(&mut self) {
+        println!("Init");
         self.object.initialize();
+        self.make_bbox();
     }
 
     // Crées une Bounding Box contenant l'objet Object
-    pub fn make_bbox(obj: Object) -> BoundingBox {
-        let mut result = BoundingBox {
-            object: Object::new_empty(),
-            min: Vector3f::new(f32::MAX, f32::MAX, f32::MAX),
-            max: Vector3f::new(f32::MIN, f32::MIN, f32::MIN),
-        };
-
-
-        for tri in obj.triangles() {
-            result.add_triangle(tri);
+    // TODO : Eviter la copie de l'objet !!!!
+    pub fn make_bbox(&mut self) {
+        let obj_copy = self.object.clone();
+        for tri in obj_copy.triangles() {
+            self.add_triangle(tri);
         }
-
-        result.object = obj;
-        result
     }
 
 
