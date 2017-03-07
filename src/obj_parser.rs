@@ -265,7 +265,8 @@ fn open_obj_file(path: &str) -> File {
 #[cfg(test)]
 mod test {
     use math::{Vector3, Vector3f};
-    use super::super::*;
+    use obj3D::*;
+    use obj_parser;
 
     #[test]
     fn test_obj_parsing_plane() {
@@ -284,7 +285,9 @@ mod test {
         let t1 = Triangle::new(p2, p4, p3);
         let t2 = Triangle::new(p1, p2, p3);
 
-        let expected_result = Mesh { triangles: vec![t1, t2] };
+        let mut expected_result = Mesh::new_empty();
+        expected_result.add_triangle(t1);
+        expected_result.add_triangle(t2);
 
         assert_eq!(obj_parser::open_obj("models/plane_no_uv.obj"),
                    expected_result);
