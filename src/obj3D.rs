@@ -190,12 +190,12 @@ impl Mesh {
     }
 
     pub fn create_point(pos: usize,
-                    norm: usize,
-                    tex: Option<usize>,
-                    list_pos: &[Vector3f],
-                    list_norm: &[Vector3f],
-                    list_tex: &Option<Vec<Vector2f>>)
-                    -> GeoPoint {
+                        norm: usize,
+                        tex: Option<usize>,
+                        list_pos: &[Vector3f],
+                        list_norm: &[Vector3f],
+                        list_tex: &Option<Vec<Vector2f>>)
+                        -> GeoPoint {
 
         // Très important : il faut décaller chaque indice de 1, car dans la norme .obj le premier
         // indice est 1, alors que dans le vector c'est 0.

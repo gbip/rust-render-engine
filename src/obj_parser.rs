@@ -77,10 +77,10 @@ pub fn open_obj(file: &str) -> Mesh {
 
     // We just convert the Option<RawData> to a (Option<usize>,...,...)
     #[allow(type_complexity)]
-    let tris : Vec<(RawData,RawData,(Option<usize>,Option<usize>,Option<usize>))> =
-                tris.into_iter()
-                .map(|t| (t.0,t.1,propagate_option(t.2)))
-                .collect::<Vec<(RawData,RawData,(Option<usize>,Option<usize>,Option<usize>))>>();
+    let tris: Vec<(RawData, RawData, (Option<usize>, Option<usize>, Option<usize>))> =
+        tris.into_iter()
+            .map(|t| (t.0, t.1, propagate_option(t.2)))
+            .collect::<Vec<(RawData, RawData, (Option<usize>, Option<usize>, Option<usize>))>>();
     for t in tris {
         let (p1, p2, p3) = (RawPoint((t.0).0 as usize, (t.1).0 as usize, (t.2).0),
                             RawPoint((t.0).1 as usize, (t.1).1 as usize, (t.2).1),
@@ -92,7 +92,7 @@ pub fn open_obj(file: &str) -> Mesh {
     mesh
 }
 
-fn add_triangles(mesh : &mut Mesh,
+fn add_triangles(mesh: &mut Mesh,
                  tris: &[RawTriangle],
                  pos: &[Vector3f],
                  norm: &[Vector3f],

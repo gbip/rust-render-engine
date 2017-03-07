@@ -128,7 +128,7 @@ impl BoundingBox {
         true
     }
 
-    pub fn intersects(&self, ray : &Ray) -> bool {
+    pub fn intersects(&self, ray: &Ray) -> bool {
         self.fast_intersect(ray)
     }
 }
