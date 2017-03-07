@@ -1,40 +1,12 @@
 use obj3D::{Object, Triangle};
-use ray::{Surface, Ray, Fragment};
+use ray::Ray;
 use math::Vector3f;
 use std::f32;
-use serde::{Serialize, Deserialize, Serializer, Deserializer};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BoundingBox {
-    object: Object,
-
     min: Vector3f,
-
     max: Vector3f,
-}
-
-
-
-// Serialization custom afin de cacher la bbox dans le json
-impl Serialize for BoundingBox {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: Serializer
-    {
-        self.object.serialize(serializer)
-    }
-}
-
-impl Deserialize for BoundingBox {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: Deserializer
-    {
-
-        Ok(BoundingBox {
-            object: Object::deserialize(deserializer)?,
-            min: new_min(),
-            max: new_max(),
-        })
-    }
 }
 
 fn new_min() -> Vector3f {
@@ -47,12 +19,21 @@ fn new_max() -> Vector3f {
 }
 
 impl BoundingBox {
-    pub fn new(obj: Object) -> Self {
+    pub fn new() -> Self {
         BoundingBox {
-            object: obj,
             min: new_min(),
             max: new_max(),
         }
+    }
+
+    pub fn new_from_object(obj: &Object) -> Self {
+        let mut result = BoundingBox {
+            min: new_min(),
+            max: new_max(),
+        };
+        result.adapt_to(obj);
+
+        result
     }
     // Ajoute un point à une Bounding Box
     fn add_point(&mut self, b: Vector3f) {
@@ -73,17 +54,9 @@ impl BoundingBox {
         self.add_point(b.w_pos());
     }
 
-    pub fn initialize(&mut self) {
-        println!("Init");
-        self.object.initialize();
-        self.make_bbox();
-    }
-
     // Crées une Bounding Box contenant l'objet Object
-    // TODO : Eviter la copie de l'objet !!!!
-    pub fn make_bbox(&mut self) {
-        let obj_copy = self.object.clone();
-        for tri in obj_copy.triangles() {
+    pub fn adapt_to(&mut self, obj: &Object) {
+        for tri in obj.triangles() {
             self.add_triangle(tri);
         }
     }
@@ -155,17 +128,13 @@ impl BoundingBox {
         true
     }
 
-    pub fn object(&self) -> &Object {
-        &self.object
+    pub fn intersects(&self, ray : &Ray) -> bool {
+        self.fast_intersect(ray)
     }
 }
 
-impl Surface for BoundingBox {
-    fn get_intersection(&self, ray: &mut Ray) -> Option<Fragment> {
-        if self.fast_intersect(ray) {
-            self.object.get_intersection(ray)
-        } else {
-            None
-        }
+impl Default for BoundingBox {
+    fn default() -> Self {
+        BoundingBox::new()
     }
 }

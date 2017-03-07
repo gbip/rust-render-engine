@@ -6,6 +6,7 @@ use ray::{Ray, Plane, Surface, Fragment};
 use std::slice::Iter;
 use angle::{Rad, Deg};
 use colored::*;
+use bounding_box::BoundingBox;
 // The Raw Point represents a triangle point where each coordinate is an index to the real value
 // stored in a vector
 #[derive(Debug)]
@@ -316,6 +317,10 @@ pub struct Object {
     #[serde(skip_serializing,skip_deserializing,default = "Vector3f::zero")]
     barycenter: Vector3f,
 
+    // La bounding box
+    #[serde(skip_serializing, skip_deserializing, default = "BoundingBox::new")]
+    bbox: BoundingBox,
+
     // La visibilité de l'objet
     visible: bool,
 }
@@ -420,6 +425,7 @@ impl Object {
         self.apply_scale();
         self.apply_rotation();
         self.apply_position();
+        self.bbox = BoundingBox::new_from_object(self);
         self.load_material();
     }
     // Crée un objet vide
@@ -438,6 +444,7 @@ impl Object {
             material_path: "".to_string(),
             name: "untitled".to_string(),
             barycenter: Vector3f::zero(),
+            bbox: BoundingBox::new(),
             visible: true,
         }
     }
@@ -449,6 +456,10 @@ impl Object {
 
     pub fn material(&self) -> &Material {
         &self.material
+    }
+
+    pub fn bounding_box(&self) -> &BoundingBox {
+        &self.bbox
     }
 
     pub fn is_visible(&self) -> bool {

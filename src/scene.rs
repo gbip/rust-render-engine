@@ -1,7 +1,6 @@
 use std::vec::Vec;
 use math::{Vector3, Vector3f, VectorialOperations};
 use obj3D::Object;
-use bounding_box::BoundingBox;
 use io_utils;
 use serde_json;
 use render::Renderer;
@@ -128,10 +127,7 @@ pub struct World {
     // Les différentes camera du monde
     cameras: Vec<Camera>,
 
-    //    objects: Vec<obj3D::Object>,
-    //#[serde(skip_serializing,skip_deserializing)]
-    #[serde(rename="objects")]
-    boxed_objects: Vec<BoundingBox>,
+    objects: Vec<Object>,
 }
 
 impl World {
@@ -142,8 +138,8 @@ impl World {
 
     // Charge la géomètrie de tous les objets. Utilisé uniquement en fin de deserialization.
     fn load_objects(&mut self) {
-        for bbox in &mut self.boxed_objects {
-            bbox.initialize();
+        for obj in &mut self.objects {
+            obj.initialize();
         }
     }
 
@@ -155,23 +151,21 @@ impl World {
         World {
             base_vector: base_vector,
             cameras: vec![],
-            boxed_objects: vec![],
+            objects: vec![],
         }
     }
 
     // Ajoute un objet dans le monde
     pub fn add_object(&mut self, pos: Vector3f, path: String, name: String) {
-        let mut bbox = BoundingBox::new(Object::new(pos, path, name));
-        bbox.initialize();
-        self.boxed_objects.push(bbox);
+        self.objects.push(Object::new(pos, path, name));
     }
 
     pub fn get_camera(&self, cam_indice: usize) -> &Camera {
         self.cameras.get(cam_indice).expect("Out of bound camera index")
     }
 
-    pub fn boxed_obj(&self) -> &Vec<BoundingBox> {
-        &self.boxed_objects
+    pub fn objects(&self) -> &Vec<Object> {
+        &self.objects
     }
 }
 
