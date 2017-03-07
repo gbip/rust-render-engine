@@ -9,6 +9,7 @@ pub mod math;
 pub mod angle;
 #[allow(non_snake_case)]
 pub mod obj3D;
+pub mod obj_parser;
 pub mod scene;
 pub mod render;
 pub mod ray;
