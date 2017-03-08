@@ -2,11 +2,77 @@ use scene;
 use img::Image;
 use color::{RGBA8, RGBA32};
 use color;
-use math::Vector3f;
 use ray::{Ray, Fragment, Surface};
+use sampler::{Sample, DefaultSampler, Sampler};
 use obj3D::Object;
 use std::collections::HashMap;
 use std::fmt;
+
+/** Structure utilisée par le sampler pour stocker les samples, et par le filter
+pour les lire et recomposer l'image finale
+TODO rename, déplacer ?*/
+pub struct RenderData {
+    pixels: Vec<Pixel>,
+    size_x: u32,
+    size_y: u32,
+}
+
+impl RenderData {
+    pub fn new(size_x: u32, size_y: u32) -> Self {
+        let mut result = RenderData {
+            pixels: vec![],
+            size_x: size_x,
+            size_y: size_y,
+        };
+
+        // Ajout des pixels (l'ordre des for est important)
+        for y in 0..size_y {
+            for x in 0..size_x {
+                result.pixels.push(Pixel::new(x, y));
+            }
+        }
+
+        result
+    }
+
+    pub fn dimensions(&self) -> (u32, u32) {
+        (self.size_x, self.size_y)
+    }
+
+    pub fn get_pixel(&mut self, x: u32, y: u32) -> &mut Pixel {
+        &mut self.pixels[(x + y * self.size_x) as usize]
+    }
+}
+
+/** Représente un pixel avec des Sample dedans. */
+pub struct Pixel {
+    x: u32,
+    y: u32,
+    samples: Vec<Sample>,
+}
+
+impl Pixel {
+    pub fn new(x: u32, y: u32) -> Pixel {
+        Pixel {
+            x: x,
+            y: y,
+            samples: vec![],
+        }
+    }
+
+    pub fn add_sample(&mut self, sample: Sample) {
+        self.samples.push(sample);
+    }
+
+    pub fn get_average_color(&self) -> RGBA32 {
+        let mut colors: Vec<RGBA32> = vec![];
+        for sample in &self.samples {
+            colors.push(sample.color);
+        }
+        color::make_average_color(&colors)
+    }
+}
+
 
 
 // Le ratio n'est pas enregistré à la deserialization, il faut penser à appeler compute_ratio()
@@ -101,40 +167,24 @@ impl Renderer {
     /** Calcule les rayons à lancer pour le canvas passé en paramètres.
     Calcule ensuite la couleur finale de chaque rayon et stocke le résultat dans
     le canvas passé en paramètres. */
-    pub fn emit_rays(&self,
-                     world: &scene::World,
-                     camera: &scene::Camera,
-                     canvas: &mut Canvas,
-                     ray_density_x: u32,
-                     ray_density_y: u32) {
+    pub fn emit_rays(&self, world: &scene::World, camera: &scene::Camera, pixel: &mut Pixel) {
 
-        // On crée les rayons à emmettre
-        let mut rays: Vec<Ray> = vec![];
-
-        for x in 0..ray_density_x {
-            for y in 0..ray_density_y {
-                let target = canvas.origin + canvas.e1 * ((x as f32 + 0.5) / ray_density_x as f32) +
-                             canvas.e2 * ((y as f32 + 0.5) / ray_density_y as f32);
-
-                rays.push(Ray::new(camera.world_position, target - camera.world_position));
-            }
-        }
-
-        canvas.colors.clear();
         let objects = world.objects()
             .iter()
             .filter(|bbox| bbox.is_visible())
             .collect::<Vec<&Object>>();
 
-        // On calcule chaque point d'intersection
-        for mut ray in rays {
+        for sample in &mut pixel.samples {
+            // On récupère le rayon à partir du sample
+            let mut ray = camera.create_ray_from_sample(self.ratio, sample);
+
+            // CALCUL DE LA COULEUR DU RAYON (TODO à mettre ailleurs)
+
             let (opt_frag, opt_obj) = self.calculate_ray_intersection(&objects, &mut ray);
 
-            // Comme pour chaque rayon on ajoute un unique fragment, l'ordre est conservé et on peut retrouver la position de chaque fragment
-            // dans l'espace à partir de sa position dans la liste.
-            // A faire peut-être : stocker les fragments directement en fonction de leur position dans l'image.
+            // On détermine la couleur du rayon, simplement à partir du fragment retourné et
+            // du matériau associé à l'objet intersecté.
             match (opt_frag, opt_obj) {
-                // Le dernier fragment trouvé est celui qui correspond à l'objet le plus en avant de la scène par rapport à la caméra
                 (Some(fragment), Some(object)) => {
                     let color: RGBA32;
                     match fragment.tex {
@@ -153,37 +203,13 @@ impl Renderer {
                         }
 
                     }
-
-                    canvas.colors.push(color);
+                    sample.color = color;
                 }
                 _ => {
-                    canvas.colors.push(self.background_color.to_rgba32());
+                    sample.color = self.background_color.to_rgba32();
                 }
             }
         }
-    }
-
-    fn create_canvas(&self, camera: &scene::Camera) -> Vec<Vec<Canvas>> {
-        let mut canvas: Vec<Vec<Canvas>> = vec![];
-
-        // On crée les "canvas"
-        let (origin, vec1, vec2) = camera.get_canvas_base(self.ratio);
-        let e1 = vec1 / self.res_x as f32;
-        let e2 = vec2 / self.res_y as f32;
-
-        // Pas besoin du -1 car Rust s'arrête tout seul à -1.
-        for x in 0..(self.res_x) {
-            let mut line: Vec<Canvas> = vec![];
-            for y in 0..(self.res_y) {
-                let x1 = x as f32 / self.res_x as f32;
-                let y1 = y as f32 / self.res_y as f32;
-
-                line.push(Canvas::new(origin + vec1 * x1 + vec2 * y1, e1, e2));
-            }
-            canvas.push(line);
-        }
-        canvas
-
     }
 
     pub fn initialize(&mut self, world: &scene::World) {
@@ -193,22 +219,32 @@ impl Renderer {
     }
 
     pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA32> {
+        let mut data = RenderData::new(self.res_x as u32, self.res_y as u32);
 
-        let mut canvas: Vec<Vec<Canvas>> = self.create_canvas(camera);
+        //Sampling
+        let sampler = DefaultSampler { sample_rate: self.subdivision_sampling };
+        sampler.create_samples(&mut data);
 
-        for line in &mut canvas {
-            for pixel in &mut line.iter_mut() {
-                self.emit_rays(world,
-                               camera,
-                               pixel,
-                               self.subdivision_sampling,
-                               self.subdivision_sampling);
-            }
+        // Emission des rayons
+        for pixel in &mut data.pixels {
+            self.emit_rays(world, camera, pixel);
         }
 
-        let temp_result: Vec<Vec<RGBA32>> = canvas.into_iter()
-            .map(|line| line.into_iter().map(|frag| frag.get_average_color()).collect())
-            .collect();
+        // Création de l'image
+        // filter.get_image(data)
+
+        // TODO plus besoin de ce code quand on aura un filter
+        let mut temp_result: Vec<Vec<RGBA32>> = vec![];
+
+        for x in 0..data.size_x {
+            let mut col: Vec<RGBA32> = vec![];
+
+            for y in 0..data.size_y {
+                col.push(data.get_pixel(x, y).get_average_color());
+            }
+
+            temp_result.push(col);
+        }
 
         Image::<RGBA32>::from_vec_vec(&temp_result)
     }
@@ -221,30 +257,5 @@ impl fmt::Debug for Renderer {
                self.res_x,
                self.res_y,
                self.background_color)
-    }
-}
-
-
-/** Représente un rectangle en trois dimensions, correspondant à un pixel sur l'image finale à rendre.
-Ce carré est décrit par une origine, et deux vecteurs directeurs. */
-pub struct Canvas {
-    origin: Vector3f,
-    e1: Vector3f,
-    e2: Vector3f,
-    colors: Vec<RGBA32>,
-}
-
-
-impl Canvas {
-    pub fn new(origin: Vector3f, e1: Vector3f, e2: Vector3f) -> Canvas {
-        Canvas {
-            origin: origin,
-            e1: e1,
-            e2: e2,
-            colors: vec![],
-        }
-    }
-    pub fn get_average_color(&self) -> RGBA32 {
-        color::make_average_color(&self.colors)
     }
 }

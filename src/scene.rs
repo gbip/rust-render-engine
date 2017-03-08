@@ -1,6 +1,8 @@
 use std::vec::Vec;
 use math::{Vector3, Vector3f, VectorialOperations};
 use obj3D::Object;
+use sampler::Sample;
+use ray::Ray;
 use io_utils;
 use serde_json;
 use render::Renderer;
@@ -117,6 +119,16 @@ impl Camera {
         let origin = self.world_position + e3 * self.clip - vec2 / 2.0 - vec1 / 2.0;
 
         (origin, vec1, vec2)
+    }
+
+    // Crée un rayon dont la direction est déterminé par les coordonnées du sample
+    // passé en paramètres.
+    pub fn create_ray_from_sample(&self, ratio: f32, sample: &Sample) -> Ray {
+        // TODO ici on fait un appel à get_canvas_basis pour chaque sample
+        let (origin, e1, e2) = self.get_canvas_base(ratio);
+        let sample_coord = sample.position();
+        let target = origin + e1 * sample_coord.x + e2 * sample_coord.y;
+        Ray::new(self.world_position, target - self.world_position)
     }
 }
 

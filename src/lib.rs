@@ -13,6 +13,7 @@ pub mod obj_parser;
 pub mod scene;
 pub mod render;
 pub mod ray;
+pub mod sampler;
 pub mod color;
 pub mod img;
 pub mod io_utils;
