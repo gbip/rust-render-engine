@@ -1,6 +1,6 @@
 use std::vec::Vec;
 use math::{Vector3, Vector3f, VectorialOperations};
-use obj3D::Object;
+use geometry::obj3d::Object;
 use sampler::Sample;
 use ray::Ray;
 use io_utils;

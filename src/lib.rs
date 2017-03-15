@@ -8,8 +8,6 @@ pub mod math;
 #[macro_use] // Il faut charger angle.rs dans les premiers modules, car sinon obj3D n'aura pas la visibilité sur les macros définies dans angle.
 pub mod angle;
 #[allow(non_snake_case)]
-pub mod obj3D;
-pub mod obj_parser;
 pub mod scene;
 pub mod render;
 pub mod ray;
@@ -18,7 +16,7 @@ pub mod color;
 pub mod img;
 pub mod io_utils;
 pub mod material;
-pub mod bounding_box;
+pub mod geometry;
 #[macro_use]
 pub extern crate serde_derive;
 pub extern crate serde_json;

@@ -4,7 +4,7 @@ use color::{RGBA8, RGBA32};
 use color;
 use ray::{Ray, Fragment, Surface};
 use sampler::{Sample, DefaultSampler, Sampler};
-use obj3D::Object;
+use geometry::obj3d::Object;
 use std::collections::HashMap;
 use std::fmt;
 
