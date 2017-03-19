@@ -8,7 +8,7 @@ use geometry::obj3d::Object;
 use std::collections::HashMap;
 use std::fmt;
 use std::slice::Iter;
-
+use filter::{Filter, MNFilter};
 /** Structure utilisée par le sampler pour stocker les samples, et par le filter
 pour les lire et recomposer l'image finale
 TODO rename, déplacer ?*/
@@ -69,16 +69,24 @@ impl Pixel {
         self.samples.push(sample);
     }
 
-    pub fn get_average_color(&self) -> RGBA32 {
+    /*pub fn get_average_color(&self) -> RGBA32 {
         let mut colors: Vec<RGBA32> = vec![];
         for sample in &self.samples {
             colors.push(sample.color);
         }
         color::make_average_color(&colors)
-    }
+    }*/
 
     pub fn samples(&self) -> Iter<Sample> {
         self.samples.iter()
+    }
+
+    pub fn x(&self) -> u32 {
+        self.x
+    }
+
+    pub fn y(&self) -> u32 {
+        self.y
     }
 }
 
@@ -234,6 +242,9 @@ impl Renderer {
         let sampler = DefaultSampler { sample_rate: self.subdivision_sampling };
         sampler.create_samples(&mut data);
 
+        let mut filter = MNFilter::default();
+        filter.set_image_size(self.res_x as u32, self.res_y as u32);
+
         // Emission des rayons
         for pixel in &mut data.pixels {
             self.emit_rays(world, camera, pixel);
@@ -249,7 +260,7 @@ impl Renderer {
             let mut col: Vec<RGBA32> = vec![];
 
             for y in 0..data.size_y {
-                col.push(data.get_pixel(x, y).get_average_color());
+                col.push(filter.compute_color(data.get_pixel(x, y)));
             }
 
             temp_result.push(col);

@@ -1,18 +1,19 @@
 use RGBA32;
 use render::Pixel;
-use math::Vector2f;
+use math::{Vector2, Vector2f};
 
-trait Filter {
-    fn compute_color(&self, data: Pixel) -> RGBA32;
+pub trait Filter {
+    fn compute_color(&self, data: &mut Pixel) -> RGBA32;
 }
 
 
 
 /** Les paramètres standard d'un filtre de mitchell.
  * Le filtre à un rayon de 1 pixel : il ne regarde que les samples dans le pixel actuel*/
-struct MNFilter {
+pub struct MNFilter {
     b: f32,
     c: f32,
+    image_size: Vector2<u32>,
 }
 
 impl MNFilter {
@@ -40,6 +41,10 @@ impl MNFilter {
             0.0
         }
     }
+
+    pub fn set_image_size(&mut self, x: u32, y: u32) {
+        self.image_size = Vector2::new(x, y);
+    }
 }
 
 impl Default for MNFilter {
@@ -47,17 +52,24 @@ impl Default for MNFilter {
         MNFilter {
             b: 1.0 / 3.0,
             c: 1.0 / 3.0,
+            image_size: Vector2::new(0, 0),
         }
     }
 }
 
 impl Filter for MNFilter {
-    fn compute_color(&self, data: Pixel) -> RGBA32 {
+    fn compute_color(&self, data: &mut Pixel) -> RGBA32 {
         let mut result: RGBA32 = RGBA32::new_black();
 
         // On calcule les contributions de chaque sample
         for sample in data.samples() {
-            let weight = self.weight_contribution(sample.position());
+            // La position exprimée en % de la taille de l'image (une valeur entre 0 et 1)
+            let absolute_sample_pos = sample.position();
+            // On ramène la valeur pour la mettre au centre du pixel concerné
+            let relative_sample_pixel_pos =
+                Vector2f::new(absolute_sample_pos.x * self.image_size.x as f32 - data.x() as f32,
+                              absolute_sample_pos.y * self.image_size.y as f32 - data.y() as f32);
+            let weight = self.weight_contribution(relative_sample_pixel_pos);
             result.r += (weight * sample.color.r() as f32) as u32;
             result.b += (weight * sample.color.b() as f32) as u32;
             result.g += (weight * sample.color.g() as f32) as u32;
