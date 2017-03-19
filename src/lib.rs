@@ -17,6 +17,7 @@ pub mod img;
 pub mod io_utils;
 pub mod material;
 pub mod geometry;
+pub mod filter;
 #[macro_use]
 pub extern crate serde_derive;
 pub extern crate serde_json;

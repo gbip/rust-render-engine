@@ -5,10 +5,10 @@ use std::ops::Mul;
 // A struct for all internal color management, but not for textures and objecs colors.
 #[derive(Clone,Debug,Copy,Serialize,Deserialize,PartialEq)]
 pub struct RGBA32 {
-    r: u32,
-    g: u32,
-    b: u32,
-    a: u32,
+    pub r: u32,
+    pub g: u32,
+    pub b: u32,
+    pub a: u32,
 }
 
 // A struct to support the classic 8 bit color values that is used to : write to a .png file,

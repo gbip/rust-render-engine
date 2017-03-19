@@ -7,6 +7,7 @@ use sampler::{Sample, DefaultSampler, Sampler};
 use geometry::obj3d::Object;
 use std::collections::HashMap;
 use std::fmt;
+use std::slice::Iter;
 
 /** Structure utilisée par le sampler pour stocker les samples, et par le filter
 pour les lire et recomposer l'image finale
@@ -42,6 +43,10 @@ impl RenderData {
     pub fn get_pixel(&mut self, x: u32, y: u32) -> &mut Pixel {
         &mut self.pixels[(x + y * self.size_x) as usize]
     }
+
+    pub fn pixels(&self) -> Iter<Pixel> {
+        self.pixels.iter()
+    }
 }
 
 /** Représente un pixel avec des Sample dedans. */
@@ -70,6 +75,10 @@ impl Pixel {
             colors.push(sample.color);
         }
         color::make_average_color(&colors)
+    }
+
+    pub fn samples(&self) -> Iter<Sample> {
+        self.samples.iter()
     }
 }
 

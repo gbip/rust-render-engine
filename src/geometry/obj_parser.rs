@@ -265,8 +265,8 @@ fn open_obj_file(path: &str) -> File {
 #[cfg(test)]
 mod test {
     use math::{Vector3, Vector3f};
-    use obj3D::*;
-    use obj_parser;
+    use geometry::obj3d::*;
+    use geometry::obj_parser;
 
     #[test]
     fn test_obj_parsing_plane() {
