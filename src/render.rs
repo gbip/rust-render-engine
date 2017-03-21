@@ -1,14 +1,13 @@
 use scene;
 use img::Image;
 use color::{RGBA8, RGBA32};
-use color;
 use ray::{Ray, Fragment, Surface};
 use sampler::{Sample, DefaultSampler, Sampler};
 use geometry::obj3d::Object;
 use std::collections::HashMap;
 use std::fmt;
 use std::slice::Iter;
-use filter::{Filter, MNFilter};
+use filter::{Filter, filters};
 /** Structure utilisée par le sampler pour stocker les samples, et par le filter
 pour les lire et recomposer l'image finale
 TODO rename, déplacer ?*/
@@ -242,8 +241,8 @@ impl Renderer {
         let sampler = DefaultSampler { sample_rate: self.subdivision_sampling };
         sampler.create_samples(&mut data);
 
-        let mut filter = MNFilter::default();
-        filter.set_image_size(self.res_x as u32, self.res_y as u32);
+        let filter = filters::BoxFilter::default();
+        //filter.set_image_size(self.res_x as u32, self.res_y as u32);
 
         // Emission des rayons
         for pixel in &mut data.pixels {

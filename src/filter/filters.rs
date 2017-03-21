@@ -1,22 +1,18 @@
 use RGBA32;
 use render::Pixel;
 use math::{Vector2, Vector2f};
-
-pub trait Filter {
-    fn compute_color(&self, data: &mut Pixel) -> RGBA32;
-}
+use filter::Filter;
 
 
-
-/** Les paramètres standard d'un filtre de mitchell.
+/** Les paramètres standard d'un filtre de Mitchell-Netravali.
  * Le filtre à un rayon de 1 pixel : il ne regarde que les samples dans le pixel actuel*/
-pub struct MNFilter {
+pub struct MitchellFilter {
     b: f32,
     c: f32,
     image_size: Vector2<u32>,
 }
 
-impl MNFilter {
+impl MitchellFilter {
     fn weight_contribution(&self, coords: Vector2f) -> f32 {
         self.polynome(coords.x * 2.0) * self.polynome(coords.y * 2.0)
     }
@@ -47,9 +43,9 @@ impl MNFilter {
     }
 }
 
-impl Default for MNFilter {
+impl Default for MitchellFilter {
     fn default() -> Self {
-        MNFilter {
+        MitchellFilter {
             b: 1.0 / 3.0,
             c: 1.0 / 3.0,
             image_size: Vector2::new(0, 0),
@@ -57,7 +53,7 @@ impl Default for MNFilter {
     }
 }
 
-impl Filter for MNFilter {
+impl Filter for MitchellFilter {
     fn compute_color(&self, data: &mut Pixel) -> RGBA32 {
         let mut result: RGBA32 = RGBA32::new_black();
 
@@ -77,5 +73,26 @@ impl Filter for MNFilter {
 
 
         result
+    }
+}
+
+
+#[derive(Default)]
+pub struct BoxFilter {}
+
+
+impl Filter for BoxFilter {
+    fn compute_color(&self, data: &mut Pixel) -> RGBA32 {
+        let mut result: RGBA32 = RGBA32::new_black();
+        let sum: u32 = data.samples().fold(0, |acc, _| acc + 1);
+        for sample in data.samples() {
+
+            result.r = sample.color.r() / sum;
+            result.g = sample.color.g() / sum;
+            result.b = sample.color.b() / sum;
+
+        }
+        result
+
     }
 }
