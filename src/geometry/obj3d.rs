@@ -176,6 +176,50 @@ impl Surface for Triangle {
         }
         result
     }
+
+    /** Source : https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm  */
+    #[allow(non_snake_case)]
+    fn fast_intersection(&self, ray: &mut Ray) -> bool {
+
+        let e1: Vector3f = self.v.pos() - self.u.pos();
+        let e2: Vector3f = self.w.pos() - self.u.pos();
+        let P: Vector3f = ray.slope().cross_product(&e2);
+
+        let det: f32 = e1.dot_product(&P);
+
+        if det > -f32::EPSILON && det < f32::EPSILON {
+            return false;
+        }
+
+        let inv_det: f32 = 1f32 / det;
+
+        let T: Vector3f = ray.origin() - self.u.pos();
+        let u: f32 = T.dot_product(&P) * inv_det;
+
+        if u < 0f32 || u > 1f32 {
+            return false;
+        }
+
+        let Q: Vector3f = T.cross_product(&e1);
+
+        let v: f32 = ray.slope().dot_product(&Q) * inv_det;
+
+        if v < 0f32 || u + v > 1f32 {
+            return false;
+        }
+
+        let t: f32 = e2.dot_product(&Q);
+
+        if t > f32::EPSILON {
+            ray.max_t = t;
+            return true;
+        }
+        false
+
+
+
+
+    }
 }
 
 #[derive(Clone,Debug,PartialEq)]
@@ -452,6 +496,25 @@ impl Surface for Object {
             0 => None,
             n => points[n - 1],
         }
+    }
+
+    fn fast_intersection(&self, ray: &mut Ray) -> bool {
+        if ray.max_t * ray.slope().norm() > self.barycenter.norm() {
+
+            for tri in self.triangles() {
+                if tri.fast_intersection(ray) {
+                    return true;
+                }
+                continue;
+            }
+            false
+        } else {
+            false
+
+        }
+
+
+
     }
 }
 

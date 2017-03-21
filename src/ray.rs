@@ -34,6 +34,13 @@ pub trait Surface {
     /** @returns the intersection point between the surface and
     the ray given. */
     fn get_intersection(&self, ray: &mut Ray) -> Option<Fragment>;
+
+    /** Il y a une implémentation par défaut, pour éviter de s'amuser à l'implémenter pour les
+     * tests unitaires. */
+    #[allow(unused_variables)]
+    fn fast_intersection(&self, ray: &mut Ray) -> bool {
+        unreachable!();
+    }
 }
 
 
@@ -105,7 +112,6 @@ impl Surface for Plane {
                                             t));
             }
         }
-
         result
     }
 }
