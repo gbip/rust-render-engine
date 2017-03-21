@@ -482,6 +482,10 @@ impl Object {
     pub fn is_visible(&self) -> bool {
         self.visible
     }
+
+    pub fn position(&self) -> &Vector3f {
+        &self.position
+    }
 }
 
 impl Surface for Object {

@@ -7,6 +7,7 @@ use io_utils;
 use serde_json;
 use render::Renderer;
 use std::time::Instant;
+use ray::Surface;
 
 // Une simple scène
 #[derive(Serialize,Deserialize,Debug)]
@@ -178,6 +179,18 @@ impl World {
 
     pub fn objects(&self) -> &Vec<Object> {
         &self.objects
+    }
+
+    // Represente le fait qu'un point soit visible par un autre : on revoie true si le rayon
+    // n'intersecte aucun triangle.
+    pub fn is_occluded(&self, ray: &mut Ray) -> bool {
+        for obj in &self.objects {
+            if obj.fast_intersection(ray) {
+                return true;
+            }
+            continue;
+        }
+        false
     }
 }
 
