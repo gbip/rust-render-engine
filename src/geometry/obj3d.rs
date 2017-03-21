@@ -1,7 +1,7 @@
 use std::vec::Vec;
 use std::f32;
 use math::{Vector3, Vector3f, Vector2f, VectorialOperations, AlmostEq};
-use material::Material;
+use material::flat_material::FlatMaterial;
 use ray::{Ray, Plane, Surface, Fragment};
 use std::slice::Iter;
 use angle::{Rad, Deg};
@@ -308,8 +308,8 @@ pub struct Object {
     mesh: Mesh,
 
     // Le materiau de l'objet
-    #[serde(skip_serializing, skip_deserializing,default = "Material::new_empty",rename="do_not_use")]
-    material: Material,
+    #[serde(skip_serializing, skip_deserializing,default = "FlatMaterial::new_empty",rename="do_not_use")]
+    material: FlatMaterial,
 
     // La position de l'objet (offset qui se propagera ensuite aux triangles)
     position: Vector3f,
@@ -395,13 +395,13 @@ impl Object {
     // Chargement du matériau
     fn load_material(&mut self) {
         if self.material_path != "" {
-            self.material = match Material::read_from_file(self.material_path.as_str()) {
+            self.material = match FlatMaterial::read_from_file(self.material_path.as_str()) {
                 Ok(value) => value,
                 Err(e) => {
                     println!("Can't load the material {} due to error : {:?}",
                              self.material_path,
                              e);
-                    Material::new_empty()
+                    FlatMaterial::new_empty()
                 }
             }
         } else {
@@ -449,7 +449,7 @@ impl Object {
     pub fn new_empty() -> Object {
         Object {
             mesh: Mesh::new_empty(),
-            material: Material::new_empty(),
+            material: FlatMaterial::new_empty(),
             position: Vector3::new(0_f32, 0_f32, 0_f32),
             scale: Vector3f::new(1f32, 1f32, 1f32),
             rotation: Vector3 {
@@ -471,7 +471,7 @@ impl Object {
         self.mesh.triangles()
     }
 
-    pub fn material(&self) -> &Material {
+    pub fn material(&self) -> &FlatMaterial {
         &self.material
     }
 

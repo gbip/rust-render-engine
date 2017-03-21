@@ -5,7 +5,6 @@
 
 extern crate lib_render;
 use lib_render::*;
-
 // Generate a template file at the location [path]
 fn generate_template(path: &str) {
     let mut scene = Scene::new_empty();
@@ -18,10 +17,10 @@ fn generate_template(path: &str) {
 
     scene.save_to_file(path);
 
-    let material_solid = material::Material::new_empty();
+    let material_solid = material::flat_material::FlatMaterial::new_empty();
     material_solid.save_to_file("template_material_solid.json");
 
-    let mut material_tex = material::Material::new_empty();
+    let mut material_tex = material::flat_material::FlatMaterial::new_empty();
     material_tex.diffuse = Channel::Texture { texture: TextureMap::new_empty() };
     material_tex.specular = Channel::Texture { texture: TextureMap::new_empty() };
     material_tex.ambient = Channel::Texture { texture: TextureMap::new_empty() };

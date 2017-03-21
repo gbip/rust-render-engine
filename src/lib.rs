@@ -15,10 +15,10 @@ pub mod sampler;
 pub mod color;
 pub mod img;
 pub mod io_utils;
-pub mod material;
 pub mod geometry;
 pub mod filter;
 pub mod light;
+pub mod material;
 #[macro_use]
 pub extern crate serde_derive;
 pub extern crate serde_json;
@@ -35,4 +35,5 @@ pub use math::Vector3;
 pub use getopts::Options;
 pub use std::env;
 pub use io_utils::*;
-pub use material::{Channel, TextureMap};
+pub use material::channel::{Channel, TextureMap};
+pub use material::flat_material;
