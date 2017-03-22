@@ -209,12 +209,10 @@ impl Renderer {
                                 .diffuse
                                 .get_color(Some(tex_coord.x),
                                            Some(tex_coord.y),
-                                           Some(&self.textures))
-                                .to_rgba32();
+                                           Some(&self.textures));
                         }
                         None => {
-                            color =
-                                object.material().diffuse.get_color(None, None, None).to_rgba32();
+                            color = object.material().diffuse.get_color(None, None, None);
 
                         }
 

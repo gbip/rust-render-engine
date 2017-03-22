@@ -1,35 +1,33 @@
-use color::RGBA8;
+use color::{RGBA8, RGBA32};
 use img::Image;
 use std::collections::HashMap;
 
+pub trait TextureMap {
+    fn get_color(&self,
+                 u: Option<f32>,
+                 v: Option<f32>,
+                 texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
+                 -> RGBA32;
+}
+
+
 #[derive(Serialize,Deserialize,Debug,Clone)]
-pub struct TextureMap {
+pub struct ImageTex {
     map_path: String,
     tiling_x: f32,
     tiling_y: f32,
 }
 
-impl TextureMap {
+impl ImageTex {
     pub fn get_map_path(&self) -> String {
         self.map_path.clone()
     }
     pub fn new(texture_path: String, tiling_x: f32, tiling_y: f32) -> Self {
-        TextureMap {
+        ImageTex {
             map_path: texture_path,
             tiling_x: tiling_x,
             tiling_y: tiling_y,
         }
-    }
-
-    pub fn get_color(&self,
-                     u: f32,
-                     v: f32,
-                     texture_registry: &HashMap<String, Image<RGBA8>>)
-                     -> RGBA8 {
-        let texture = &texture_registry.get(self.map_path.as_str()).unwrap();
-        texture.get_pixel_at(((u * self.tiling_x * texture.width() as f32) as u32 % texture.width()),
-                             ((v * self.tiling_y * texture.height() as f32) as u32 % texture.height()))
-
     }
     pub fn new_empty() -> Self {
         Self {
@@ -40,12 +38,34 @@ impl TextureMap {
     }
 }
 
+impl TextureMap for ImageTex {
+    fn get_color(&self,
+                 u: Option<f32>,
+                 v: Option<f32>,
+                 texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
+                 -> RGBA32 {
+
+        let texture = &texture_registry.unwrap()
+            .get(self.map_path.as_str())
+            .unwrap();
+        texture.get_pixel_at(((u.unwrap() * self.tiling_x * texture.width() as f32) as u32 %
+                           texture.width()),
+                          ((v.unwrap() * self.tiling_y * texture.height() as f32) as u32 %
+                           texture.height()))
+            .to_rgba32()
+
+    }
+}
+
+pub struct NormalTex {}
+
+
 // Représente un canal de couleur : soit c'est une texture, soit c'est une couleur
 #[derive(Serialize,Deserialize,Debug,Clone)]
 #[serde(untagged)]
 pub enum Channel {
     Solid { color: RGBA8 },
-    Texture { texture: TextureMap },
+    Texture { texture: ImageTex },
 }
 
 impl Channel {
@@ -56,13 +76,13 @@ impl Channel {
                      u: Option<f32>,
                      v: Option<f32>,
                      texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
-                     -> RGBA8 {
+                     -> RGBA32 {
 
         match (u, v, texture_registry, self) {
             (Some(u), Some(v), Some(texture_registry), &Channel::Texture { ref texture }) => {
-                texture.get_color(u, v, texture_registry)
+                texture.get_color(Some(u), Some(v), Some(texture_registry))
             }
-            (None, None, None, &Channel::Solid { color }) => color,
+            (None, None, None, &Channel::Solid { color }) => color.to_rgba32(),
             _ => panic!("Error get_color"),
         }
     }
