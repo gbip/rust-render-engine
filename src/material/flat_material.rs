@@ -1,7 +1,10 @@
-use color::RGBA8;
+use color::{RGBA8, RGBA32};
 use io_utils;
 use serde_json;
 use material::channel::Channel;
+use material::Material;
+use ray::Fragment;
+use scene::World;
 
 #[derive(Serialize,Deserialize,Debug,Clone)]
 pub struct FlatMaterial {
@@ -19,7 +22,7 @@ impl FlatMaterial {
         }
     }
 
-    pub fn channels(&self) -> Vec<&Channel> {
+    fn channels(&self) -> Vec<&Channel> {
         vec![&self.diffuse, &self.specular, &self.ambient]
     }
 
@@ -51,5 +54,12 @@ impl FlatMaterial {
             .expect("Could not save material");
 
 
+    }
+}
+
+
+impl Material for FlatMaterial {
+    fn get_color(&self, frag: &Fragment, world: &World) -> RGBA32 {
+        unimplemented!()
     }
 }

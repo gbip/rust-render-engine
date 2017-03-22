@@ -171,7 +171,7 @@ impl Renderer {
             // TODO : Peut être virer le branching ici ?
             // TODO : Regarder le geometry/intersection.rs dans tray
             if object.bounding_box().intersects(ray) {
-                if let Some(frag) = object.get_intersection(ray) {
+                if let Some(frag) = object.get_intersection_fragment(ray) {
                     fragment = Some(frag);
                     obj = Some(object);
                 }

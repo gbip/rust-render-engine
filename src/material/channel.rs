@@ -57,7 +57,19 @@ impl TextureMap for ImageTex {
     }
 }
 
+#[derive(Serialize,Deserialize)]
 pub struct NormalTex {}
+
+impl TextureMap for NormalTex {
+    fn get_color(&self,
+                 u: Option<f32>,
+                 v: Option<f32>,
+                 texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
+                 -> RGBA32 {
+        unimplemented!()
+
+    }
+}
 
 
 // Représente un canal de couleur : soit c'est une texture, soit c'est une couleur

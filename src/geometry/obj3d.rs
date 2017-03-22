@@ -2,7 +2,7 @@ use std::vec::Vec;
 use std::f32;
 use math::{Vector3, Vector3f, Vector2f, VectorialOperations, AlmostEq};
 use material::flat_material::FlatMaterial;
-use ray::{Ray, Plane, Surface, Fragment};
+use ray::{Ray, Plane, Surface, Fragment, Intersection};
 use std::slice::Iter;
 use angle::{Rad, Deg};
 use colored::*;
@@ -127,7 +127,7 @@ impl Triangle {
 
 
 impl Surface for Triangle {
-    fn get_intersection(&self, ray: &mut Ray) -> Option<Fragment> {
+    fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment> {
         let pt_a = self.u.pos;
         let pt_b = self.v.pos;
         let pt_c = self.w.pos;
@@ -139,7 +139,7 @@ impl Surface for Triangle {
 
         let plane = Plane::new(&vec_ab, &vec_bc, &pt_a);
 
-        let mut result = plane.get_intersection(ray);
+        let mut result = plane.get_intersection_fragment(ray);
 
         if let Some(ref mut point) = result {
             // On calcule si le point appartient à la face triangle
@@ -486,13 +486,21 @@ impl Object {
     pub fn position(&self) -> &Vector3f {
         &self.position
     }
+
+    pub fn get_intersection_point(&self, ray: &mut Ray) -> Intersection {
+
+        Intersection::new(self.get_intersection_fragment(ray),
+                          &self.mesh,
+                          &self.material)
+
+    }
 }
 
 impl Surface for Object {
-    fn get_intersection(&self, ray: &mut Ray) -> Option<Fragment> {
+    fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment> {
 
         let points: Vec<Option<Fragment>> = self.triangles()
-            .map(|tri| tri.get_intersection(ray))
+            .map(|tri| tri.get_intersection_fragment(ray))
             .filter(|point| point.is_some())
             .collect();
 
@@ -539,20 +547,20 @@ mod test {
         // Ce rayon doit intersecter le triangle en (0,0,0)
         let mut r1 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.0, 1.0, 0.0));
 
-        let frag1 = tri1.get_intersection(&mut r1);
+        let frag1 = tri1.get_intersection_fragment(&mut r1);
         assert_ne!(frag1, None);
 
         // Normalement, l'intersection du triangle est en (0.5,0,0), donc ce rayon ne doit pas
         // intersecter avec le triangle
         let mut r2 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.51, 1.0, 0.0));
 
-        let frag2 = tri1.get_intersection(&mut r2);
+        let frag2 = tri1.get_intersection_fragment(&mut r2);
         assert_eq!(frag2, None);
 
         // Celui là par contre devrait :
         let mut r3 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.5, 1.0, 0.0));
 
-        let frag3 = tri1.get_intersection(&mut r3);
+        let frag3 = tri1.get_intersection_fragment(&mut r3);
         assert_ne!(frag3, None);
     }
 

@@ -1,5 +1,28 @@
 use math::{Vector3f, Vector2f};
 use math::VectorialOperations;
+use geometry::obj3d::Mesh;
+use material::Material;
+
+/** Represente un point d'intresection entre un rayon et de la géometrie */
+pub struct Intersection<'a> {
+    fragment: Option<Fragment>,
+    geometry: &'a Mesh,
+    material: &'a Material,
+}
+
+impl<'a> Intersection<'a> {
+    /** Un peu de magie sur les lifetime pour que le compilo comprenne ce qu'il se passe*/
+    pub fn new<'b: 'a, T: Material>(frag: Option<Fragment>,
+                                    geo: &'b Mesh,
+                                    mat: &'b T)
+                                    -> Intersection<'a> {
+        Intersection {
+            fragment: frag,
+            geometry: geo,
+            material: mat,
+        }
+    }
+}
 
 #[derive(Debug, PartialEq)]
 pub struct Ray {
@@ -31,9 +54,11 @@ pub struct Fragment {
 
 
 pub trait Surface {
-    /** @returns the intersection point between the surface and
+    /** @returns the intersection fragment between the surface and
     the ray given. */
-    fn get_intersection(&self, ray: &mut Ray) -> Option<Fragment>;
+    fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment>;
+
+
 
     /** Il y a une implémentation par défaut, pour éviter de s'amuser à l'implémenter pour les
      * tests unitaires. */
@@ -85,7 +110,7 @@ impl Plane {
 }
 
 impl Surface for Plane {
-    fn get_intersection(&self, ray: &mut Ray) -> Option<Fragment> {
+    fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment> {
 
         let slope: &Vector3f = &ray.slope;
         let origin: &Vector3f = &ray.origin;
@@ -191,7 +216,7 @@ mod tests {
             max_t: -1.0,
         };
 
-        assert!(match plane.get_intersection(&mut ray) {
+        assert!(match plane.get_intersection_fragment(&mut ray) {
             None => true,
             _ => false,
         });
@@ -220,7 +245,7 @@ mod tests {
             max_t: -1.0,
         };
 
-        let intersection = plane.get_intersection(&mut ray);
+        let intersection = plane.get_intersection_fragment(&mut ray);
         assert!(match intersection {
             None => true,
             Some(_) => false,
@@ -250,7 +275,7 @@ mod tests {
             max_t: -1.0,
         };
 
-        let intersection = plane.get_intersection(&mut ray);
+        let intersection = plane.get_intersection_fragment(&mut ray);
         assert!(match intersection {
             None => false,
             Some(point) => {
