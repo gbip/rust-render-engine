@@ -21,9 +21,9 @@ fn generate_template(path: &str) {
     material_solid.save_to_file("template_material_solid.json");
 
     let mut material_tex = material::flat_material::FlatMaterial::new_empty();
-    material_tex.diffuse = Channel::Texture { texture: TextureMap::new_empty() };
-    material_tex.specular = Channel::Texture { texture: TextureMap::new_empty() };
-    material_tex.ambient = Channel::Texture { texture: TextureMap::new_empty() };
+    material_tex.diffuse = Channel::TextureMap { texture: TextureMap::new_empty() };
+    material_tex.specular = Channel::TextureMap { texture: TextureMap::new_empty() };
+    material_tex.ambient = Channel::TextureMap { texture: TextureMap::new_empty() };
     material_tex.save_to_file("template_material_texture.json");
 
 }

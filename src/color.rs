@@ -118,6 +118,15 @@ impl RGBA32 {
         }
     }
 
+    pub fn new_white() -> RGBA32 {
+        RGBA32 {
+            r: u32::max_value(),
+            g: u32::max_value(),
+            b: u32::max_value(),
+            a: u32::max_value(),
+        }
+    }
+
     pub fn r(&self) -> u32 {
         self.r
     }

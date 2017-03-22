@@ -27,9 +27,11 @@ impl<'a> Intersection<'a> {
         match self.fragment.tex {
             Some(coords) => {
                 self.material
-                    .get_color(world, Some((coords.x, coords.y, texture_register)))
+                    .get_color(&self.fragment,
+                               world,
+                               Some((coords.x, coords.y, texture_register)))
             }
-            None => self.material.get_color(world, None),
+            None => self.material.get_color(&self.fragment, world, None),
         }
     }
 }

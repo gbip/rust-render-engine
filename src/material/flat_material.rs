@@ -5,6 +5,7 @@ use material::channel::Channel;
 use material::Material;
 use scene::World;
 use render::TextureRegister;
+use ray::Fragment;
 
 #[derive(Serialize,Deserialize,Debug,Clone)]
 pub struct FlatMaterial {
@@ -59,8 +60,8 @@ impl FlatMaterial {
 
 
 impl Material for FlatMaterial {
-    //#[allow(unused_variables)]
     fn get_color(&self,
+                 frag: &Fragment,
                  world: &World,
                  texture_data: Option<(f32, f32, &TextureRegister)>)
                  -> RGBA32 {
@@ -71,7 +72,7 @@ impl Material for FlatMaterial {
             None => (None, None, None),
         };
 
-        self.diffuse.get_color(u, v, tex_reg)
+        self.diffuse.get_color(frag, u, v, tex_reg)
 
 
     }

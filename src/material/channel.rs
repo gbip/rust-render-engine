@@ -1,11 +1,14 @@
 use color::{RGBA8, RGBA32};
 use img::Image;
 use std::collections::HashMap;
+use ray::Fragment;
+use math::VectorialOperations;
 
 /** Represente le fait qu'une structure de donnée soit une texture utilisable dans un canal d'un
  * matériau  */
 pub trait Texture {
     fn get_color(&self,
+                 frag: &Fragment,
                  u: Option<f32>,
                  v: Option<f32>,
                  texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
@@ -42,7 +45,9 @@ impl TextureMap {
 }
 
 impl Texture for TextureMap {
+    #[allow(unused_variables)]
     fn get_color(&self,
+                 frag: &Fragment,
                  u: Option<f32>,
                  v: Option<f32>,
                  texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
@@ -62,43 +67,57 @@ impl Texture for TextureMap {
 
 /** Represente une texture qui prends en entrée de la géométrie et qui retourne une couleur en
  * fonction de la normale*/
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize,Deserialize,Debug,Clone)]
 pub struct NormalMap {}
 
 impl Texture for NormalMap {
+    #[allow(unused_variables)]
     fn get_color(&self,
+                 frag: &Fragment,
                  u: Option<f32>,
                  v: Option<f32>,
                  texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
                  -> RGBA32 {
-        unimplemented!()
+        let normal = frag.normal / frag.normal.norm();
+
+        let mut white = RGBA32::new_white();
+        white.r = (white.r as f32 * normal.x) as u32;
+        white.g = (white.g as f32 * normal.y) as u32;
+        white.b = (white.b as f32 * normal.z) as u32;
+        white
 
     }
 }
-
 
 // Représente un canal de couleur : soit c'est une texture, soit c'est une couleur
 #[derive(Serialize,Deserialize,Debug,Clone)]
 #[serde(untagged)]
 pub enum Channel {
     Solid { color: RGBA8 },
-    Texture { texture: TextureMap },
+    TextureMap { texture: TextureMap },
+    NormalMap { tex: NormalMap },
 }
 
 impl Channel {
     // Renvoies la couleur
     // A faire : personnaliser les messages en fonction de l'erreur de l'utilisateur et reconnaître
     // les cas où on a un problème dans le json
+    // TODO Normalement il n'y a plus de besoin de faire du pattern_matching...
     pub fn get_color(&self,
+                     frag: &Fragment,
                      u: Option<f32>,
                      v: Option<f32>,
                      texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
                      -> RGBA32 {
 
         match (u, v, texture_registry, self) {
-            (Some(u), Some(v), Some(texture_registry), &Channel::Texture { ref texture }) => {
-                texture.get_color(Some(u), Some(v), Some(texture_registry))
+            (Some(u), Some(v), Some(texture_registry), &Channel::TextureMap { ref texture }) => {
+                texture.get_color(frag, Some(u), Some(v), Some(texture_registry))
             }
+            (Some(u), Some(v), Some(texture_registry), &Channel::NormalMap { ref tex }) => {
+                tex.get_color(frag, Some(u), Some(v), Some(texture_registry))
+            }
+
             (None, None, None, &Channel::Solid { color }) => color.to_rgba32(),
             _ => panic!("Error get_color"),
         }
@@ -112,13 +131,13 @@ impl Channel {
     }
     pub fn is_texture(&self) -> bool {
         match *self {
-            Channel::Texture { .. } => true,
+            Channel::TextureMap { .. } => true,
             _ => false,
         }
     }
     pub fn get_texture_path(&self) -> String {
         match *self {
-            Channel::Texture { ref texture } => texture.get_map_path(),
+            Channel::TextureMap { ref texture } => texture.get_map_path(),
             _ => panic!("Erreur, ce n'est pas un canal de texture"),
         }
     }
