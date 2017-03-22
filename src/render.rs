@@ -1,13 +1,21 @@
 use scene;
 use img::Image;
 use color::{RGBA8, RGBA32};
-use ray::{Ray, Fragment, Surface};
+use ray::{Ray, Intersection};
 use sampler::{Sample, DefaultSampler, Sampler};
 use geometry::obj3d::Object;
 use std::collections::HashMap;
 use std::fmt;
 use std::slice::Iter;
 use filter::{Filter, filters};
+
+
+/** Type representant un registre de texture */
+pub type TextureRegister = HashMap<String, Image<RGBA8>>;
+
+
+
+
 /** Structure utilisée par le sampler pour stocker les samples, et par le filter
 pour les lire et recomposer l'image finale
 TODO rename, déplacer ?*/
@@ -113,7 +121,7 @@ pub struct Renderer {
 }
 
 
-impl Renderer {
+impl<'a> Renderer {
     pub fn new(res_x: usize, res_y: usize) -> Self {
         Renderer {
             res_x: res_x,
@@ -160,24 +168,22 @@ impl Renderer {
         println!("Resolution is : {} x {}", self.res_x, self.res_y);
     }
 
-    pub fn calculate_ray_intersection<'a>(&self,
-                                          objects: &[&'a Object], // TODO Changer en raytree
+    pub fn calculate_ray_intersection<'b>(&self,
+                                          objects: &[&'b Object], // TODO Changer en raytree
                                           mut ray: &mut Ray)
-                                          -> (Option<Fragment>, Option<&'a Object>) {
+                                          -> Option<Intersection<'b>> {
 
-        let mut fragment: Option<Fragment> = None;
-        let mut obj: Option<&Object> = None;
+        let mut intersection_point: Option<Intersection> = None;
         for object in objects {
             // TODO : Peut être virer le branching ici ?
             // TODO : Regarder le geometry/intersection.rs dans tray
             if object.bounding_box().intersects(ray) {
-                if let Some(frag) = object.get_intersection_fragment(ray) {
-                    fragment = Some(frag);
-                    obj = Some(object);
+                if let Some(point) = object.get_intersection_point(ray) {
+                    intersection_point = Some(point);
                 }
             }
         }
-        (fragment, obj)
+        intersection_point
     }
 
     /** Calcule les rayons à lancer pour le canvas passé en paramètres.
@@ -196,28 +202,13 @@ impl Renderer {
 
             // CALCUL DE LA COULEUR DU RAYON (TODO à mettre ailleurs)
 
-            let (opt_frag, opt_obj) = self.calculate_ray_intersection(&objects, &mut ray);
+            let point = self.calculate_ray_intersection(&objects, &mut ray);
 
             // On détermine la couleur du rayon, simplement à partir du fragment retourné et
             // du matériau associé à l'objet intersecté.
-            match (opt_frag, opt_obj) {
-                (Some(fragment), Some(object)) => {
-                    let color: RGBA32;
-                    match fragment.tex {
-                        Some(tex_coord) => {
-                            color = object.material()
-                                .diffuse
-                                .get_color(Some(tex_coord.x),
-                                           Some(tex_coord.y),
-                                           Some(&self.textures));
-                        }
-                        None => {
-                            color = object.material().diffuse.get_color(None, None, None);
-
-                        }
-
-                    }
-                    sample.color = color;
+            match point {
+                Some(p) => {
+                    sample.color = p.get_point_color(world, &self.textures);
                 }
                 _ => {
                     sample.color = self.background_color.to_rgba32();

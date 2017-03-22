@@ -3,8 +3,8 @@ use io_utils;
 use serde_json;
 use material::channel::Channel;
 use material::Material;
-use ray::Fragment;
 use scene::World;
+use render::TextureRegister;
 
 #[derive(Serialize,Deserialize,Debug,Clone)]
 pub struct FlatMaterial {
@@ -59,7 +59,20 @@ impl FlatMaterial {
 
 
 impl Material for FlatMaterial {
-    fn get_color(&self, frag: &Fragment, world: &World) -> RGBA32 {
-        unimplemented!()
+    //#[allow(unused_variables)]
+    fn get_color(&self,
+                 world: &World,
+                 texture_data: Option<(f32, f32, &TextureRegister)>)
+                 -> RGBA32 {
+
+
+        let (u, v, tex_reg) = match texture_data {
+            Some(data) => (Some(data.0), Some(data.1), Some(data.2)),
+            None => (None, None, None),
+        };
+
+        self.diffuse.get_color(u, v, tex_reg)
+
+
     }
 }

@@ -2,24 +2,34 @@ use math::{Vector3f, Vector2f};
 use math::VectorialOperations;
 use geometry::obj3d::Mesh;
 use material::Material;
+use scene::World;
+use color::RGBA32;
+use render::TextureRegister;
 
 /** Represente un point d'intresection entre un rayon et de la géometrie */
 pub struct Intersection<'a> {
-    fragment: Option<Fragment>,
+    fragment: Fragment,
     geometry: &'a Mesh,
     material: &'a Material,
 }
 
 impl<'a> Intersection<'a> {
     /** Un peu de magie sur les lifetime pour que le compilo comprenne ce qu'il se passe*/
-    pub fn new<'b: 'a, T: Material>(frag: Option<Fragment>,
-                                    geo: &'b Mesh,
-                                    mat: &'b T)
-                                    -> Intersection<'a> {
+    pub fn new<'b: 'a, T: Material>(frag: Fragment, geo: &'b Mesh, mat: &'b T) -> Intersection<'a> {
         Intersection {
             fragment: frag,
             geometry: geo,
             material: mat,
+        }
+    }
+
+    pub fn get_point_color(&self, world: &World, texture_register: &TextureRegister) -> RGBA32 {
+        match self.fragment.tex {
+            Some(coords) => {
+                self.material
+                    .get_color(world, Some((coords.x, coords.y, texture_register)))
+            }
+            None => self.material.get_color(world, None),
         }
     }
 }

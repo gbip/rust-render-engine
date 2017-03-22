@@ -487,12 +487,12 @@ impl Object {
         &self.position
     }
 
-    pub fn get_intersection_point(&self, ray: &mut Ray) -> Intersection {
+    pub fn get_intersection_point(&self, ray: &mut Ray) -> Option<Intersection> {
 
-        Intersection::new(self.get_intersection_fragment(ray),
-                          &self.mesh,
-                          &self.material)
-
+        match self.get_intersection_fragment(ray) {
+            Some(frag) => Some(Intersection::new(frag, &self.mesh, &self.material)),
+            None => None,
+        }
     }
 }
 
