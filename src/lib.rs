@@ -35,5 +35,5 @@ pub use math::Vector3;
 pub use getopts::Options;
 pub use std::env;
 pub use io_utils::*;
-pub use material::channel::{Channel, TextureMap, ImageTex};
+pub use material::channel::{Channel, TextureMap, Texture};
 pub use material::flat_material;

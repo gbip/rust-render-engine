@@ -2,7 +2,9 @@ use color::{RGBA8, RGBA32};
 use img::Image;
 use std::collections::HashMap;
 
-pub trait TextureMap {
+/** Represente le fait qu'une structure de donnée soit une texture utilisable dans un canal d'un
+ * matériau  */
+pub trait Texture {
     fn get_color(&self,
                  u: Option<f32>,
                  v: Option<f32>,
@@ -11,19 +13,20 @@ pub trait TextureMap {
 }
 
 
+/** Represente une map qui est une texture */
 #[derive(Serialize,Deserialize,Debug,Clone)]
-pub struct ImageTex {
+pub struct TextureMap {
     map_path: String,
     tiling_x: f32,
     tiling_y: f32,
 }
 
-impl ImageTex {
+impl TextureMap {
     pub fn get_map_path(&self) -> String {
         self.map_path.clone()
     }
     pub fn new(texture_path: String, tiling_x: f32, tiling_y: f32) -> Self {
-        ImageTex {
+        TextureMap {
             map_path: texture_path,
             tiling_x: tiling_x,
             tiling_y: tiling_y,
@@ -38,7 +41,7 @@ impl ImageTex {
     }
 }
 
-impl TextureMap for ImageTex {
+impl Texture for TextureMap {
     fn get_color(&self,
                  u: Option<f32>,
                  v: Option<f32>,
@@ -57,10 +60,12 @@ impl TextureMap for ImageTex {
     }
 }
 
+/** Represente une texture qui prends en entrée de la géométrie et qui retourne une couleur en
+ * fonction de la normale*/
 #[derive(Serialize,Deserialize)]
-pub struct NormalTex {}
+pub struct NormalMap {}
 
-impl TextureMap for NormalTex {
+impl Texture for NormalMap {
     fn get_color(&self,
                  u: Option<f32>,
                  v: Option<f32>,
@@ -77,7 +82,7 @@ impl TextureMap for NormalTex {
 #[serde(untagged)]
 pub enum Channel {
     Solid { color: RGBA8 },
-    Texture { texture: ImageTex },
+    Texture { texture: TextureMap },
 }
 
 impl Channel {
