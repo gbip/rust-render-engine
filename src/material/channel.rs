@@ -95,7 +95,7 @@ impl Texture for NormalMap {
 pub enum Channel {
     Solid { color: RGBA8 },
     TextureMap { texture: TextureMap },
-    NormalMap { tex: NormalMap },
+    NormalMap { normal: NormalMap },
 }
 
 impl Channel {
@@ -114,8 +114,8 @@ impl Channel {
             (Some(u), Some(v), Some(texture_registry), &Channel::TextureMap { ref texture }) => {
                 texture.get_color(frag, Some(u), Some(v), Some(texture_registry))
             }
-            (Some(u), Some(v), Some(texture_registry), &Channel::NormalMap { ref tex }) => {
-                tex.get_color(frag, Some(u), Some(v), Some(texture_registry))
+            (None, None, None, &Channel::NormalMap { ref normal }) => {
+                normal.get_color(frag, None, None, None)
             }
 
             (None, None, None, &Channel::Solid { color }) => color.to_rgba32(),

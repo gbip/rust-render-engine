@@ -185,7 +185,7 @@
         "obj_path": "models/suzanne_low.obj",
         "name": "Suzanne",
 	"visible": true ,
-	"material" : "scenes/materials/solid_green.json"
+	"material" : "scenes/materials/normals.json"
       }
 
     ]
