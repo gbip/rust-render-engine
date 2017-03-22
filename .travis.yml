@@ -1,4 +1,4 @@
 language: rust
 rust:
-                  - nightly
+                  - 1.17.0-nightly (cab4bff3d 2017-03-21)
 matrix:
