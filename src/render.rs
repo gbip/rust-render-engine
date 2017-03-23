@@ -210,7 +210,7 @@ impl<'a> Renderer {
                 Some(p) => {
                     sample.color = p.get_point_color(world, &self.textures);
                 }
-                _ => {
+                None => {
                     sample.color = self.background_color.to_rgba32();
                 }
             }
