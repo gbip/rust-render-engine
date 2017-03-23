@@ -62,7 +62,7 @@ impl FlatMaterial {
 impl Material for FlatMaterial {
     fn get_color(&self,
                  frag: &Fragment,
-                 world: &World,
+                 _: &World,
                  texture_data: Option<(f32, f32, &TextureRegister)>)
                  -> RGBA32 {
 

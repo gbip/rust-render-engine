@@ -45,9 +45,8 @@ impl TextureMap {
 }
 
 impl Texture for TextureMap {
-    #[allow(unused_variables)]
     fn get_color(&self,
-                 frag: &Fragment,
+                 _: &Fragment,
                  u: Option<f32>,
                  v: Option<f32>,
                  texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
@@ -71,12 +70,11 @@ impl Texture for TextureMap {
 pub struct NormalMap {}
 
 impl Texture for NormalMap {
-    #[allow(unused_variables)]
     fn get_color(&self,
                  frag: &Fragment,
-                 u: Option<f32>,
-                 v: Option<f32>,
-                 texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
+                 _: Option<f32>,
+                 _: Option<f32>,
+                 _: Option<&HashMap<String, Image<RGBA8>>>)
                  -> RGBA32 {
         let normal = frag.normal / frag.normal.norm();
 
