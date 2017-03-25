@@ -182,7 +182,7 @@
           "y": 0.0,
           "z": 270.0
         },
-        "obj_path": "models/smoothed_suzanne.obj",
+        "obj_path": "models/suzanne_low.obj",
         "name": "Suzanne",
 	"visible": true ,
 	"material" : "scenes/materials/solid_green.json"
@@ -195,7 +195,7 @@
     "res_y": 540,
     "threads":8,
     "bucket_size":10,
-    "subdivision_sampling" : 1,
+    "subdivision_sampling" : 16,
     "background_color": {
       "r": 0,
       "g": 0,

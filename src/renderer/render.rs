@@ -8,7 +8,7 @@ use std::fmt;
 use filter::{Filter, filters};
 use renderer::Pixel;
 use renderer::block::Block;
-use renderer::sampler::{DefaultSampler, Sampler};
+use renderer::sampler::{HaltonSampler, Sampler};
 use std::sync::{Arc, Mutex};
 use std::clone::Clone;
 use std::ops::DerefMut;
@@ -218,7 +218,7 @@ impl Renderer {
                         shared_image: &Arc<Mutex<Image<RGBA32>>>) {
 
         // Generation des samples
-        let sampler = DefaultSampler { sample_rate: self.subdivision_sampling };
+        let sampler = HaltonSampler { sample_rate: self.subdivision_sampling };
         sampler.create_samples(&mut block);
 
         let filter = filters::BoxFilter::default();

@@ -39,7 +39,8 @@ pub trait Sampler {
     fn create_samples(&self, area: &mut SamplableArea);
 }
 
-/** Sampler avec une distribution d'échantillon uniforme à travers les pixels*/
+/** Sampler avec une distribution d'échantillon uniforme à travers les pixels
+(Stratified sampler without jittering)*/
 pub struct DefaultSampler {
     pub sample_rate: u32,
 }
@@ -68,6 +69,48 @@ impl Sampler for DefaultSampler {
     }
 }
 
-pub struct HaltonSampler {
+// TODO PBRT propose une opti pour la base 2
+fn get_halton(a : u32, basis : u32) -> f32 {
+    // Inversion de a
+    let mut a_rev = 0;
+    let mut a_not_rev = a;
+    let inv_basis = 1_f32 / basis as f32;
+    let mut total_div = 1_f32;
 
+    while a_not_rev != 0 {
+        let d = a_not_rev % basis;
+        a_rev = basis * a_rev + d;
+        a_not_rev /= basis;
+        total_div *= inv_basis;
+    }
+
+    // Passage en décimal
+    a_rev as f32 * total_div
+}
+
+/** Sampler 2D utilisant les séquences de Halton. */
+pub struct HaltonSampler {
+    pub sample_rate : u32,
+}
+
+impl Sampler for HaltonSampler {
+    fn create_samples(&self, area: &mut SamplableArea) {
+        let offset = area.offset();
+        let (width, height) = area.dimensions();
+        let sub_x = width / area.pixel_width() as f32;
+        let sub_y = height / area.pixel_height() as f32;
+
+        for y in 0..area.pixel_width() {
+            for x in 0..area.pixel_height() {
+                for i in 0..self.sample_rate {
+                    let sample_pos = Vector2f {
+                        x : (x as f32 + get_halton(i, 2)) * sub_x,
+                        y : (y as f32 + get_halton(i, 3)) * sub_y,
+                    } + offset;
+
+                    area.add_sample(Sample::new(sample_pos.x, sample_pos.y));
+                }
+            }
+        }
+    }
 }
