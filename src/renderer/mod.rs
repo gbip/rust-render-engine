@@ -2,11 +2,10 @@ use Image;
 use color::RGBA8;
 use std::slice::Iter;
 use std::collections::HashMap;
-use renderer::sampler::Sample;
+use sampler::Sample;
 
 pub mod render;
 pub mod block;
-pub mod sampler;
 
 /** Type representant un registre de texture */
 pub type TextureRegister = HashMap<String, Image<RGBA8>>;

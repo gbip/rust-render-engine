@@ -10,6 +10,7 @@ pub mod angle;
 #[allow(non_snake_case)]
 pub mod scene;
 pub mod renderer;
+pub mod sampler;
 pub mod ray;
 pub mod color;
 pub mod img;

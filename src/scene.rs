@@ -1,7 +1,7 @@
 use std::vec::Vec;
 use math::{Vector3, Vector3f, VectorialOperations};
 use geometry::obj3d::Object;
-use renderer::sampler::Sample;
+use sampler::Sample;
 use ray::Ray;
 use io_utils;
 use serde_json;

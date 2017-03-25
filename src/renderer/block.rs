@@ -1,7 +1,7 @@
 use std::slice::{IterMut, Iter};
 use math::Vector2f;
 use renderer::Pixel;
-use renderer::sampler::{SamplableArea, Sample};
+use sampler::{SamplableArea, Sample};
 
 /** Structure qui represente un "bout" d'image à rendre.
  * Elle est utilisée par le sampler pour stocker les samples, et par le filter
