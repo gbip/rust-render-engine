@@ -36,7 +36,31 @@ pub trait SamplableArea {
 }
 
 pub trait Sampler {
-    fn create_samples(&self, area: &mut SamplableArea);
+    fn create_samples(&self, area: &mut SamplableArea) {
+        let offset = area.offset();
+        let (width, height) = area.dimensions();
+        let sub_x = width / area.pixel_width() as f32;
+        let sub_y = height / area.pixel_height() as f32;
+
+        for y in 0..area.pixel_width() {
+            for x in 0..area.pixel_height() {
+                let distrib = self.get_sample_distribution();
+
+                for point in distrib {
+                    let sample_pos = Vector2f {
+                        x : (x as f32 + point.x) * sub_x,
+                        y : (y as f32 + point.y) * sub_y,
+                    } + offset;
+
+                    area.add_sample(Sample::new(sample_pos.x, sample_pos.y));
+                }
+            }
+        }
+    }
+
+    fn get_sample_distribution(&self) -> Vec<Vector2f> {
+        vec![]
+    }
 }
 
 /** Sampler avec une distribution d'échantillon uniforme à travers les pixels
@@ -46,26 +70,19 @@ pub struct DefaultSampler {
 }
 
 impl Sampler for DefaultSampler {
-    fn create_samples(&self, area: &mut SamplableArea) {
-        let offset = area.offset();
-        let (width, height) = area.dimensions();
-        let sub_x = width / area.pixel_width() as f32;
-        let sub_y = height / area.pixel_height() as f32;
+    fn get_sample_distribution(&self) -> Vec<Vector2f> {
+        let mut result : Vec<Vector2f> = vec![];
 
-        for y in 0..area.pixel_width() {
-            for x in 0..area.pixel_height() {
-                for i in 0..self.sample_rate {
-                    for j in 0..self.sample_rate {
-                        let sample_pos = Vector2f {
-                            x : (x as f32 + i as f32 / self.sample_rate as f32 + 0.5) * sub_x,
-                            y : (y as f32 + j as f32 / self.sample_rate as f32 + 0.5) * sub_y,
-                        } + offset;
-
-                        area.add_sample(Sample::new(sample_pos.x, sample_pos.y));
-                    }
-                }
+        for i in 0..self.sample_rate {
+            for j in 0..self.sample_rate {
+                result.push(Vector2f {
+                    x : i as f32 / self.sample_rate as f32 + 0.5,
+                    y : j as f32 / self.sample_rate as f32 + 0.5,
+                });
             }
         }
+
+        result
     }
 }
 
@@ -94,23 +111,15 @@ pub struct HaltonSampler {
 }
 
 impl Sampler for HaltonSampler {
-    fn create_samples(&self, area: &mut SamplableArea) {
-        let offset = area.offset();
-        let (width, height) = area.dimensions();
-        let sub_x = width / area.pixel_width() as f32;
-        let sub_y = height / area.pixel_height() as f32;
-
-        for y in 0..area.pixel_width() {
-            for x in 0..area.pixel_height() {
-                for i in 0..self.sample_rate {
-                    let sample_pos = Vector2f {
-                        x : (x as f32 + get_halton(i, 2)) * sub_x,
-                        y : (y as f32 + get_halton(i, 3)) * sub_y,
-                    } + offset;
-
-                    area.add_sample(Sample::new(sample_pos.x, sample_pos.y));
-                }
-            }
+    fn get_sample_distribution(&self) -> Vec<Vector2f> {
+        let mut result : Vec<Vector2f> = vec![];
+        for i in 0..self.sample_rate {
+            result.push(Vector2f {
+                x : get_halton(i, 2),
+                y : get_halton(i, 3),
+            });
         }
+
+        result
     }
 }
