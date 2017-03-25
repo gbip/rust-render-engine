@@ -185,14 +185,16 @@
         "obj_path": "models/smoothed_suzanne.obj",
         "name": "Suzanne",
 	"visible": true ,
-	"material" : "scenes/materials/normals.json"
+	"material" : "scenes/materials/solid_green.json"
       }
 
     ]
   },
   "renderer": {
-    "res_x": 1920,
-    "res_y": 1080,
+    "res_x": 960,
+    "res_y": 540,
+    "threads":8,
+    "bucket_size":10,
     "subdivision_sampling" : 1,
     "background_color": {
       "r": 0,

@@ -9,6 +9,11 @@ use std::fmt;
 use filter::{Filter, filters};
 use renderer::Pixel;
 use renderer::block::Block;
+use std::sync::{Arc, Mutex};
+use std::clone::Clone;
+use std::ops::DerefMut;
+use scoped_pool::Pool;
+use colored::*;
 
 // Le ratio n'est pas enregistré à la deserialization, il faut penser à appeler compute_ratio()
 // pour avoir un ratio autre que 0.
@@ -29,6 +34,10 @@ pub struct Renderer {
 
     #[serde(skip_serializing, skip_deserializing, default = "HashMap::new")]
     textures: HashMap<String, Image<RGBA8>>,
+
+    threads: usize,
+
+    bucket_size: usize,
 }
 
 
@@ -41,6 +50,8 @@ impl Renderer {
             background_color: RGBA8::new_black(),
             textures: HashMap::new(),
             subdivision_sampling: 1,
+            bucket_size: 10,
+            threads: 1,
         }
     }
 
@@ -76,7 +87,12 @@ impl Renderer {
     }
 
     pub fn show_information(&self) {
-        println!("Resolution is : {} x {}", self.res_x, self.res_y);
+        println!("The output resolution is : {} x {}", self.res_x, self.res_y);
+
+        let stri = format!("{} {}",
+                           "Rendering with",
+                           format!("{} threads", self.threads).blue());
+        println!("{}", stri);
     }
 
     pub fn calculate_ray_intersection<'b>(&self,
@@ -134,47 +150,100 @@ impl Renderer {
         self.load_textures(world);
     }
 
-    pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA32> {
-        let mut data = Block::new(self.res_x as u32, self.res_y as u32, 0, 0);
+    /** Cette fonction permet de générer des blocs pour rendre l'image */
+    fn generate_blocks(&self) -> Vec<Block> {
 
-        //Sampling
+        let bloc_size = self.bucket_size;
+        let mut result: Vec<Block> = vec![];
+        if self.res_x % bloc_size != 0 || self.res_y % bloc_size != 0 {
+            panic!("Error, the resolution is not a multiple of 10");
+        } else {
+            for i in 0..self.res_x / 10 {
+                for j in 0..self.res_y / 10 {
+                    let block = Block::new(bloc_size as u32,
+                                           bloc_size as u32,
+                                           (i * bloc_size) as u32,
+                                           (j * bloc_size) as u32);
+                    result.push(block);
+                }
+            }
+        }
+        result
+
+    }
+
+    /** Fonction principale, qui génére les blocs de l'image et les rends, pour enfin les
+     * recombiner dans une image finale. */
+    #[allow(let_and_return)]
+    pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA32> {
+        let shared_image: Arc<Mutex<Image<RGBA32>>> = Arc::new(Mutex::new(Image::new(self.res_x,
+                                                                                     self.res_y)));
+        // On definit le nombre de threads à utiliser
+        let pool = Pool::new(self.threads);
+
+        // Génération des sous bloc de l'image
+        let mut blocks = self.generate_blocks();
+
+        // On passe les blocs aux threads
+        pool.scoped(|scope| while !blocks.is_empty() {
+            let block = blocks.pop().unwrap();
+            scope.execute(|| { self.render_block(block, world, camera, &shared_image); });
+        });
+
+        // On transforme le Arc<Mutex<Image>> en Image
+        let result = shared_image.lock().unwrap().deref_mut().clone();
+        result
+    }
+
+    /** Cette fonction se charge de rendre un bloc de l'image. */
+    pub fn render_block(&self,
+                        mut block: Block,
+                        world: &scene::World,
+                        camera: &scene::Camera,
+                        shared_image: &Arc<Mutex<Image<RGBA32>>>) {
+
+        // Generation des samples
         let sampler = DefaultSampler { sample_rate: self.subdivision_sampling };
-        sampler.create_samples(&mut data);
+        sampler.create_samples(&mut block, self.res_x as u32, self.res_y as u32);
 
         let filter = filters::BoxFilter::default();
         //filter.set_image_size(self.res_x as u32, self.res_y as u32);
 
         // Emission des rayons
-        for pixel in data.pixels_mut() {
+        for pixel in block.pixels_mut() {
             self.calculate_rays(world, camera, pixel);
         }
 
-        // Création de l'image
-        // filter.get_image(data)
 
-        // TODO plus besoin de ce code quand on aura un filter
         let mut temp_result: Vec<Vec<RGBA32>> = vec![];
 
-        for x in 0..data.dimensions().0 {
+        // Reconstruction de l'image à partir des samples et du filtre
+        for x in 0..block.dimensions().0 {
             let mut col: Vec<RGBA32> = vec![];
 
-            for y in 0..data.dimensions().1 {
-                col.push(filter.compute_color(data.get_pixel(x, y)));
+            for y in 0..block.dimensions().1 {
+                col.push(filter.compute_color(block.get_pixel(x, y)));
             }
-
             temp_result.push(col);
         }
 
-        Image::<RGBA32>::from_vec_vec(&temp_result)
+        // Superposition de l'image rendue à l'image finale
+        shared_image.lock()
+            .unwrap()
+            .deref_mut()
+            .superpose_sub_image(Image::<RGBA32>::from_vec_vec(&temp_result),
+                                 block.position_x(),
+                                 block.position_y());
     }
 }
 
 impl fmt::Debug for Renderer {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f,
-               "Renderer : resolution = {}x{}, background_color = {:?}",
+               "Renderer : resolution = {}x{}, background_color = {:?}, threads = {}",
                self.res_x,
                self.res_y,
-               self.background_color)
+               self.background_color,
+               self.threads)
     }
 }

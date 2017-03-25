@@ -1,8 +1,10 @@
 use std::slice::{IterMut, Iter};
 use renderer::Pixel;
-/** Structure utilisée par le sampler pour stocker les samples, et par le filter
-pour les lire et recomposer l'image finale
-TODO rename, déplacer ?*/
+
+/** Structure qui represente un "bout" d'image à rendre.
+ * Elle est utilisée par le sampler pour stocker les samples, et par le filter
+pour lire les samples et recomposer l'image finale. */
+#[derive(Clone)]
 pub struct Block {
     pixels: Vec<Pixel>,
     size_x: u32,
@@ -27,8 +29,15 @@ impl Block {
                 result.pixels.push(Pixel::new(x, y));
             }
         }
-
         result
+    }
+
+    pub fn position_x(&self) -> u32 {
+        self.pos_x
+    }
+
+    pub fn position_y(&self) -> u32 {
+        self.pos_y
     }
 
     pub fn dimensions(&self) -> (u32, u32) {
@@ -44,7 +53,6 @@ impl Block {
     }
 
     pub fn pixels_mut(&mut self) -> IterMut<Pixel> {
-
         self.pixels.iter_mut()
     }
 }

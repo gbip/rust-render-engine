@@ -102,7 +102,7 @@ impl Camera {
         self.fov = fov;
     }
 
-    /* Donne un repère pour placer le cadre de la caméra. Le premier point
+    /** Donne un repère pour placer le cadre de la caméra. Le premier point
     correspond à l'origine en haut à gauche, les deux autres aux vecteurs
     x et y qui définissent les dimensions et orientations du cadre respectivement */
     pub fn get_canvas_base(&self, ratio: f32) -> (Vector3f, Vector3f, Vector3f) {
