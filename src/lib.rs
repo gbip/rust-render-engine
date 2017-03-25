@@ -11,7 +11,6 @@ pub mod angle;
 pub mod scene;
 pub mod renderer;
 pub mod ray;
-pub mod sampler;
 pub mod color;
 pub mod img;
 pub mod io_utils;

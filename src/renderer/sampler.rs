@@ -59,4 +59,8 @@ impl Sampler for DefaultSampler {
             }
         }
     }
+
+    pub struct HaltonSampler {
+        
+    }
 }
