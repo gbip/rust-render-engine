@@ -1,21 +1,9 @@
-use Image;
-use color::RGBA8;
-use std::slice::Iter;
-use std::collections::HashMap;
-use sampler::Sample;
-
-pub mod render;
-pub mod block;
-
-
-
-/** Type representant un registre de texture */
-pub type TextureRegister = HashMap<String, Image<RGBA8>>;
-
+use std::slice::{IterMut, Iter};
+use renderer::Pixel;
 /** Structure utilisée par le sampler pour stocker les samples, et par le filter
 pour les lire et recomposer l'image finale
 TODO rename, déplacer ?*/
-pub struct RenderData {
+pub struct Block {
     pixels: Vec<Pixel>,
     size_x: u32,
     size_y: u32,
@@ -23,9 +11,9 @@ pub struct RenderData {
     pos_y: u32,
 }
 
-impl RenderData {
+impl Block {
     pub fn new(size_x: u32, size_y: u32, pos_x: u32, pos_y: u32) -> Self {
-        let mut result = RenderData {
+        let mut result = Block {
             pixels: vec![],
             size_x: size_x,
             size_y: size_y,
@@ -54,36 +42,9 @@ impl RenderData {
     pub fn pixels(&self) -> Iter<Pixel> {
         self.pixels.iter()
     }
-}
 
-/** Représente un pixel avec des Sample dedans. */
-pub struct Pixel {
-    x: u32,
-    y: u32,
-    samples: Vec<Sample>,
-}
+    pub fn pixels_mut(&mut self) -> IterMut<Pixel> {
 
-impl Pixel {
-    pub fn new(x: u32, y: u32) -> Pixel {
-        Pixel {
-            x: x,
-            y: y,
-            samples: vec![],
-        }
-    }
-
-    pub fn add_sample(&mut self, sample: Sample) {
-        self.samples.push(sample);
-    }
-    pub fn samples(&self) -> Iter<Sample> {
-        self.samples.iter()
-    }
-
-    pub fn x(&self) -> u32 {
-        self.x
-    }
-
-    pub fn y(&self) -> u32 {
-        self.y
+        self.pixels.iter_mut()
     }
 }

@@ -1,0 +1,40 @@
+use renderer::render::Renderer;
+use img::Image;
+use color::RGBA32;
+use scene::{World, Camera};
+use renderer::Pixel;
+use std::slice::Iter;
+
+/** Défini une sous-image à rendre */
+pub struct Block {
+    x: u32,
+    y: u32,
+
+    width: u32,
+    height: u32,
+}
+
+impl Block {
+    /** Renvoi un nouveau Block qui a pour position (x,y) et comme taille width*height*/
+    pub fn new(x: u32, y: u32, width: u32, height: u32) -> Block {
+        Block {
+            x: x,
+            y: y,
+            width: width,
+            height: height,
+        }
+    }
+
+    fn generate_block_renderer(&self) -> Renderer {
+        unimplemented!()
+    }
+
+
+    pub fn render_block(&self, world: &World, camera: &Camera) -> Image<RGBA32> {
+        self.generate_block_renderer().render(world, camera)
+    }
+
+    pub fn pixels(&self) -> Iter<Pixel> {
+        unimplemented!()
+    }
+}

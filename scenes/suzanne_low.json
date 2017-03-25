@@ -180,9 +180,9 @@
         "rotation": {
           "x": 0.0,
           "y": 0.0,
-          "z": 90.0
+          "z": 270.0
         },
-        "obj_path": "models/suzanne_low.obj",
+        "obj_path": "models/smoothed_suzanne.obj",
         "name": "Suzanne",
 	"visible": true ,
 	"material" : "scenes/materials/normals.json"
@@ -191,8 +191,8 @@
     ]
   },
   "renderer": {
-    "res_x": 960,
-    "res_y": 540,
+    "res_x": 1920,
+    "res_y": 1080,
     "subdivision_sampling" : 1,
     "background_color": {
       "r": 0,

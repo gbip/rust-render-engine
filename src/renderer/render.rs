@@ -7,7 +7,8 @@ use geometry::obj3d::Object;
 use std::collections::HashMap;
 use std::fmt;
 use filter::{Filter, filters};
-use renderer::{RenderData, Pixel};
+use renderer::Pixel;
+use renderer::block::Block;
 
 // Le ratio n'est pas enregistré à la deserialization, il faut penser à appeler compute_ratio()
 // pour avoir un ratio autre que 0.
@@ -31,7 +32,7 @@ pub struct Renderer {
 }
 
 
-impl<'a> Renderer {
+impl Renderer {
     pub fn new(res_x: usize, res_y: usize) -> Self {
         Renderer {
             res_x: res_x,
@@ -99,7 +100,7 @@ impl<'a> Renderer {
     /** Calcule les rayons à lancer pour le canvas passé en paramètres.
     Calcule ensuite la couleur finale de chaque rayon et stocke le résultat dans
     le canvas passé en paramètres. */
-    pub fn emit_rays(&self, world: &scene::World, camera: &scene::Camera, pixel: &mut Pixel) {
+    pub fn calculate_rays(&self, world: &scene::World, camera: &scene::Camera, pixel: &mut Pixel) {
 
         let objects = world.objects()
             .iter()
@@ -134,7 +135,7 @@ impl<'a> Renderer {
     }
 
     pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA32> {
-        let mut data = RenderData::new(self.res_x as u32, self.res_y as u32);
+        let mut data = Block::new(self.res_x as u32, self.res_y as u32, 0, 0);
 
         //Sampling
         let sampler = DefaultSampler { sample_rate: self.subdivision_sampling };
@@ -144,8 +145,8 @@ impl<'a> Renderer {
         //filter.set_image_size(self.res_x as u32, self.res_y as u32);
 
         // Emission des rayons
-        for pixel in &mut data.pixels {
-            self.emit_rays(world, camera, pixel);
+        for pixel in data.pixels_mut() {
+            self.calculate_rays(world, camera, pixel);
         }
 
         // Création de l'image
@@ -154,10 +155,10 @@ impl<'a> Renderer {
         // TODO plus besoin de ce code quand on aura un filter
         let mut temp_result: Vec<Vec<RGBA32>> = vec![];
 
-        for x in 0..data.size_x {
+        for x in 0..data.dimensions().0 {
             let mut col: Vec<RGBA32> = vec![];
 
-            for y in 0..data.size_y {
+            for y in 0..data.dimensions().1 {
                 col.push(filter.compute_color(data.get_pixel(x, y)));
             }
 

@@ -1,4 +1,4 @@
-use renderer::RenderData;
+use renderer::block::Block;
 use color::RGBA32;
 use math::Vector2f;
 
@@ -24,7 +24,7 @@ impl Sample {
 }
 
 pub trait Sampler {
-    fn create_samples(&self, data: &mut RenderData);
+    fn create_samples(&self, data: &mut Block);
 }
 
 // Sampler dégueu
@@ -33,7 +33,7 @@ pub struct DefaultSampler {
 }
 
 impl Sampler for DefaultSampler {
-    fn create_samples(&self, data: &mut RenderData) {
+    fn create_samples(&self, data: &mut Block) {
         let (width, height) = data.dimensions();
 
         for y in 0..height {
