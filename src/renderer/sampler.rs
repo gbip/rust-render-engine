@@ -1,4 +1,3 @@
-use renderer::block::Block;
 use color::RGBA32;
 use math::Vector2f;
 
@@ -24,8 +23,20 @@ impl Sample {
     }
 }
 
+pub trait SamplableArea {
+    fn dimensions(&self) -> (f32, f32);
+    fn offset(&self) -> Vector2f;
+    fn pixel_width(&self) -> u32 {
+        1u32
+    }
+    fn pixel_height(&self) -> u32 {
+        1u32
+    }
+    fn add_sample(&mut self, sample : Sample);
+}
+
 pub trait Sampler {
-    fn create_samples(&self, block: &mut Block, res_x: u32, res_y: u32);
+    fn create_samples(&self, area: &mut SamplableArea);
 }
 
 /** Sampler avec une distribution d'échantillon uniforme à travers les pixels*/
@@ -34,33 +45,29 @@ pub struct DefaultSampler {
 }
 
 impl Sampler for DefaultSampler {
-    fn create_samples(&self, block: &mut Block, res_x: u32, res_y: u32) {
-        let pos_x = block.position_x();
-        let pos_y = block.position_y();
+    fn create_samples(&self, area: &mut SamplableArea) {
+        let offset = area.offset();
+        let (width, height) = area.dimensions();
+        let sub_x = width / area.pixel_width() as f32;
+        let sub_y = height / area.pixel_height() as f32;
 
-
-        let block_width = pos_x + block.dimensions().0;
-        let block_height = pos_y + block.dimensions().1;
-
-        //let (width, height): (u32, u32) = block.dimensions();
-        for y in pos_y..block_height {
-            for x in pos_x..block_width {
-                let mut pixel = block.get_pixel(x - pos_x, y - pos_y);
+        for y in 0..area.pixel_width() {
+            for x in 0..area.pixel_height() {
                 for i in 0..self.sample_rate {
                     for j in 0..self.sample_rate {
-                        pixel.add_sample(Sample::new((x as f32 +
-                                                      i as f32 / self.sample_rate as f32) /
-                                                     res_x as f32,
-                                                     (y as f32 +
-                                                      j as f32 / self.sample_rate as f32) /
-                                                     res_y as f32));
+                        let sample_pos = Vector2f {
+                            x : (x as f32 + i as f32 / self.sample_rate as f32 + 0.5) * sub_x,
+                            y : (y as f32 + j as f32 / self.sample_rate as f32 + 0.5) * sub_y,
+                        } + offset;
+
+                        area.add_sample(Sample::new(sample_pos.x, sample_pos.y));
                     }
                 }
             }
         }
     }
+}
 
-    pub struct HaltonSampler {
-        
-    }
+pub struct HaltonSampler {
+
 }
