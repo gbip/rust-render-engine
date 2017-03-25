@@ -127,7 +127,11 @@ impl Renderer {
 
         for sample in &mut pixel.samples {
             // On récupère le rayon à partir du sample
-            let mut ray = camera.create_ray_from_sample(sample, self.ratio, self.res_x as f32, self.res_y as f32);
+            let mut ray =
+                camera.create_ray_from_sample(sample,
+                                              self.ratio,
+                                              self.res_x as f32,
+                                              self.res_y as f32);
 
             // CALCUL DE LA COULEUR DU RAYON (TODO à mettre ailleurs)
 
