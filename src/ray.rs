@@ -148,6 +148,11 @@ impl Surface for Plane {
         }
         result
     }
+
+    fn fast_intersection(&self, ray : &mut Ray) -> bool {
+        let slope: &Vector3f = &ray.slope;
+        self.a * slope.x + self.b * slope.y + self.c * slope.z != 0.0
+    }
 }
 
 impl Fragment {
