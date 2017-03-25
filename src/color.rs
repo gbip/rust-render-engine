@@ -15,10 +15,10 @@ pub struct RGBA32 {
 // manage object color through textures.
 #[derive(Clone,Debug,Copy,Serialize,Deserialize,PartialEq)]
 pub struct RGBA8 {
-    r: u8,
-    g: u8,
-    b: u8,
-    a: u8,
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+    pub a: u8,
 }
 
 fn u32_to_u8(v: u32) -> u8 {

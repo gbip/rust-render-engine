@@ -512,7 +512,6 @@ impl Surface for Object {
 
     fn fast_intersection(&self, ray: &mut Ray) -> bool {
         if ray.max_t * ray.slope().norm() > self.barycenter.norm() {
-
             for tri in self.triangles() {
                 if tri.fast_intersection(ray) {
                     return true;
@@ -522,11 +521,7 @@ impl Surface for Object {
             false
         } else {
             false
-
         }
-
-
-
     }
 }
 

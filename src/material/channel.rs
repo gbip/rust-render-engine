@@ -78,11 +78,12 @@ impl Texture for NormalMap {
                  -> RGBA32 {
         let normal = frag.normal / frag.normal.norm();
 
-        let mut white = RGBA32::new_white();
-        white.r = (white.r as f32 * normal.x) as u32;
-        white.g = (white.g as f32 * normal.y) as u32;
-        white.b = (white.b as f32 * normal.z) as u32;
-        white
+        //let mut white = RGBA32::new_white();
+        let mut white = RGBA8::new(&128, &128, &128, &128);
+        white.r = (white.r as f32 * normal.x) as u8;
+        white.g = (white.g as f32 * normal.y) as u8;
+        white.b = (white.b as f32 * normal.z) as u8;
+        white.to_rgba32()
 
     }
 }
