@@ -12,8 +12,10 @@ use renderer::block::Block;
 use std::sync::{Arc, Mutex};
 use std::clone::Clone;
 use std::ops::DerefMut;
+use std::io::Stdout;
 use scoped_pool::Pool;
 use colored::*;
+use pbr::ProgressBar;
 
 // Le ratio n'est pas enregistré à la deserialization, il faut penser à appeler compute_ratio()
 // pour avoir un ratio autre que 0.
@@ -91,7 +93,7 @@ impl Renderer {
 
         let stri = format!("{} {}",
                            "Rendering with",
-                           format!("{} threads", self.threads).blue());
+                           format!("{} threads", self.threads).yellow());
         println!("{}", stri);
     }
 
@@ -137,7 +139,7 @@ impl Renderer {
                 Some(p) => {
                     sample.color = p.get_point_color(world, &self.textures);
                 }
-                None => {
+                _ => {
                     sample.color = self.background_color.to_rgba32();
                 }
             }
@@ -178,18 +180,31 @@ impl Renderer {
     pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA32> {
         let shared_image: Arc<Mutex<Image<RGBA32>>> = Arc::new(Mutex::new(Image::new(self.res_x,
                                                                                      self.res_y)));
+
         // On definit le nombre de threads à utiliser
         let pool = Pool::new(self.threads);
 
         // Génération des sous bloc de l'image
         let mut blocks = self.generate_blocks();
 
+        // La barre qui affiche le temps d'attente du rendu
+        let progress_bar: Mutex<ProgressBar<Stdout>> = Mutex::new(ProgressBar::new(blocks.len() as
+                                                                                   u64));
+        progress_bar.lock().unwrap().show_speed = false;
+        progress_bar.lock().unwrap().show_counter = false;
+        progress_bar.lock().unwrap().message("Rendering : ");
+        progress_bar.lock().unwrap().format("|▌▌░|");
+
         // On passe les blocs aux threads
         pool.scoped(|scope| while !blocks.is_empty() {
             let block = blocks.pop().unwrap();
-            scope.execute(|| { self.render_block(block, world, camera, &shared_image); });
+            scope.execute(|| {
+                self.render_block(block, world, camera, &shared_image);
+                progress_bar.lock().unwrap().inc();
+            });
         });
 
+        progress_bar.lock().unwrap().finish();
         // On transforme le Arc<Mutex<Image>> en Image
         let result = shared_image.lock().unwrap().deref_mut().clone();
         result

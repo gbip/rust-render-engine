@@ -28,6 +28,7 @@ pub extern crate getopts;
 pub extern crate num;
 pub extern crate colored;
 pub extern crate scoped_pool;
+pub extern crate pbr;
 
 pub use scene::Scene;
 pub use img::Image;
