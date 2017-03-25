@@ -1,7 +1,7 @@
 pub mod filters;
 
 use RGBA32;
-use render::Pixel;
+use renderer::Pixel;
 
 
 /** Un trait qui représente un filtre */

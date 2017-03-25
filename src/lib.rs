@@ -9,7 +9,7 @@ pub mod math;
 pub mod angle;
 #[allow(non_snake_case)]
 pub mod scene;
-pub mod render;
+pub mod renderer;
 pub mod ray;
 pub mod sampler;
 pub mod color;

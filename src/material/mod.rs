@@ -1,7 +1,7 @@
 use ray::Fragment;
 use scene::World;
 use color::RGBA32;
-use render::TextureRegister;
+use renderer::TextureRegister;
 
 pub mod channel;
 pub mod flat_material;

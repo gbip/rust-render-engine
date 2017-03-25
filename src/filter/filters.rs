@@ -1,5 +1,5 @@
 use RGBA32;
-use render::Pixel;
+use renderer::Pixel;
 use math::{Vector2, Vector2f};
 use filter::Filter;
 

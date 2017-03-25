@@ -1,4 +1,4 @@
-use render::RenderData;
+use renderer::RenderData;
 use color::RGBA32;
 use math::Vector2f;
 

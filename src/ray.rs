@@ -4,7 +4,7 @@ use geometry::obj3d::Mesh;
 use material::Material;
 use scene::World;
 use color::RGBA32;
-use render::TextureRegister;
+use renderer::TextureRegister;
 
 /** Represente un point d'intresection entre un rayon et de la géometrie */
 pub struct Intersection<'a> {

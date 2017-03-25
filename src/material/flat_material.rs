@@ -4,7 +4,7 @@ use serde_json;
 use material::channel::Channel;
 use material::Material;
 use scene::World;
-use render::TextureRegister;
+use renderer::TextureRegister;
 use ray::Fragment;
 
 #[derive(Serialize,Deserialize,Debug,Clone)]

@@ -5,7 +5,7 @@ use sampler::Sample;
 use ray::Ray;
 use io_utils;
 use serde_json;
-use render::Renderer;
+use renderer::render::Renderer;
 use std::time::Instant;
 use ray::Surface;
 
