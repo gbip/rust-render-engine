@@ -86,10 +86,9 @@ impl Filter for BoxFilter {
         let mut result: RGBA32 = RGBA32::new_black();
         let sum: u32 = data.samples().fold(0, |acc, _| acc + 1);
         for sample in data.samples() {
-
-            result.r = sample.color.r() / sum;
-            result.g = sample.color.g() / sum;
-            result.b = sample.color.b() / sum;
+            result.r += sample.color.r() / sum;
+            result.g += sample.color.g() / sum;
+            result.b += sample.color.b() / sum;
 
         }
         result
