@@ -64,8 +64,10 @@ impl Filter for MitchellFilter {
             let absolute_sample_pos = sample.position();
             // On ramène la valeur pour la mettre au centre du pixel concerné
             let relative_sample_pixel_pos =
-                Vector2f::new(absolute_sample_pos.x - data.x() as f32 - pixel_position.0 as f32,
-                              absolute_sample_pos.y - data.y() as f32 - pixel_position.1 as f32);
+                Vector2f::new(absolute_sample_pos.x - data.x() as f32 - pixel_position.0 as f32 +
+                              0.5,
+                              absolute_sample_pos.y - data.y() as f32 - pixel_position.1 as f32 +
+                              0.5);
             weight_sum += self.weight_contribution(relative_sample_pixel_pos);
         }
         for sample in data.samples() {
@@ -73,10 +75,12 @@ impl Filter for MitchellFilter {
             let absolute_sample_pos = sample.position();
             // On ramène la valeur pour la mettre au centre du pixel concerné
             let relative_sample_pixel_pos =
-                Vector2f::new(absolute_sample_pos.x - data.x() as f32 - pixel_position.0 as f32,
-                              absolute_sample_pos.y - data.y() as f32 - pixel_position.1 as f32);
+                Vector2f::new(absolute_sample_pos.x - data.x() as f32 - pixel_position.0 as f32 +
+                              0.5,
+                              absolute_sample_pos.y - data.y() as f32 - pixel_position.1 as f32 +
+                              0.5);
             let weight = self.weight_contribution(relative_sample_pixel_pos);
-            //println!("weight: {}", weight);
+            println!("weight: {}", weight);
             result.r += (weight / weight_sum * sample.color.r() as f32) as u32;
             result.b += (weight / weight_sum * sample.color.b() as f32) as u32;
             result.g += (weight / weight_sum * sample.color.g() as f32) as u32;
