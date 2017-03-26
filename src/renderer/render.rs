@@ -127,7 +127,11 @@ impl Renderer {
 
         for sample in &mut pixel.samples {
             // On récupère le rayon à partir du sample
-            let mut ray = camera.create_ray_from_sample(sample, self.ratio, self.res_x as f32, self.res_y as f32);
+            let mut ray =
+                camera.create_ray_from_sample(sample,
+                                              self.ratio,
+                                              self.res_x as f32,
+                                              self.res_y as f32);
 
             // CALCUL DE LA COULEUR DU RAYON (TODO à mettre ailleurs)
 
@@ -222,7 +226,8 @@ impl Renderer {
         sampler.create_samples(&mut block);
 
         let filter = filters::BoxFilter::default();
-        //filter.set_image_size(self.res_x as u32, self.res_y as u32);
+        /*let mut filter = filters::MitchellFilter::default();
+        filter.set_image_size(self.res_x as u32, self.res_y as u32);*/
 
         // Emission des rayons
         for pixel in block.pixels_mut() {
@@ -237,7 +242,8 @@ impl Renderer {
             let mut col: Vec<RGBA32> = vec![];
 
             for y in 0..block.dimensions().1 {
-                col.push(filter.compute_color(block.get_pixel(x, y)));
+                col.push(filter.compute_color(block.get_pixel(x, y),
+                                              (block.position_x(), block.position_y())));
             }
             temp_result.push(col);
         }

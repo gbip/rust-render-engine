@@ -55,6 +55,14 @@ impl GeoPoint {
                           (uyz * mc - u.x * s) * self.pos.z,
                           (uzx * mc - u.y * s) * self.pos.x + (uyz * mc + u.x * s) * self.pos.y +
                           (u.z * u.z * mc + c) * self.pos.z);
+
+        self.norm =
+            Vector3f::new((u.x * u.x * mc + c) * self.norm.x + (uxy * mc - u.z * s) * self.norm.y +
+                          (uzx * mc + u.y * s) * self.norm.z,
+                          (uxy * mc + u.z * s) * self.norm.x + (u.y * u.y * mc + c) * self.norm.y +
+                          (uyz * mc - u.x * s) * self.norm.z,
+                          (uzx * mc - u.y * s) * self.norm.x + (uyz * mc + u.x * s) * self.norm.y +
+                          (u.z * u.z * mc + c) * self.norm.z);
     }
 
     // déplace le géopoint de manière à ce que la distance qui le sépare de l'origine

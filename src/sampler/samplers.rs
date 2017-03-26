@@ -1,5 +1,5 @@
 use math::Vector2f;
-use sampler::{Sampler};
+use sampler::Sampler;
 
 /** Sampler avec une distribution d'échantillon uniforme à travers les pixels
 (Stratified sampler without jittering)*/
@@ -9,13 +9,13 @@ pub struct DefaultSampler {
 
 impl Sampler for DefaultSampler {
     fn get_sample_distribution(&self) -> Vec<Vector2f> {
-        let mut result : Vec<Vector2f> = vec![];
+        let mut result: Vec<Vector2f> = vec![];
 
         for i in 0..self.sample_rate {
             for j in 0..self.sample_rate {
                 result.push(Vector2f {
-                    x : i as f32 / self.sample_rate as f32 + 0.5,
-                    y : j as f32 / self.sample_rate as f32 + 0.5,
+                    x: i as f32 / self.sample_rate as f32 + 0.5,
+                    y: j as f32 / self.sample_rate as f32 + 0.5,
                 });
             }
         }
@@ -25,7 +25,7 @@ impl Sampler for DefaultSampler {
 }
 
 // TODO PBRT propose une opti pour la base 2
-fn get_halton(a : u32, basis : u32) -> f32 {
+fn get_halton(a: u32, basis: u32) -> f32 {
     // Inversion de a
     let mut a_rev = 0;
     let mut a_not_rev = a;
@@ -45,16 +45,16 @@ fn get_halton(a : u32, basis : u32) -> f32 {
 
 /** Sampler 2D utilisant les séquences de Halton. */
 pub struct HaltonSampler {
-    pub sample_rate : u32,
+    pub sample_rate: u32,
 }
 
 impl Sampler for HaltonSampler {
     fn get_sample_distribution(&self) -> Vec<Vector2f> {
-        let mut result : Vec<Vector2f> = vec![];
+        let mut result: Vec<Vector2f> = vec![];
         for i in 0..self.sample_rate {
             result.push(Vector2f {
-                x : get_halton(i, 2),
-                y : get_halton(i, 3),
+                x: get_halton(i, 2),
+                y: get_halton(i, 3),
             });
         }
 

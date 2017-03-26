@@ -124,11 +124,17 @@ impl Camera {
 
     // Crée un rayon dont la direction est déterminé par les coordonnées du sample
     // passé en paramètres.
-    pub fn create_ray_from_sample(&self, sample: &Sample, ratio: f32, sample_res_x : f32, sample_res_y : f32) -> Ray {
+    pub fn create_ray_from_sample(&self,
+                                  sample: &Sample,
+                                  ratio: f32,
+                                  sample_res_x: f32,
+                                  sample_res_y: f32)
+                                  -> Ray {
         // TODO ici on fait un appel à get_canvas_basis pour chaque sample
         let (origin, e1, e2) = self.get_canvas_base(ratio);
         let sample_coord = sample.position();
-        let target = origin + e1 * sample_coord.x / sample_res_x + e2 * sample_coord.y / sample_res_y;
+        let target = origin + e1 * sample_coord.x / sample_res_x +
+                     e2 * sample_coord.y / sample_res_y;
         Ray::new(self.world_position, target - self.world_position)
     }
 }

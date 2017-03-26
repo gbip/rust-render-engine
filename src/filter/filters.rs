@@ -54,24 +54,33 @@ impl Default for MitchellFilter {
 }
 
 impl Filter for MitchellFilter {
-    fn compute_color(&self, data: &mut Pixel) -> RGBA32 {
+    // TODO : Accélerer ce calcul ?
+    fn compute_color(&self, data: &Pixel, pixel_position: (u32, u32)) -> RGBA32 {
         let mut result: RGBA32 = RGBA32::new_black();
-
+        let mut weight_sum: f32 = 0.0;
         // On calcule les contributions de chaque sample
         for sample in data.samples() {
-            // La position exprimée en % de la taille de l'image (une valeur entre 0 et 1)
+            // La position exprimée dans le système de coordonnée de l'image
             let absolute_sample_pos = sample.position();
             // On ramène la valeur pour la mettre au centre du pixel concerné
             let relative_sample_pixel_pos =
-                Vector2f::new(absolute_sample_pos.x * self.image_size.x as f32 - data.x() as f32,
-                              absolute_sample_pos.y * self.image_size.y as f32 - data.y() as f32);
-            let weight = self.weight_contribution(relative_sample_pixel_pos);
-            result.r += (weight * sample.color.r() as f32) as u32;
-            result.b += (weight * sample.color.b() as f32) as u32;
-            result.g += (weight * sample.color.g() as f32) as u32;
+                Vector2f::new(absolute_sample_pos.x - data.x() as f32 - pixel_position.0 as f32,
+                              absolute_sample_pos.y - data.y() as f32 - pixel_position.1 as f32);
+            weight_sum += self.weight_contribution(relative_sample_pixel_pos);
         }
-
-
+        for sample in data.samples() {
+            // La position exprimée dans le système de coordonnée de l'image
+            let absolute_sample_pos = sample.position();
+            // On ramène la valeur pour la mettre au centre du pixel concerné
+            let relative_sample_pixel_pos =
+                Vector2f::new(absolute_sample_pos.x - data.x() as f32 - pixel_position.0 as f32,
+                              absolute_sample_pos.y - data.y() as f32 - pixel_position.1 as f32);
+            let weight = self.weight_contribution(relative_sample_pixel_pos);
+            //println!("weight: {}", weight);
+            result.r += (weight / weight_sum * sample.color.r() as f32) as u32;
+            result.b += (weight / weight_sum * sample.color.b() as f32) as u32;
+            result.g += (weight / weight_sum * sample.color.g() as f32) as u32;
+        }
         result
     }
 }
@@ -82,7 +91,7 @@ pub struct BoxFilter {}
 
 
 impl Filter for BoxFilter {
-    fn compute_color(&self, data: &mut Pixel) -> RGBA32 {
+    fn compute_color(&self, data: &Pixel, _: (u32, u32)) -> RGBA32 {
         let mut result: RGBA32 = RGBA32::new_black();
         let sum: u32 = data.samples().fold(0, |acc, _| acc + 1);
         for sample in data.samples() {

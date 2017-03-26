@@ -1,4 +1,3 @@
-
 pub mod samplers;
 
 use color::RGBA32;
@@ -35,7 +34,7 @@ pub trait SamplableArea {
     fn pixel_height(&self) -> u32 {
         1u32
     }
-    fn add_sample(&mut self, sample : Sample);
+    fn add_sample(&mut self, sample: Sample);
 }
 
 pub trait Sampler {
@@ -51,8 +50,8 @@ pub trait Sampler {
 
                 for point in distrib {
                     let sample_pos = Vector2f {
-                        x : (x as f32 + point.x) * sub_x,
-                        y : (y as f32 + point.y) * sub_y,
+                        x: (x as f32 + point.x) * sub_x,
+                        y: (y as f32 + point.y) * sub_y,
                     } + offset;
 
                     area.add_sample(Sample::new(sample_pos.x, sample_pos.y));
