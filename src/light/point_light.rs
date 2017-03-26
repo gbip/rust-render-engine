@@ -18,4 +18,10 @@ impl Light for PointLight {
         ray.max_t = self.position.norm();
         world.is_occluded(&mut ray)
     }
+
+    fn emit_rays(&self, point: &Vector3f, _: &World) -> Vec<Ray> {
+        let mut result : Vec<Ray> = vec![];
+        result.push(Ray::new(*point, self.position - *point));
+        result
+    }
 }
