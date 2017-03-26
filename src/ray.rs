@@ -11,32 +11,36 @@ pub struct Intersection<'a> {
     fragment: Fragment,
     geometry: &'a Mesh,
     material: &'a Material,
+    ray: Ray,
 }
 
 impl<'a> Intersection<'a> {
     /** Un peu de magie sur les lifetime pour que le compilo comprenne ce qu'il se passe*/
-    pub fn new<'b: 'a, T: Material>(frag: Fragment, geo: &'b Mesh, mat: &'b T) -> Intersection<'a> {
+    pub fn new<'b: 'a, T: Material>(frag: Fragment, ray : &Ray, geo: &'b Mesh, mat: &'b T) -> Intersection<'a> {
         Intersection {
             fragment: frag,
             geometry: geo,
             material: mat,
+            ray: *ray,
         }
     }
 
     pub fn get_point_color(&self, world: &World, texture_register: &TextureRegister) -> RGBA32 {
+        // TODO à simplifier (tout en gardant la gestion des cas anormaux)
         match self.fragment.tex {
-            Some(coords) => {
+            Some(_) => {
                 self.material
                     .get_color(&self.fragment,
+                               &self.ray,
                                world,
-                               Some((coords.x, coords.y, texture_register)))
+                               Some(texture_register))
             }
-            None => self.material.get_color(&self.fragment, world, None),
+            None => self.material.get_color(&self.fragment, &self.ray, world, None),
         }
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Ray {
     // Le vecteur directeur du rayon
     slope: Vector3f,

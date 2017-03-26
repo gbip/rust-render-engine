@@ -5,7 +5,8 @@ use material::channel::Channel;
 use material::Material;
 use scene::World;
 use renderer::TextureRegister;
-use ray::Fragment;
+use ray::{Fragment, Ray};
+use math::VectorialOperations;
 
 #[derive(Serialize,Deserialize,Debug,Clone)]
 pub struct FlatMaterial {
@@ -62,18 +63,37 @@ impl FlatMaterial {
 impl Material for FlatMaterial {
     fn get_color(&self,
                  frag: &Fragment,
+                 _: &Ray,
                  _: &World,
-                 texture_data: Option<(f32, f32, &TextureRegister)>)
+                 texture_data: Option<&TextureRegister>)
                  -> RGBA32 {
 
-
-        let (u, v, tex_reg) = match texture_data {
-            Some(data) => (Some(data.0), Some(data.1), Some(data.2)),
-            None => (None, None, None),
+        let (u, v, tex_reg) = match (frag.tex, texture_data) {
+            (Some(tex_coords), Some(texture_register)) => (Some(tex_coords.x), Some(tex_coords.y), Some(texture_register)),
+            _ => (None, None, None),
         };
 
         self.diffuse.get_color(frag, u, v, tex_reg)
+    }
+}
 
+// C'est très le fun
+pub struct MatCap {}
 
+impl Material for MatCap {
+    fn get_color(&self,
+                 frag: &Fragment,
+                 ray: &Ray,
+                 _: &World,
+                 _: Option<&TextureRegister>)
+                 -> RGBA32 {
+            let coef = (frag.normal.dot_product(&(ray.slope() / ray.slope().norm())).abs() * 255f32) as u8;
+
+            RGBA8::new(
+                &coef,
+                &(255u8 - coef),
+                &coef,
+                &255u8
+            ).to_rgba32()
     }
 }

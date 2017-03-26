@@ -415,7 +415,6 @@ impl Object {
         } else {
             println!("{} has not material, assigning to it a default material.",
                      self.name);
-
         }
     }
 
@@ -498,7 +497,7 @@ impl Object {
     pub fn get_intersection_point(&self, ray: &mut Ray) -> Option<Intersection> {
 
         match self.get_intersection_fragment(ray) {
-            Some(frag) => Some(Intersection::new(frag, &self.mesh, &self.material)),
+            Some(frag) => Some(Intersection::new(frag, ray, &self.mesh, &self.material)),
             None => None,
         }
     }
@@ -519,17 +518,16 @@ impl Surface for Object {
     }
 
     fn fast_intersection(&self, ray: &mut Ray) -> bool {
-        if ray.max_t * ray.slope().norm() > self.barycenter.norm() {
+        if self.bbox.intersects(ray) {
             for tri in self.triangles() {
                 if tri.fast_intersection(ray) {
                     return true;
                 }
                 continue;
             }
-            false
-        } else {
-            false
         }
+
+        false
     }
 }
 
