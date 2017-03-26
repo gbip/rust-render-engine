@@ -1,4 +1,3 @@
-
 pub mod samplers;
 
 use color::RGBA32;

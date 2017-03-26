@@ -46,7 +46,12 @@ impl Block {
         (self.size_x, self.size_y)
     }
 
-    pub fn get_pixel(&mut self, x: u32, y: u32) -> &mut Pixel {
+    pub fn get_pixel(&self, x: u32, y: u32) -> &Pixel {
+        &self.pixels[(x + y * self.size_x) as usize]
+    }
+
+    pub fn get_pixel_mut(&mut self, x: u32, y: u32) -> &mut Pixel {
+
         &mut self.pixels[(x + y * self.size_x) as usize]
     }
 
@@ -84,7 +89,7 @@ impl SamplableArea for Block {
         let y = sample.position().y as u32 - self.pos_y;
 
         if x < self.size_x && y < self.size_y {
-            self.get_pixel(x, y).add_sample(sample);
+            self.get_pixel_mut(x, y).add_sample(sample);
         } else {
             panic!("Sample en dehors de la zone ");
         }
