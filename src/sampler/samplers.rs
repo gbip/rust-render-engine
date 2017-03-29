@@ -4,18 +4,28 @@ use sampler::Sampler;
 /** Sampler avec une distribution d'échantillon uniforme à travers les pixels
 (Stratified sampler without jittering)*/
 pub struct DefaultSampler {
-    pub sample_rate: u32,
+    sample_rate: u32,
+    sample_square_root : u32,
+}
+
+impl DefaultSampler {
+    pub fn new(sample_rate : u32) -> DefaultSampler {
+        DefaultSampler {
+            sample_rate : sample_rate,
+            sample_square_root : (sample_rate as f32).sqrt() as u32,
+        }
+    }
 }
 
 impl Sampler for DefaultSampler {
     fn get_sample_distribution(&self) -> Vec<Vector2f> {
         let mut result: Vec<Vector2f> = vec![];
 
-        for i in 0..self.sample_rate {
-            for j in 0..self.sample_rate {
+        for i in 0..self.sample_square_root {
+            for j in 0..self.sample_square_root {
                 result.push(Vector2f {
-                    x: i as f32 / self.sample_rate as f32 + 0.5,
-                    y: j as f32 / self.sample_rate as f32 + 0.5,
+                    x: i as f32 / self.sample_square_root as f32 + 0.5,
+                    y: j as f32 / self.sample_square_root as f32 + 0.5,
                 });
             }
         }
@@ -45,7 +55,15 @@ fn get_halton(a: u32, basis: u32) -> f32 {
 
 /** Sampler 2D utilisant les séquences de Halton. */
 pub struct HaltonSampler {
-    pub sample_rate: u32,
+    sample_rate: u32,
+}
+
+impl HaltonSampler {
+    pub fn new(sample_rate : u32) -> HaltonSampler {
+        HaltonSampler {
+            sample_rate : sample_rate,
+        }
+    }
 }
 
 impl Sampler for HaltonSampler {

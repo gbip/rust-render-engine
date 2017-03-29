@@ -222,7 +222,7 @@ impl Renderer {
                         shared_image: &Arc<Mutex<Image<RGBA32>>>) {
 
         // Generation des samples
-        let sampler = samplers::HaltonSampler { sample_rate: self.subdivision_sampling };
+        let sampler = samplers::HaltonSampler::new(self.subdivision_sampling);
         sampler.create_samples(&mut block);
 
         let filter = filters::BoxFilter::default();
