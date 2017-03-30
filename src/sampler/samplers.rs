@@ -12,7 +12,7 @@ impl DefaultSampler {
     pub fn new(sample_rate : u32) -> DefaultSampler {
         DefaultSampler {
             sample_rate : sample_rate,
-            sample_square_root : (sample_rate as f32).sqrt() as u32,
+            sample_square_root : (sample_rate as f32).sqrt().ceil() as u32,
         }
     }
 }
@@ -27,6 +27,7 @@ impl Sampler for DefaultSampler {
                     x: i as f32 / self.sample_square_root as f32 + 0.5,
                     y: j as f32 / self.sample_square_root as f32 + 0.5,
                 });
+                if result.len() >= self.sample_rate as usize { break; }
             }
         }
 
