@@ -16,7 +16,11 @@ pub struct Intersection<'a> {
 
 impl<'a> Intersection<'a> {
     /** Un peu de magie sur les lifetime pour que le compilo comprenne ce qu'il se passe*/
-    pub fn new<'b: 'a, T: Material>(frag: Fragment, ray : &Ray, geo: &'b Mesh, mat: &'b T) -> Intersection<'a> {
+    pub fn new<'b: 'a, T: Material>(frag: Fragment,
+                                    ray: &Ray,
+                                    geo: &'b Mesh,
+                                    mat: &'b T)
+                                    -> Intersection<'a> {
         Intersection {
             fragment: frag,
             geometry: geo,
@@ -30,10 +34,7 @@ impl<'a> Intersection<'a> {
         match self.fragment.tex {
             Some(_) => {
                 self.material
-                    .get_color(&self.fragment,
-                               &self.ray,
-                               world,
-                               Some(texture_register))
+                    .get_color(&self.fragment, &self.ray, world, Some(texture_register))
             }
             None => self.material.get_color(&self.fragment, &self.ray, world, None),
         }

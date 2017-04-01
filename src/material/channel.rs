@@ -117,7 +117,7 @@ impl Channel {
                 normal.get_color(frag, None, None, None)
             }
 
-            (None, None, None, &Channel::Solid { color }) => color.to_rgba32(),
+            (None, None, None, &Channel::Solid { ref color }) => color.to_rgba32(),
             _ => panic!("Error get_color"),
         }
     }

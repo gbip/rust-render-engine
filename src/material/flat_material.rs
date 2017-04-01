@@ -69,7 +69,9 @@ impl Material for FlatMaterial {
                  -> RGBA32 {
 
         let (u, v, tex_reg) = match (frag.tex, texture_data) {
-            (Some(tex_coords), Some(texture_register)) => (Some(tex_coords.x), Some(tex_coords.y), Some(texture_register)),
+            (Some(tex_coords), Some(texture_register)) => {
+                (Some(tex_coords.x), Some(tex_coords.y), Some(texture_register))
+            }
             _ => (None, None, None),
         };
 
@@ -87,13 +89,9 @@ impl Material for MatCap {
                  _: &World,
                  _: Option<&TextureRegister>)
                  -> RGBA32 {
-            let coef = (frag.normal.dot_product(&(ray.slope() / ray.slope().norm())).abs() * 255f32) as u8;
+        let coef = (frag.normal.dot_product(&(ray.slope() / ray.slope().norm())).abs() *
+                    255f32) as u8;
 
-            RGBA8::new(
-                &coef,
-                &(255u8 - coef),
-                &coef,
-                &255u8
-            ).to_rgba32()
+        RGBA8::new(&coef, &(255u8 - coef), &coef, &255u8).to_rgba32()
     }
 }

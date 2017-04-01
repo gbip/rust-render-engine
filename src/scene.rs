@@ -1,6 +1,7 @@
 use std::vec::Vec;
 use math::{Vector3, Vector3f, VectorialOperations};
 use geometry::obj3d::Object;
+use light::LightObject;
 use sampler::Sample;
 use ray::Ray;
 use io_utils;
@@ -147,6 +148,8 @@ pub struct World {
     cameras: Vec<Camera>,
 
     objects: Vec<Object>,
+
+    lights: Vec<LightObject>,
 }
 
 impl World {
@@ -171,6 +174,7 @@ impl World {
             base_vector: base_vector,
             cameras: vec![],
             objects: vec![],
+            lights: vec![],
         }
     }
 

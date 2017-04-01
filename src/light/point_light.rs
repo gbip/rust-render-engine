@@ -4,11 +4,11 @@ use light::Light;
 use ray::Ray;
 
 /** Represente une lumière ponctuelle */
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize,Deserialize, Debug)]
 pub struct PointLight {
     position: Vector3f,
 
-    intensitiy: f32,
+    intensity: f32,
 }
 
 
@@ -20,7 +20,7 @@ impl Light for PointLight {
     }
 
     fn emit_rays(&self, point: &Vector3f, _: &World) -> Vec<Ray> {
-        let mut result : Vec<Ray> = vec![];
+        let mut result: Vec<Ray> = vec![];
         result.push(Ray::new(*point, self.position - *point));
         result
     }

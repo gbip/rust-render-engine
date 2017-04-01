@@ -168,7 +168,7 @@
         },
         "obj_path": "models/uv_plane.obj",
         "name": "White Floor",
-        "material_path": "scenes/materials/material1.json",
+        "material": "scenes/materials/checker.json",
 	       "visible": true
       },
 {
@@ -224,11 +224,26 @@
 	"visible": true
       }
 
+    ],
+    "lights": [
+      {
+        "point": {
+          "position": {
+            "x": 10.0,
+            "y": 0.0,
+            "z": 3.0
+          },
+          "intensity": 10.0
+        }
+      }
     ]
   },
   "renderer": {
     "res_x": 960,
     "res_y": 540,
+    "threads":8,
+    "bucket_size":10,
+    "subdivision_sampling" : 4,
     "background_color": {
       "r": 0,
       "g": 0,

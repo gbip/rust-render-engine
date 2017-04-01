@@ -80,7 +80,6 @@ impl Filter for MitchellFilter {
                               absolute_sample_pos.y - data.y() as f32 - pixel_position.1 as f32 +
                               0.5);
             let weight = self.weight_contribution(relative_sample_pixel_pos);
-            println!("weight: {}", weight);
             result.r += (weight / weight_sum * sample.color.r() as f32) as u32;
             result.b += (weight / weight_sum * sample.color.b() as f32) as u32;
             result.g += (weight / weight_sum * sample.color.g() as f32) as u32;

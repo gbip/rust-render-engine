@@ -188,6 +188,18 @@
 	"material" : "scenes/materials/normals.json"
       }
 
+    ],
+    "lights": [
+      {
+        "point": {
+          "position": {
+            "x": 10.0,
+            "y": 0.0,
+            "z": 3.0
+          },
+          "intensity": 10.0
+        }
+      }
     ]
   },
   "renderer": {
