@@ -76,7 +76,8 @@ impl Renderer {
             for path in texture_paths {
                 let path_str = String::from(path.as_str());
                 println!("Ajout de la texture {}", path);
-                textures.entry(path)
+                textures
+                    .entry(path)
                     .or_insert_with(|| Image::<RGBA8>::read_from_file(path_str.as_str()));
             }
         }
@@ -120,18 +121,18 @@ impl Renderer {
     le canvas passé en paramètres. */
     pub fn calculate_rays(&self, world: &scene::World, camera: &scene::Camera, pixel: &mut Pixel) {
 
-        let objects = world.objects()
+        let objects = world
+            .objects()
             .iter()
             .filter(|bbox| bbox.is_visible())
             .collect::<Vec<&Object>>();
 
         for sample in &mut pixel.samples {
             // On récupère le rayon à partir du sample
-            let mut ray =
-                camera.create_ray_from_sample(sample,
-                                              self.ratio,
-                                              self.res_x as f32,
-                                              self.res_y as f32);
+            let mut ray = camera.create_ray_from_sample(sample,
+                                                        self.ratio,
+                                                        self.res_x as f32,
+                                                        self.res_y as f32);
 
             // CALCUL DE LA COULEUR DU RAYON (TODO à mettre ailleurs)
 
@@ -201,12 +202,12 @@ impl Renderer {
 
         // On passe les blocs aux threads
         pool.scoped(|scope| while !blocks.is_empty() {
-            let block = blocks.pop().unwrap();
-            scope.execute(|| {
-                self.render_block(block, world, camera, &shared_image);
-                progress_bar.lock().unwrap().inc();
-            });
-        });
+                        let block = blocks.pop().unwrap();
+                        scope.execute(|| {
+                                          self.render_block(block, world, camera, &shared_image);
+                                          progress_bar.lock().unwrap().inc();
+                                      });
+                    });
 
         progress_bar.lock().unwrap().finish();
         // On transforme le Arc<Mutex<Image>> en Image
@@ -249,7 +250,8 @@ impl Renderer {
         }
 
         // Superposition de l'image rendue à l'image finale
-        shared_image.lock()
+        shared_image
+            .lock()
             .unwrap()
             .deref_mut()
             .superpose_sub_image(Image::<RGBA32>::from_vec_vec(&temp_result),

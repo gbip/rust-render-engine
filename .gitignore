@@ -9,3 +9,4 @@ template.json
 *.sh
 *.png
 /.idea/
+*.rs.bk

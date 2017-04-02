@@ -58,9 +58,11 @@ impl Scene {
         self.renderer.show_information();
         println!("Starting to render...");
         let now = Instant::now();
-        let image = self.renderer.render(&self.world, self.world.get_camera(0));
+        let image = self.renderer
+            .render(&self.world, self.world.get_camera(0));
         println!("Render done in {} s, writting result to file {}",
-                 now.elapsed().as_secs() as f64 + (now.elapsed().subsec_nanos() as f64 * (1.0/1_000_000_000_f64)),
+                 now.elapsed().as_secs() as f64 + (now.elapsed().subsec_nanos() as f64 *
+                     (1.0/1_000_000_000_f64)),
                  &file_path,);
         image.write_to_file(file_path)
     }
@@ -68,8 +70,8 @@ impl Scene {
 
 #[derive(Serialize,Deserialize,Debug)]
 pub struct Camera {
-    /// The position fo the camera exprimed in the standard word space coordinates (where {0,0,0} is the
-    /// center of the world)
+    /// The position fo the camera exprimed in the standard word space coordinates (where {0,0,0}
+    /// is the center of the world)
     pub world_position: Vector3f,
 
     /// The position of the point at which the camera is aiming, in world space coordinates
@@ -155,7 +157,8 @@ pub struct World {
 impl World {
     // Ajoute une caméra dans le monde
     pub fn add_camera(self: &mut World, position: Vector3f, target: Vector3f) {
-        self.cameras.push(Camera::new(position, target, self.base_vector[2]));
+        self.cameras
+            .push(Camera::new(position, target, self.base_vector[2]));
     }
 
     // Charge la géomètrie de tous les objets. Utilisé uniquement en fin de deserialization.
@@ -184,7 +187,9 @@ impl World {
     }
 
     pub fn get_camera(&self, cam_indice: usize) -> &Camera {
-        self.cameras.get(cam_indice).expect("Out of bound camera index")
+        self.cameras
+            .get(cam_indice)
+            .expect("Out of bound camera index")
     }
 
     pub fn objects(&self) -> &Vec<Object> {
@@ -238,25 +243,25 @@ mod test {
         let (origin, vec1, vec2) = cam.get_canvas_base(1.0);
 
         assert!((origin -
-                 Vector3f {
-                x: 4.0,
-                y: 2.0,
-                z: 4.0 + 2.0_f32.sqrt(),
-            })
-            .norm() < 0.001);
+                     Vector3f {
+                         x: 4.0,
+                         y: 2.0,
+                         z: 4.0 + 2.0_f32.sqrt(),
+                     })
+                    .norm() < 0.001);
         assert!((vec1 -
-                 Vector3f {
-                x: -2.0,
-                y: 2.0,
-                z: 0.0,
-            })
-            .norm() < 0.001);
+                     Vector3f {
+                         x: -2.0,
+                         y: 2.0,
+                         z: 0.0,
+                     })
+                    .norm() < 0.001);
         assert!((vec2 -
-                 Vector3f {
-                x: 0.0,
-                y: 0.0,
-                z: -2.0 * 2.0_f32.sqrt(),
-            })
-            .norm() < 0.001);
+                     Vector3f {
+                         x: 0.0,
+                         y: 0.0,
+                         z: -2.0 * 2.0_f32.sqrt(),
+                     })
+                    .norm() < 0.001);
     }
 }

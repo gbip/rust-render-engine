@@ -31,8 +31,8 @@ pub trait AlmostEq<T> {
     // valeur possible.
     fn equal_with_threshold(&self, other: &Self, threshold: Option<T>) -> bool;
 
-    // De même que pour equal_with_threshold, l'implémentation doit spécifier la plus petite valeur
-    // possible si le seuil est absent
+    // De même que pour equal_with_threshold, l'implémentation doit spécifier la plus petite
+    // valeur possible si le seuil est absent
     fn not_equal_with_threshold(&self, other: &Self, threshold: Option<T>) -> bool;
 
     // Lire "almost non equal"
@@ -589,15 +589,15 @@ mod tests {
         };
 
         assert!((v1 * v2).aeq(&Vector3 {
-            x: 0_f32,
-            y: 2_f32,
-            z: 4_f32,
-        }));
+                                   x: 0_f32,
+                                   y: 2_f32,
+                                   z: 4_f32,
+                               }));
         assert!((&v1 * &v2).aeq(&Vector3 {
-            x: 0_f32,
-            y: 2_f32,
-            z: 4_f32,
-        }));
+                                     x: 0_f32,
+                                     y: 2_f32,
+                                     z: 4_f32,
+                                 }));
     }
 
     #[test]
