@@ -99,6 +99,12 @@ impl Ray {
         }
     }
 
+    /** Renvoies 1/slope, utile pour accélerer les calcules d'intersection avec les bounding box
+    ! */
+    pub fn inv_slope(&self) -> Vector3f {
+        self.inv_slope
+    }
+
     pub fn slope(&self) -> Vector3f {
         self.slope
     }
