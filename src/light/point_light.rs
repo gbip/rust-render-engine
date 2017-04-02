@@ -1,4 +1,4 @@
-use math::{VectorialOperations, Vector3f};
+use math::Vector3f;
 use scene::World;
 use light::Light;
 use ray::Ray;
