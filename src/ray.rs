@@ -1,3 +1,5 @@
+use std::rc::Rc;
+use std::cell::Cell;
 use math::{Vector3f, Vector2f};
 use math::VectorialOperations;
 use geometry::obj3d::Mesh;
@@ -11,13 +13,13 @@ pub struct Intersection<'a> {
     fragment: Fragment,
     geometry: &'a Mesh,
     material: &'a Material,
-    ray: Ray,
+    ray: Rc<Cell<Ray>>,
 }
 
 impl<'a> Intersection<'a> {
     /** Un peu de magie sur les lifetime pour que le compilo comprenne ce qu'il se passe*/
     pub fn new<'b: 'a, T: Material>(frag: Fragment,
-                                    ray: &Ray,
+                                    ray: Rc<Cell<Ray>>,
                                     geo: &'b Mesh,
                                     mat: &'b T)
                                     -> Intersection<'a> {
@@ -25,7 +27,7 @@ impl<'a> Intersection<'a> {
             fragment: frag,
             geometry: geo,
             material: mat,
-            ray: *ray,
+            ray: ray.clone(),
         }
     }
 
@@ -34,11 +36,14 @@ impl<'a> Intersection<'a> {
         match self.fragment.tex {
             Some(_) => {
                 self.material
-                    .get_color(&self.fragment, &self.ray, world, Some(texture_register))
+                    .get_color(&self.fragment,
+                               &self.ray.get(),
+                               world,
+                               Some(texture_register))
             }
             None => {
                 self.material
-                    .get_color(&self.fragment, &self.ray, world, None)
+                    .get_color(&self.fragment, &self.ray.get(), world, None)
             }
         }
     }
@@ -76,13 +81,17 @@ pub struct Fragment {
 
 
 pub trait Surface {
-    /** @returns the intersection fragment between the surface and
-    the ray given. */
-    fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment>;
+    /** Retourne le fragment crée par l'interseciton entre un rayon et de la géomètrie. Prends en
+     entrée un Rc<Cell<Ray>> pour éviter d'allouer de la mémoire à chaque création de fragment.
+     On aurait pu modifier le Fragment pour permettre d'avoir un borrow sur un rayon, mais à cause
+     de la mutabilité d'un rayon, cela n'est pas possible.
+     Pourquoi le Cell ? Il faut lire la doc : https://doc.rust-lang.org/std/cell/index.html
+    */
+    fn get_intersection_fragment(&self, ray: Rc<Cell<Ray>>) -> Option<Fragment>;
 
     /** Il y a une implémentation par défaut, pour éviter de s'amuser à l'implémenter pour les
      * tests unitaires. */
-    fn fast_intersection(&self, _: &mut Ray) -> bool {
+    fn fast_intersection(&self, _: Rc<Cell<Ray>>) -> bool {
         unreachable!();
     }
 }
@@ -136,10 +145,10 @@ impl Plane {
 }
 
 impl Surface for Plane {
-    fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment> {
+    fn get_intersection_fragment(&self, ray: Rc<Cell<Ray>>) -> Option<Fragment> {
 
-        let slope: &Vector3f = &ray.slope;
-        let origin: &Vector3f = &ray.origin;
+        let slope: &Vector3f = &ray.get().slope;
+        let origin: &Vector3f = &ray.get().origin;
 
         // ax + by + cz + d = 0 <=> m * t = p
         let m = self.a * slope.x + self.b * slope.y + self.c * slope.z;
@@ -150,7 +159,7 @@ impl Surface for Plane {
         } else {
             let t = p / m;
 
-            if t < 0.0 || (ray.max_t > 0.0 && t > ray.max_t) {
+            if t < 0.0 || (ray.get().max_t > 0.0 && t > ray.get().max_t) {
                 //La surface est "avant" ou "après" le point d'émission du rayon
                 None
             } else {
@@ -159,8 +168,8 @@ impl Surface for Plane {
         }
     }
 
-    fn fast_intersection(&self, ray: &mut Ray) -> bool {
-        let slope: &Vector3f = &ray.slope;
+    fn fast_intersection(&self, ray: Rc<Cell<Ray>>) -> bool {
+        let slope: &Vector3f = &ray.get().slope;
         self.a * slope.x + self.b * slope.y + self.c * slope.z != 0.0
     }
 }

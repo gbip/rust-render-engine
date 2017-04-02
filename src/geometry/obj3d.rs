@@ -1,5 +1,7 @@
 use std::vec::Vec;
 use std::f32;
+use std::rc::Rc;
+use std::cell::Cell;
 use math::{Vector3, Vector3f, Vector2f, VectorialOperations, AlmostEq};
 use material::flat_material::FlatMaterial;
 use ray::{Ray, Plane, Surface, Fragment, Intersection};
@@ -137,7 +139,7 @@ impl Triangle {
 
 
 impl Surface for Triangle {
-    fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment> {
+    fn get_intersection_fragment(&self, ray: Rc<Cell<Ray>>) -> Option<Fragment> {
         let pt_a = self.u.pos;
         let pt_b = self.v.pos;
         let pt_c = self.w.pos;
@@ -149,7 +151,7 @@ impl Surface for Triangle {
 
         let plane = Plane::new(&vec_ab, &vec_bc, &pt_a);
 
-        let mut result = plane.get_intersection_fragment(ray);
+        let mut result = plane.get_intersection_fragment(ray.clone());
 
         if let Some(ref mut point) = result {
             // On calcule si le point appartient à la face triangle
@@ -167,7 +169,7 @@ impl Surface for Triangle {
                 return None;
             }
 
-            ray.max_t = point.param;
+            ray.get().max_t = point.param;
 
             let global_area_x2: f32 = vec_ab.cross_product(&vec_bc).norm();
             let u = cp_c.norm() / global_area_x2;
@@ -190,11 +192,11 @@ impl Surface for Triangle {
     /** Source : https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
     */
     #[allow(non_snake_case)]
-    fn fast_intersection(&self, ray: &mut Ray) -> bool {
+    fn fast_intersection(&self, ray: Rc<Cell<Ray>>) -> bool {
 
         let e1: Vector3f = self.v.pos() - self.u.pos(); // Rapide
         let e2: Vector3f = self.w.pos() - self.u.pos(); // Rapide
-        let P: Vector3f = ray.slope().cross_product(&e2); // Moyen
+        let P: Vector3f = ray.get().slope().cross_product(&e2); // Moyen
 
         let det: f32 = e1.dot_product(&P); // Moyen
 
@@ -205,7 +207,7 @@ impl Surface for Triangle {
 
         let inv_det: f32 = 1f32 / det; // Lent
 
-        let T: Vector3f = ray.origin() - self.u.pos(); // Rapide
+        let T: Vector3f = ray.get().origin() - self.u.pos(); // Rapide
         let u: f32 = T.dot_product(&P) * inv_det; // Moyen
 
         if u < 0f32 || u > 1f32 {
@@ -215,7 +217,7 @@ impl Surface for Triangle {
 
         let Q: Vector3f = T.cross_product(&e1); // Moyen
 
-        let v: f32 = ray.slope().dot_product(&Q) * inv_det; // Moyen
+        let v: f32 = ray.get().slope().dot_product(&Q) * inv_det; // Moyen
 
         if v < 0f32 || u + v > 1f32 {
             // Rapide
@@ -224,9 +226,9 @@ impl Surface for Triangle {
 
         let t: f32 = e2.dot_product(&Q) * inv_det; // Moyen
 
-        if t > f32::EPSILON && ray.max_t > t {
+        if t > f32::EPSILON && ray.get().max_t > t {
             // Rapide
-            ray.max_t = t;
+            ray.get().max_t = t;
             return true;
         }
         false
@@ -498,20 +500,20 @@ impl Object {
         &self.position
     }
 
-    pub fn get_intersection_point(&self, ray: &mut Ray) -> Option<Intersection> {
+    pub fn get_intersection_point(&self, ray: Rc<Cell<Ray>>) -> Option<Intersection> {
 
-        match self.get_intersection_fragment(ray) {
-            Some(frag) => Some(Intersection::new(frag, ray, &self.mesh, &self.material)),
+        match self.get_intersection_fragment(ray.clone()) {
+            Some(frag) => Some(Intersection::new(frag, ray.clone(), &self.mesh, &self.material)),
             None => None,
         }
     }
 }
 
 impl Surface for Object {
-    fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment> {
+    fn get_intersection_fragment(&self, ray: Rc<Cell<Ray>>) -> Option<Fragment> {
 
         let points: Vec<Option<Fragment>> = self.triangles()
-            .map(|tri| tri.get_intersection_fragment(ray))
+            .map(|tri| tri.get_intersection_fragment(ray.clone()))
             .filter(|point| point.is_some())
             .collect();
 
@@ -521,10 +523,10 @@ impl Surface for Object {
         }
     }
 
-    fn fast_intersection(&self, ray: &mut Ray) -> bool {
-        if self.visible && self.bbox.intersects(ray) {
+    fn fast_intersection(&self, ray: Rc<Cell<Ray>>) -> bool {
+        if self.visible && self.bbox.intersects(ray.clone()) {
             for tri in self.triangles() {
-                if tri.fast_intersection(ray) {
+                if tri.fast_intersection(ray.clone()) {
                     return true;
                 }
             }
