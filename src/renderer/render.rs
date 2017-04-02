@@ -9,7 +9,7 @@ use filter::{Filter, filters};
 use renderer::Pixel;
 use renderer::block::Block;
 use sampler::{samplers, Sampler};
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 use std::clone::Clone;
 use std::ops::DerefMut;
 use std::io::Stdout;
@@ -183,8 +183,7 @@ impl Renderer {
      * recombiner dans une image finale. */
     #[allow(let_and_return)]
     pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA32> {
-        let shared_image: Arc<Mutex<Image<RGBA32>>> = Arc::new(Mutex::new(Image::new(self.res_x,
-                                                                                     self.res_y)));
+        let shared_image: Mutex<Image<RGBA32>> = Mutex::new(Image::new(self.res_x, self.res_y));
 
         // On definit le nombre de threads à utiliser
         let pool = Pool::new(self.threads);
@@ -210,6 +209,7 @@ impl Renderer {
                     });
 
         progress_bar.lock().unwrap().finish();
+
         // On transforme le Arc<Mutex<Image>> en Image
         let result = shared_image.lock().unwrap().deref_mut().clone();
         result
@@ -220,7 +220,7 @@ impl Renderer {
                         mut block: Block,
                         world: &scene::World,
                         camera: &scene::Camera,
-                        shared_image: &Arc<Mutex<Image<RGBA32>>>) {
+                        shared_image: &Mutex<Image<RGBA32>>) {
 
         // Generation des samples
         let sampler = samplers::HaltonSampler::new(self.subdivision_sampling);
