@@ -20,7 +20,7 @@ pub enum LightObject {
 }
 
 impl LightObject {
-    fn as_trait_object(&self) -> &Light {
+    pub fn as_trait(&self) -> &Light {
         match *self {
             LightObject::Point { ref point } => point,
         }

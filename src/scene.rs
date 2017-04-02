@@ -202,6 +202,10 @@ impl World {
         }
         false
     }
+
+    pub fn lights(&self) -> &Vec<LightObject> {
+        &self.lights
+    }
 }
 
 #[cfg(test)]

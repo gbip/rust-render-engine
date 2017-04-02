@@ -218,15 +218,11 @@ impl Surface for Triangle {
 
         let t: f32 = e2.dot_product(&Q);
 
-        if t > f32::EPSILON {
+        if t > f32::EPSILON && ray.max_t > t {
             ray.max_t = t;
             return true;
         }
         false
-
-
-
-
     }
 }
 
@@ -518,12 +514,12 @@ impl Surface for Object {
     }
 
     fn fast_intersection(&self, ray: &mut Ray) -> bool {
-        if self.bbox.intersects(ray) {
+        if self.bbox.intersects(ray) && self.visible {
             for tri in self.triangles() {
-                if tri.fast_intersection(ray) {
-                    return true;
+                match tri.get_intersection_fragment(ray) {
+                    Some(_) => return true,
+                    _ => continue,
                 }
-                continue;
             }
         }
 

@@ -133,25 +133,18 @@ impl Surface for Plane {
         let m = self.a * slope.x + self.b * slope.y + self.c * slope.z;
         let p = -(self.d + self.a * origin.x + self.b * origin.y + self.c * origin.z);
 
-        let result: Option<Fragment>;
         if m == 0.0 {
-            result = None;
+            None
         } else {
             let t = p / m;
 
             if t < 0.0 || (ray.max_t > 0.0 && t > ray.max_t) {
                 //La surface est "avant" ou "après" le point d'émission du rayon
-                result = None;
+                None
             } else {
-                result = Some(Fragment::new(Vector3f {
-                                                x: slope.x * t + origin.x,
-                                                y: slope.y * t + origin.y,
-                                                z: slope.z * t + origin.z,
-                                            },
-                                            t));
+                Some(Fragment::new(t * slope + *origin, t))
             }
         }
-        result
     }
 
     fn fast_intersection(&self, ray: &mut Ray) -> bool {

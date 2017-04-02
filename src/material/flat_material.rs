@@ -1,3 +1,4 @@
+// use std::cmp;
 use color::{RGBA8, RGBA32};
 use io_utils;
 use serde_json;
@@ -64,7 +65,7 @@ impl Material for FlatMaterial {
     fn get_color(&self,
                  frag: &Fragment,
                  _: &Ray,
-                 _: &World,
+                 world: &World,
                  texture_data: Option<&TextureRegister>)
                  -> RGBA32 {
 
@@ -75,7 +76,42 @@ impl Material for FlatMaterial {
             _ => (None, None, None),
         };
 
-        self.diffuse.get_color(frag, u, v, tex_reg)
+        // Calcul de l'intensité totale
+        let mut intensity = 0.0;
+        let lights = world.lights();
+        let light_count = lights.len();
+
+        if light_count == 0 {
+            intensity = 1.0;
+        }
+
+        for light in lights {
+            let light_rays = light.as_trait().emit_rays(&frag.position, world);
+
+            for mut light_ray in light_rays {
+                if !world.is_occluded(&mut light_ray) {
+                    let ray_vect = -light_ray.slope() / light_ray.slope().norm();
+                    //let factor = cmp::max(&0.0, &ray_vect.dot_product(&frag.normal));
+                    let factor = ray_vect.dot_product(&(frag.normal / frag.normal.norm())).abs();
+                    intensity += factor / light_count as f32;
+                }
+            }
+            /*if light.as_trait().visible(&frag.position, world) {
+                intensity += 1.0 / light_count as f32;
+            }*/
+        }
+
+        // Calcul de la couleur du matériau
+        let color = self.diffuse.get_color(frag, u, v, tex_reg).to_rgba8();
+
+        // Application
+        RGBA8 {
+                r: (color.r as f32 * intensity) as u8,
+                g: (color.g as f32 * intensity) as u8,
+                b: (color.b as f32 * intensity) as u8,
+                a: color.a,
+            }
+            .to_rgba32()
     }
 }
 

@@ -14,14 +14,18 @@ pub struct PointLight {
 
 impl Light for PointLight {
     fn visible(&self, point: &Vector3f, world: &World) -> bool {
-        let mut ray: Ray = Ray::new(*point, self.position - *point);
-        ray.max_t = self.position.norm();
-        world.is_occluded(&mut ray)
+        let slope = *point - self.position;
+        let mut ray: Ray = Ray::new(self.position, slope);
+        ray.max_t = 0.999;
+        !world.is_occluded(&mut ray)
     }
 
     fn emit_rays(&self, point: &Vector3f, _: &World) -> Vec<Ray> {
         let mut result: Vec<Ray> = vec![];
-        result.push(Ray::new(*point, self.position - *point));
+        let slope = *point - self.position;
+        let mut ray: Ray = Ray::new(self.position, slope);
+        ray.max_t = 0.999;
+        result.push(ray);
         result
     }
 }
