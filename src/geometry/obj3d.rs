@@ -537,6 +537,8 @@ impl Surface for Object {
 
 #[cfg(test)]
 mod test {
+    use std::rc::Rc;
+    use std::cell::Cell;
     use math::{Vector3, Vector3f};
     use ray::{Surface, Ray};
     use super::{GeoPoint, Triangle};
@@ -550,22 +552,25 @@ mod test {
         let tri1 = Triangle::new(p1, p2, p3);
 
         // Ce rayon doit intersecter le triangle en (0,0,0)
-        let mut r1 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.0, 1.0, 0.0));
+        let r1 = Rc::new(Cell::new(Ray::new(Vector3f::new(0.0, -1.0, 0.0),
+                                            Vector3f::new(0.0, 1.0, 0.0))));
 
-        let frag1 = tri1.get_intersection_fragment(&mut r1);
+        let frag1 = tri1.get_intersection_fragment(r1);
         assert_ne!(frag1, None);
 
         // Normalement, l'intersection du triangle est en (0.5,0,0), donc ce rayon ne doit pas
         // intersecter avec le triangle
-        let mut r2 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.51, 1.0, 0.0));
+        let r2 = Rc::new(Cell::new(Ray::new(Vector3f::new(0.0, -1.0, 0.0),
+                                            Vector3f::new(0.51, 1.0, 0.0))));
 
-        let frag2 = tri1.get_intersection_fragment(&mut r2);
+        let frag2 = tri1.get_intersection_fragment(r2);
         assert_eq!(frag2, None);
 
         // Celui là par contre devrait :
-        let mut r3 = Ray::new(Vector3f::new(0.0, -1.0, 0.0), Vector3f::new(0.5, 1.0, 0.0));
+        let r3 = Rc::new(Cell::new(Ray::new(Vector3f::new(0.0, -1.0, 0.0),
+                                            Vector3f::new(0.5, 1.0, 0.0))));
 
-        let frag3 = tri1.get_intersection_fragment(&mut r3);
+        let frag3 = tri1.get_intersection_fragment(r3);
         assert_ne!(frag3, None);
     }
 

@@ -235,18 +235,18 @@ mod tests {
             d: 35.0,
         };
 
-        let mut ray = Ray::new(Vector3f {
-                                   x: 8.0,
-                                   y: 7.0,
-                                   z: 5.0,
-                               },
-                               Vector3f {
-                                   x: 1.0,
-                                   y: 0.0,
-                                   z: 0.0,
-                               });
+        let ray = Rc::new(Cell::new(Ray::new(Vector3f {
+                                                 x: 8.0,
+                                                 y: 7.0,
+                                                 z: 5.0,
+                                             },
+                                             Vector3f {
+                                                 x: 1.0,
+                                                 y: 0.0,
+                                                 z: 0.0,
+                                             })));
 
-        assert!(match plane.get_intersection_fragment(&mut ray) {
+        assert!(match plane.get_intersection_fragment(ray) {
                     None => true,
                     _ => false,
                 });
@@ -261,18 +261,18 @@ mod tests {
             d: 35.0,
         };
 
-        let mut ray = Ray::new(Vector3f {
-                                   x: 0.0,
-                                   y: 0.0,
-                                   z: 0.0,
-                               },
-                               Vector3f {
-                                   x: 0.0,
-                                   y: 1.0,
-                                   z: 0.0,
-                               });
+        let ray = Rc::new(Cell::new(Ray::new(Vector3f {
+                                                 x: 0.0,
+                                                 y: 0.0,
+                                                 z: 0.0,
+                                             },
+                                             Vector3f {
+                                                 x: 0.0,
+                                                 y: 1.0,
+                                                 z: 0.0,
+                                             })));
 
-        let intersection = plane.get_intersection_fragment(&mut ray);
+        let intersection = plane.get_intersection_fragment(ray);
         assert!(match intersection {
                     None => true,
                     Some(_) => false,
@@ -288,18 +288,18 @@ mod tests {
             d: 35.0,
         };
 
-        let mut ray = Ray::new(Vector3f {
-                                   x: 0.0,
-                                   y: 0.0,
-                                   z: 0.0,
-                               },
-                               Vector3f {
-                                   x: 0.0,
-                                   y: -1.0,
-                                   z: 0.0,
-                               });
+        let ray = Rc::new(Cell::new(Ray::new(Vector3f {
+                                                 x: 0.0,
+                                                 y: 0.0,
+                                                 z: 0.0,
+                                             },
+                                             Vector3f {
+                                                 x: 0.0,
+                                                 y: -1.0,
+                                                 z: 0.0,
+                                             })));
 
-        let intersection = plane.get_intersection_fragment(&mut ray);
+        let intersection = plane.get_intersection_fragment(ray);
         assert!(match intersection {
                     None => false,
                     Some(point) => {
