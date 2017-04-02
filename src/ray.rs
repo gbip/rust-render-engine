@@ -36,7 +36,10 @@ impl<'a> Intersection<'a> {
                 self.material
                     .get_color(&self.fragment, &self.ray, world, Some(texture_register))
             }
-            None => self.material.get_color(&self.fragment, &self.ray, world, None),
+            None => {
+                self.material
+                    .get_color(&self.fragment, &self.ray, world, None)
+            }
         }
     }
 }
@@ -47,9 +50,11 @@ pub struct Ray {
     slope: Vector3f,
     // L'origine du rayon
     origin: Vector3f,
-    // Un paramètre qui indique l'extrémité du rayon. Par exemple, lorsque le rayon est arrêté par
-    // une surface il ne se propage pas sur les surfaces situées derrière.
+    // Un paramètre qui indique l'extrémité du rayon. Par exemple, lorsque le rayon est arrêté
+    // par une surface il ne se propage pas sur les surfaces situées derrière.
     pub max_t: f32,
+
+    inv_slope: Vector3f,
 }
 
 #[derive(Debug, Clone)]
@@ -90,6 +95,7 @@ impl Ray {
             origin: origin,
             slope: slope,
             max_t: -1.0,
+            inv_slope: Vector3f::new(1.0 / slope.x, 1.0 / slope.y, 1.0 / slope.z),
         }
     }
 
@@ -214,24 +220,21 @@ mod tests {
             d: 35.0,
         };
 
-        let mut ray = Ray {
-            origin: Vector3f {
-                x: 8.0,
-                y: 7.0,
-                z: 5.0,
-            },
-            slope: Vector3f {
-                x: 1.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            max_t: -1.0,
-        };
+        let mut ray = Ray::new(Vector3f {
+                                   x: 8.0,
+                                   y: 7.0,
+                                   z: 5.0,
+                               },
+                               Vector3f {
+                                   x: 1.0,
+                                   y: 0.0,
+                                   z: 0.0,
+                               });
 
         assert!(match plane.get_intersection_fragment(&mut ray) {
-            None => true,
-            _ => false,
-        });
+                    None => true,
+                    _ => false,
+                });
     }
 
     #[test]
@@ -243,25 +246,22 @@ mod tests {
             d: 35.0,
         };
 
-        let mut ray = Ray {
-            origin: Vector3f {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            slope: Vector3f {
-                x: 0.0,
-                y: 1.0,
-                z: 0.0,
-            },
-            max_t: -1.0,
-        };
+        let mut ray = Ray::new(Vector3f {
+                                   x: 0.0,
+                                   y: 0.0,
+                                   z: 0.0,
+                               },
+                               Vector3f {
+                                   x: 0.0,
+                                   y: 1.0,
+                                   z: 0.0,
+                               });
 
         let intersection = plane.get_intersection_fragment(&mut ray);
         assert!(match intersection {
-            None => true,
-            Some(_) => false,
-        });
+                    None => true,
+                    Some(_) => false,
+                });
     }
 
     #[test]
@@ -273,32 +273,29 @@ mod tests {
             d: 35.0,
         };
 
-        let mut ray = Ray {
-            origin: Vector3f {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            slope: Vector3f {
-                x: 0.0,
-                y: -1.0,
-                z: 0.0,
-            },
-            max_t: -1.0,
-        };
+        let mut ray = Ray::new(Vector3f {
+                                   x: 0.0,
+                                   y: 0.0,
+                                   z: 0.0,
+                               },
+                               Vector3f {
+                                   x: 0.0,
+                                   y: -1.0,
+                                   z: 0.0,
+                               });
 
         let intersection = plane.get_intersection_fragment(&mut ray);
         assert!(match intersection {
-            None => false,
-            Some(point) => {
-                (point.position -
-                 Vector3f {
-                        x: 0.0,
-                        y: -35.0,
-                        z: 0.0,
-                    })
-                    .norm() < 0.00001
-            }
-        });
+                    None => false,
+                    Some(point) => {
+                        (point.position -
+                             Vector3f {
+                                 x: 0.0,
+                                 y: -35.0,
+                                 z: 0.0,
+                             })
+                            .norm() < 0.00001
+                    }
+                });
     }
 }

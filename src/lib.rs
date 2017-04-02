@@ -5,7 +5,8 @@
 pub mod math;
 
 
-#[macro_use] // Il faut charger angle.rs dans les premiers modules, car sinon obj3D n'aura pas la visibilité sur les macros définies dans angle.
+#[macro_use] // Il faut charger angle.rs dans les premiers modules, car sinon obj3D n'aura pas la
+// visibilité sur les macros définies dans angle.
 pub mod angle;
 #[allow(non_snake_case)]
 pub mod scene;

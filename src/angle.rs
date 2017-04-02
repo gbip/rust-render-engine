@@ -68,41 +68,35 @@ impl<T> Add<Deg<T>> for Deg<T>
 
 macro_rules! impl_operations {
 
-    ($K:ty) => 
+    ($K:ty) =>
     {
 
-        // Conversion 
-        
+        // Conversion
         impl From<$K> for Rad<$K> {
             #[inline]
             fn from(val:$K) -> Rad<$K> {
                 Rad(val)
             }
         }
-        
         impl<'a> From<&'a $K> for Rad<$K> {
             #[inline]
             fn from(val:&'a $K) -> Rad<$K> {
                 Rad(val.clone())
             }
         }
-
         impl From<$K> for Deg<$K> {
             #[inline]
             fn from(val: $K) -> Deg<$K> {
                 Deg(val)
             }
         }
-
         impl<'a> From<&'a $K> for Deg<$K> {
             #[inline]
             fn from(val: &'a $K) -> Deg<$K> {
                 Deg(val.clone())
             }
         }
-
         // DIVISION
-
         impl Div<$K> for Deg<$K> {
             type Output=Deg<$K>;
             #[inline]
@@ -117,9 +111,7 @@ macro_rules! impl_operations {
                 Rad(self.0/other)
             }
         }
-        
         // MULTIPLICATION
-        
         impl Mul<$K> for Deg<$K> {
             type Output=Deg<$K>;
             #[inline]
@@ -127,7 +119,6 @@ macro_rules! impl_operations {
                 Deg(self.0*other)
             }
         }
-
         impl Mul<$K> for Rad<$K> {
             type Output=Rad<$K>;
             #[inline]

@@ -25,7 +25,8 @@ impl GeoPoint {
         }
     }
 
-    // Crée un point sans coordonée de texture et avec une normale nulle. Utile pour écrire des test.
+    // Crée un point sans coordonée de texture et avec une normale nulle. Utile pour écrire des
+    // test.
     pub fn new_pos(pos: Vector3f) -> GeoPoint {
         GeoPoint {
             norm: Vector3f::new(0.0, 0.0, 0.0),
@@ -47,7 +48,8 @@ impl GeoPoint {
         let uyz = u.y * u.z;
         let uzx = u.z * u.x;
 
-        // Formule tirée de Wikipedia : https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
+        // Formule tirée de Wikipedia :
+        // https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
         self.pos =
             Vector3f::new((u.x * u.x * mc + c) * self.pos.x + (uxy * mc - u.z * s) * self.pos.y +
                           (uzx * mc + u.y * s) * self.pos.z,
@@ -185,40 +187,45 @@ impl Surface for Triangle {
         result
     }
 
-    /** Source : https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm  */
+    /** Source : https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
+    */
     #[allow(non_snake_case)]
     fn fast_intersection(&self, ray: &mut Ray) -> bool {
 
-        let e1: Vector3f = self.v.pos() - self.u.pos();
-        let e2: Vector3f = self.w.pos() - self.u.pos();
-        let P: Vector3f = ray.slope().cross_product(&e2);
+        let e1: Vector3f = self.v.pos() - self.u.pos(); // Rapide
+        let e2: Vector3f = self.w.pos() - self.u.pos(); // Rapide
+        let P: Vector3f = ray.slope().cross_product(&e2); // Moyen
 
-        let det: f32 = e1.dot_product(&P);
+        let det: f32 = e1.dot_product(&P); // Moyen
 
         if det > -f32::EPSILON && det < f32::EPSILON {
+            // Rapide
             return false;
         }
 
-        let inv_det: f32 = 1f32 / det;
+        let inv_det: f32 = 1f32 / det; // Lent
 
-        let T: Vector3f = ray.origin() - self.u.pos();
-        let u: f32 = T.dot_product(&P) * inv_det;
+        let T: Vector3f = ray.origin() - self.u.pos(); // Rapide
+        let u: f32 = T.dot_product(&P) * inv_det; // Moyen
 
         if u < 0f32 || u > 1f32 {
+            // Rapide
             return false;
         }
 
-        let Q: Vector3f = T.cross_product(&e1);
+        let Q: Vector3f = T.cross_product(&e1); // Moyen
 
-        let v: f32 = ray.slope().dot_product(&Q) * inv_det;
+        let v: f32 = ray.slope().dot_product(&Q) * inv_det; // Moyen
 
         if v < 0f32 || u + v > 1f32 {
+            // Rapide
             return false;
         }
 
-        let t: f32 = e2.dot_product(&Q) * inv_det;
+        let t: f32 = e2.dot_product(&Q) * inv_det; // Moyen
 
         if t > f32::EPSILON && ray.max_t > t {
+            // Rapide
             ray.max_t = t;
             return true;
         }
@@ -312,7 +319,8 @@ pub struct Object {
     mesh: Mesh,
 
     // Le materiau de l'objet
-    #[serde(skip_serializing, skip_deserializing,default = "FlatMaterial::new_empty",rename="do_not_use")]
+    #[serde(skip_serializing, skip_deserializing,default = "FlatMaterial::new_empty",
+    rename="do_not_use")]
     material: FlatMaterial,
 
     // La position de l'objet (offset qui se propagera ensuite aux triangles)
@@ -425,8 +433,8 @@ impl Object {
                      format!("Warning, the object {} is not centered in (0,0,0) but in {}",
                              self.name,
                              &barycenter)
-                         .yellow()
-                         .dimmed());
+                             .yellow()
+                             .dimmed());
             // On centre l'objet à l'origine.
             self.position = -barycenter;
             self.apply_position();
@@ -514,14 +522,13 @@ impl Surface for Object {
     }
 
     fn fast_intersection(&self, ray: &mut Ray) -> bool {
-        if self.bbox.intersects(ray) && self.visible {
+        if self.visible && self.bbox.intersects(ray) {
             for tri in self.triangles() {
                 if tri.fast_intersection(ray) {
                     return true;
                 }
             }
         }
-
         false
     }
 }

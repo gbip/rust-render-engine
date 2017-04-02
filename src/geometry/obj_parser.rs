@@ -45,9 +45,10 @@ pub fn open_obj(file: &str) -> Mesh {
     let mut tex: Option<Vec<Vector2f>> = None;
 
     // We clean the reader of all useless lines before iterating over it.
-    for line in &reader.lines()
-        .map(|l| l.expect("Error while reading line"))
-        .collect::<Vec<String>>() {
+    for line in &reader
+                     .lines()
+                     .map(|l| l.expect("Error while reading line"))
+                     .collect::<Vec<String>>() {
         let parsed_line = match parse_line(line) {
             Ok(t) => t,
             Err(e) => panic!(e),
@@ -151,11 +152,7 @@ fn extract_indexes(line: &str) -> Result<(RawData, RawData, Option<RawData>), St
     //Represents the fact that a line may contain an invalid number of indices
     let mut error = false;
     let parsed_data: Vec<Vec<u32>> = data.iter()
-        .map(|u| {
-            u.iter()
-                .map(|val| convert_to_u32(val))
-                .collect()
-        })
+        .map(|u| u.iter().map(|val| convert_to_u32(val)).collect())
         .collect();
 
     //Splitting the case between the position + normal or the pos + norm + tex scenario

@@ -52,10 +52,12 @@ impl Texture for TextureMap {
                  texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
                  -> RGBA32 {
 
-        let texture = &texture_registry.unwrap()
-            .get(self.map_path.as_str())
-            .unwrap();
-        texture.get_pixel_at(((u.unwrap() * self.tiling_x * texture.width() as f32) as u32 %
+        let texture = &texture_registry
+                           .unwrap()
+                           .get(self.map_path.as_str())
+                           .unwrap();
+        texture
+            .get_pixel_at(((u.unwrap() * self.tiling_x * texture.width() as f32) as u32 %
                            texture.width()),
                           ((v.unwrap() * self.tiling_y * texture.height() as f32) as u32 %
                            texture.height()))
