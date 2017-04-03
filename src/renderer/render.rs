@@ -162,20 +162,45 @@ impl Renderer {
 
     /** Cette fonction permet de générer des blocs pour rendre l'image */
     fn generate_blocks(&self) -> Vec<Block> {
-
         let bloc_size = self.bucket_size;
         let mut result: Vec<Block> = vec![];
-        if self.res_x % bloc_size != 0 || self.res_y % bloc_size != 0 {
-            panic!("Error, the resolution is not a multiple of 10");
-        } else {
-            for i in 0..self.res_x / 10 {
-                for j in 0..self.res_y / 10 {
-                    let block = Block::new(bloc_size as u32,
-                                           bloc_size as u32,
-                                           (i * bloc_size) as u32,
-                                           (j * bloc_size) as u32);
-                    result.push(block);
-                }
+
+        // Le nombre de pixels qui ne tiendront pas dans des blocs de taille standard (bloc_size x
+        // bloc_size)
+        let offset_x: u32 = (self.res_x % bloc_size) as u32;
+        let offset_y: u32 = (self.res_y % bloc_size) as u32;
+
+        // Le nombre de pixels qui tiennent dans des blocs standards (par opposition aux offsets)
+        let size_x: u32 = self.res_x as u32 - offset_x;
+        let size_y: u32 = self.res_y as u32 - offset_y;
+
+        // Le nombre de blocs en x et en y sans compter les blocs non standards
+        let bloc_count_x: u32 = size_x / bloc_size as u32;
+        let bloc_count_y: u32 = size_y / bloc_size as u32;
+
+
+        // Gestion des blocs non standards
+        if offset_x != 0 {
+            for y in 0..bloc_count_y {
+                let block = Block::new(offset_x, bloc_size as u32, size_x, y * bloc_size as u32);
+                result.push(block);
+            }
+        }
+        if offset_y != 0 {
+            for x in 0..bloc_count_x {
+                let block = Block::new(bloc_size as u32, offset_y, x * bloc_size as u32, size_y);
+                result.push(block);
+            }
+        }
+
+        // Gestion des blocs standards
+        for i in 0..bloc_count_x {
+            for j in 0..bloc_count_y {
+                let block = Block::new(bloc_size as u32,
+                                       bloc_size as u32,
+                                       i * bloc_size as u32,
+                                       j * bloc_size as u32);
+                result.push(block);
             }
         }
         result

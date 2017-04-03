@@ -5,7 +5,7 @@ use math::Vector2f;
 
 /** Un sample, qui correspondra à un rayon émis dans la scène. L'ensemble
 des samples est ensuite interpolé pour former l'image finale. */
-#[derive(Clone)]
+#[derive(Clone,Debug)]
 pub struct Sample {
     /** La position relative du rayon par rapport au centre de son pixel */
     position: Vector2f,

@@ -182,7 +182,7 @@
           "y": 0.0,
           "z": 270.0
         },
-        "obj_path": "models/suzanne_low.obj",
+        "obj_path": "models/smoothed_suzanne.obj",
         "name": "Suzanne",
 	"visible": true ,
 	"material" : "scenes/materials/solid_green.json"

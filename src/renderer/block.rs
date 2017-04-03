@@ -6,7 +6,7 @@ use sampler::{SamplableArea, Sample};
 /** Structure qui represente un "bout" d'image à rendre.
  * Elle est utilisée par le sampler pour stocker les samples, et par le filter
 pour lire les samples et recomposer l'image finale. */
-#[derive(Clone)]
+#[derive(Clone,Debug)]
 pub struct Block {
     pixels: Vec<Pixel>,
     size_x: u32,

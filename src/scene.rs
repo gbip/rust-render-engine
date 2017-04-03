@@ -27,7 +27,7 @@ impl Scene {
             Ok(file) => {
                 match serde_json::from_str(file.as_str()) {
                     Ok(val) => val,
-                    Err(e) => panic!("Error while loading world. Serde error is : {}", e),
+                    Err(e) => panic!("Error while loading world. {}", e),
                 }
             }
             Err(e) => panic!("Error while reading file {} : {}", file, e),
