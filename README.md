@@ -19,9 +19,10 @@ Pour charger une scène et la rendre, il faut lancer : `render_engine --read <ch
 - [x] Support de la géomètrie à travers des fichiers .obj
 - [x] Benchmarking du code
 - [x] Rendu dans une résolution arbitraire
-- [ ] Choisir le sampling des rayons
-- [ ] Le support des textures
-- [ ] Le support des lumières
+- [x] Choisir le sampling des rayons
+- [x] Le support des textures
+- [x] Le support des lumières
+- [ ] Materiaux basés sur la physique
 
 ## Performances
 
@@ -36,7 +37,7 @@ git clone https://github.com/gbip/rust-render-engine
 rustup override set nightly
 cargo build --release
 ```
-### How to use 
+### How to use
 In order to generate an example file for a scene called `template.json`you can run : `render_engine --generate` or `render_engine -g`
 
 In order to load a scene from a file, and save it to a .png, you can run : `render_engine --read <path_scene> --write <path_file>.png`
@@ -46,9 +47,10 @@ In order to load a scene from a file, and save it to a .png, you can run : `rend
 - [x]  Arbitrary geometry support through .obj files (wavefront specification)
 - [x] Benchmarks for the code
 - [x] Rendering in an arbitrary resolution
-- [ ] Choose the subdivision sampling
-- [ ] Use textures
-- [ ] Support of lights
+- [x] Choose the subdivision sampling
+- [x] Use textures
+- [x] Support of lights
+- [ ] Physic based materials
 
 ## Performances
 The render engine has some terrible performances for the moment...

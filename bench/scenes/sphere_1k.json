@@ -27790,7 +27790,11 @@
     "res_y": 540,
     "threads":8,
     "bucket_size":10,
-    "subdivision_sampling" : 4,
+    "sampler": {
+      "halton": {
+        "sample_rate": 4
+      }
+    },
     "background_color": {
       "r": 0,
       "g": 0,

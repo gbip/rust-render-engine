@@ -2,6 +2,7 @@ pub mod samplers;
 
 use color::RGBA32;
 use math::Vector2f;
+use sampler::samplers::{DefaultSampler, HaltonSampler};
 
 /** Un sample, qui correspondra à un rayon émis dans la scène. L'ensemble
 des samples est ensuite interpolé pour former l'image finale. */
@@ -25,6 +26,7 @@ impl Sample {
     }
 }
 
+// Une section rectangulaire samplable. Peut être un bloc ou une lumière surfacique.
 pub trait SamplableArea {
     fn dimensions(&self) -> (f32, f32);
     fn offset(&self) -> Vector2f;
@@ -62,5 +64,21 @@ pub trait Sampler {
 
     fn get_sample_distribution(&self) -> Vec<Vector2f> {
         vec![]
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(untagged)]
+pub enum SamplerObject {
+    HaltonSampler { halton : HaltonSampler},
+    DefaultSampler { default : DefaultSampler},
+}
+
+impl SamplerObject {
+    pub fn as_trait(&self) -> &Sampler {
+        match *self {
+            SamplerObject::HaltonSampler { ref halton} => halton,
+            SamplerObject::DefaultSampler { ref default} => default,
+        }
     }
 }

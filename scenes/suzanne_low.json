@@ -207,7 +207,11 @@
     "res_y": 540,
     "threads":8,
     "bucket_size":10,
-    "subdivision_sampling" : 8,
+    "sampler": {
+      "halton": {
+        "sample_rate": 8
+      }
+    },
     "background_color": {
       "r": 0,
       "g": 0,
