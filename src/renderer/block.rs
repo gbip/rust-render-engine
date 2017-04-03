@@ -87,7 +87,6 @@ impl SamplableArea for Block {
     fn add_sample(&mut self, sample: Sample) {
         let x = sample.position().x as u32 - self.pos_x;
         let y = sample.position().y as u32 - self.pos_y;
-
         if x < self.size_x && y < self.size_y {
             self.get_pixel_mut(x, y).add_sample(sample);
         } else {

@@ -8,7 +8,7 @@ use std::fmt;
 use filter::{Filter, filters};
 use renderer::Pixel;
 use renderer::block::Block;
-use sampler::{SamplerFactory};
+use sampler::SamplerFactory;
 use std::sync::Mutex;
 use std::clone::Clone;
 use std::ops::DerefMut;
@@ -133,9 +133,9 @@ impl Renderer {
             // On récupère le rayon à partir du sample
             let ray: Rc<RefCell<Ray>> =
                 Rc::new(RefCell::new(camera.create_ray_from_sample(sample,
-                                                                self.ratio,
-                                                                self.res_x as f32,
-                                                                self.res_y as f32)));
+                                                                   self.ratio,
+                                                                   self.res_x as f32,
+                                                                   self.res_y as f32)));
 
             // CALCUL DE LA COULEUR DU RAYON (TODO à mettre ailleurs)
 
@@ -251,7 +251,9 @@ impl Renderer {
                         shared_image: &Mutex<Image<RGBA32>>) {
 
         // Generation des samples
-        self.sampler_factory.create_sampler().create_samples(&mut block);
+        self.sampler_factory
+            .create_sampler()
+            .create_samples(&mut block);
 
         let filter = filters::BoxFilter::default();
         /*let mut filter = filters::MitchellFilter::default();

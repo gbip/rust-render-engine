@@ -81,11 +81,11 @@ pub struct Fragment {
 
 
 pub trait Surface {
-    /** Retourne le fragment crée par l'interseciton entre un rayon et de la géomètrie. Prends en
-     entrée un Rc<RefCell<Ray>> pour éviter d'allouer de la mémoire à chaque création de fragment.
-     On aurait pu modifier le Fragment pour permettre d'avoir un borrow sur un rayon, mais à cause
-     de la mutabilité d'un rayon, cela n'est pas possible.
-     Pourquoi le RefCell ? Il faut lire la doc : https://doc.rust-lang.org/std/cell/index.html
+    /** Retourne le fragment crée par l'interseciton entre un rayon et de la géomètrie. Prends
+    en entrée un Rc<RefCell<Ray>> pour éviter d'allouer de la mémoire à chaque création de
+    fragment. On aurait pu modifier le Fragment pour permettre d'avoir un borrow sur un
+    rayon, mais à cause de la mutabilité d'un rayon, cela n'est pas possible. Pourquoi le RefCell
+     ? Il faut lire la doc : https://doc.rust-lang.org/std/cell/index.html
     */
     fn get_intersection_fragment(&self, ray: Rc<RefCell<Ray>>) -> Option<Fragment>;
 
@@ -236,15 +236,15 @@ mod tests {
         };
 
         let ray = Rc::new(RefCell::new(Ray::new(Vector3f {
-                                                 x: 8.0,
-                                                 y: 7.0,
-                                                 z: 5.0,
-                                             },
-                                             Vector3f {
-                                                 x: 1.0,
-                                                 y: 0.0,
-                                                 z: 0.0,
-                                             })));
+                                                    x: 8.0,
+                                                    y: 7.0,
+                                                    z: 5.0,
+                                                },
+                                                Vector3f {
+                                                    x: 1.0,
+                                                    y: 0.0,
+                                                    z: 0.0,
+                                                })));
 
         assert!(match plane.get_intersection_fragment(ray) {
                     None => true,
@@ -262,15 +262,15 @@ mod tests {
         };
 
         let ray = Rc::new(RefCell::new(Ray::new(Vector3f {
-                                                 x: 0.0,
-                                                 y: 0.0,
-                                                 z: 0.0,
-                                             },
-                                             Vector3f {
-                                                 x: 0.0,
-                                                 y: 1.0,
-                                                 z: 0.0,
-                                             })));
+                                                    x: 0.0,
+                                                    y: 0.0,
+                                                    z: 0.0,
+                                                },
+                                                Vector3f {
+                                                    x: 0.0,
+                                                    y: 1.0,
+                                                    z: 0.0,
+                                                })));
 
         let intersection = plane.get_intersection_fragment(ray);
         assert!(match intersection {
@@ -289,15 +289,15 @@ mod tests {
         };
 
         let ray = Rc::new(RefCell::new(Ray::new(Vector3f {
-                                                 x: 0.0,
-                                                 y: 0.0,
-                                                 z: 0.0,
-                                             },
-                                             Vector3f {
-                                                 x: 0.0,
-                                                 y: -1.0,
-                                                 z: 0.0,
-                                             })));
+                                                    x: 0.0,
+                                                    y: 0.0,
+                                                    z: 0.0,
+                                                },
+                                                Vector3f {
+                                                    x: 0.0,
+                                                    y: -1.0,
+                                                    z: 0.0,
+                                                })));
 
         let intersection = plane.get_intersection_fragment(ray);
         assert!(match intersection {
@@ -317,15 +317,15 @@ mod tests {
     #[test]
     fn test_rc_ray() {
         let rc = Rc::new(RefCell::new(Ray::new(Vector3f {
-                                                 x: 0.0,
-                                                 y: 0.0,
-                                                 z: 0.0,
-                                             },
-                                             Vector3f {
-                                                 x: 0.0,
-                                                 y: -1.0,
-                                                 z: 0.0,
-                                             })));
+                                                   x: 0.0,
+                                                   y: 0.0,
+                                                   z: 0.0,
+                                               },
+                                               Vector3f {
+                                                   x: 0.0,
+                                                   y: -1.0,
+                                                   z: 0.0,
+                                               })));
         rc.borrow_mut().max_t = 0.5;
         assert_eq!(rc.borrow().max_t, 0.5);
     }

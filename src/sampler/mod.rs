@@ -46,8 +46,8 @@ pub trait Sampler {
         let sub_x = width / area.pixel_width() as f32;
         let sub_y = height / area.pixel_height() as f32;
 
-        for y in 0..area.pixel_width() {
-            for x in 0..area.pixel_height() {
+        for y in 0..area.pixel_height() {
+            for x in 0..area.pixel_width() {
                 let distrib = self.get_sample_distribution();
 
                 for point in distrib {
@@ -69,17 +69,17 @@ pub trait Sampler {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum SamplerFactory {
-    HaltonSampler { subdivision_sampling : u32},
-    DefaultSampler { subdivision_sampling : u32},
+    HaltonSampler { subdivision_sampling: u32 },
+    DefaultSampler { subdivision_sampling: u32 },
 }
 
 impl SamplerFactory {
     pub fn create_sampler(&self) -> Box<Sampler> {
         match *self {
-            SamplerFactory::HaltonSampler { subdivision_sampling} => {
+            SamplerFactory::HaltonSampler { subdivision_sampling } => {
                 Box::new(HaltonSampler::new(subdivision_sampling))
-            },
-            SamplerFactory::DefaultSampler { subdivision_sampling} => {
+            }
+            SamplerFactory::DefaultSampler { subdivision_sampling } => {
                 Box::new(DefaultSampler::new(subdivision_sampling))
             }
         }

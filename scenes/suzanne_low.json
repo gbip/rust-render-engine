@@ -209,13 +209,13 @@
     ]
   },
   "renderer": {
-    "res_x": 960,
+    "res_x": 900,
     "res_y": 540,
     "threads":8,
-    "bucket_size":10,
+    "bucket_size":16,
     "sampler": {
       "HaltonSampler": {
-        "subdivision_sampling": 8
+        "subdivision_sampling": 4
       }
     },
     "background_color": {

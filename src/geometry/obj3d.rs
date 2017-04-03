@@ -553,7 +553,7 @@ mod test {
 
         // Ce rayon doit intersecter le triangle en (0,0,0)
         let r1 = Rc::new(RefCell::new(Ray::new(Vector3f::new(0.0, -1.0, 0.0),
-                                            Vector3f::new(0.0, 1.0, 0.0))));
+                                               Vector3f::new(0.0, 1.0, 0.0))));
 
         let frag1 = tri1.get_intersection_fragment(r1);
         assert_ne!(frag1, None);
@@ -561,14 +561,14 @@ mod test {
         // Normalement, l'intersection du triangle est en (0.5,0,0), donc ce rayon ne doit pas
         // intersecter avec le triangle
         let r2 = Rc::new(RefCell::new(Ray::new(Vector3f::new(0.0, -1.0, 0.0),
-                                            Vector3f::new(0.51, 1.0, 0.0))));
+                                               Vector3f::new(0.51, 1.0, 0.0))));
 
         let frag2 = tri1.get_intersection_fragment(r2);
         assert_eq!(frag2, None);
 
         // Celui là par contre devrait :
         let r3 = Rc::new(RefCell::new(Ray::new(Vector3f::new(0.0, -1.0, 0.0),
-                                            Vector3f::new(0.5, 1.0, 0.0))));
+                                               Vector3f::new(0.5, 1.0, 0.0))));
 
         let frag3 = tri1.get_intersection_fragment(r3);
         assert_ne!(frag3, None);
