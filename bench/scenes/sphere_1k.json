@@ -27801,6 +27801,7 @@
         "subdivision_sampling": 8
       }
     },
+    "filter": "BoxFilter",
     "background_color": {
       "r": 0,
       "g": 0,

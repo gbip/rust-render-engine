@@ -250,6 +250,7 @@
         "subdivision_sampling": 4
       }
     },
+    "filter": "BoxFilter",
     "background_color": {
       "r": 0,
       "g": 0,
