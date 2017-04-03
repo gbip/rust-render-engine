@@ -16,7 +16,7 @@ pub enum FilterFactory {
 }
 
 impl FilterFactory {
-    pub fn create_filter(&self, width: u32, height : u32) -> Box<Filter> {
+    pub fn create_filter(&self, width: u32, height: u32) -> Box<Filter> {
         match *self {
             FilterFactory::BoxFilter => Box::new(BoxFilter::default()),
             FilterFactory::MitchellFilter => {

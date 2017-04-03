@@ -182,7 +182,7 @@
           "y": 0.0,
           "z": 270.0
         },
-        "obj_path": "models/suzanne_low.obj",
+        "obj_path": "models/smoothed_suzanne.obj",
         "name": "Suzanne",
 	"visible": true ,
 	"material" : "scenes/materials/solid_green.json"
@@ -205,6 +205,38 @@
             "a": 255
           }
         }
+      },
+      {
+        "point": {
+          "position": {
+            "x": 15.0,
+            "y": 5.0,
+            "z": 8.0
+          },
+          "intensity": 10.0,
+          "color": {
+            "r": 255,
+            "g": 0,
+            "b": 255,
+            "a": 255
+          }
+        }
+      },
+      {
+        "point": {
+          "position": {
+            "x": 15.0,
+            "y": -5.0,
+            "z": 8.0
+          },
+          "intensity": 10.0,
+          "color" : {
+            "r": 255,
+            "g": 0,
+            "b": 255,
+            "a": 255
+          }
+        }
       }
     ]
   },
@@ -212,7 +244,7 @@
     "res_x": 960,
     "res_y": 540,
     "threads":8,
-    "bucket_size":17,
+    "bucket_size":10,
     "sampler": {
       "HaltonSampler": {
         "subdivision_sampling": 4

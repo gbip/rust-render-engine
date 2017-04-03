@@ -589,15 +589,15 @@ mod tests {
         };
 
         assert!((v1 * v2).aeq(&Vector3 {
-                                   x: 0_f32,
-                                   y: 2_f32,
-                                   z: 4_f32,
-                               }));
+            x: 0_f32,
+            y: 2_f32,
+            z: 4_f32,
+        }));
         assert!((&v1 * &v2).aeq(&Vector3 {
-                                     x: 0_f32,
-                                     y: 2_f32,
-                                     z: 4_f32,
-                                 }));
+            x: 0_f32,
+            y: 2_f32,
+            z: 4_f32,
+        }));
     }
 
     #[test]

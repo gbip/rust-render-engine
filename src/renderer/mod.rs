@@ -55,7 +55,7 @@ impl RenderData {
 }
 
 /** Représente un pixel avec des Sample dedans. */
-#[derive(Clone)]
+#[derive(Clone,Debug)]
 pub struct Pixel {
     x: u32,
     y: u32,

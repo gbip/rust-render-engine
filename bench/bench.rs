@@ -24,11 +24,11 @@ fn write_bench_to_file(name: &str, time: f64) {
         .open(&file_name)
         .expect(format!("Error : can't open {} for writing benchmarks results",
                         file_name)
-                        .as_str());
+            .as_str());
     file.write_all(format!("{} was executed in: {} \n", name, time).as_bytes())
         .expect(format!("Error while writing the benchmark results into {}",
                         file_name)
-                        .as_str());
+            .as_str());
 
 
 }

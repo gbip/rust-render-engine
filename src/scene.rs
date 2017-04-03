@@ -1,6 +1,4 @@
 use std::vec::Vec;
-use std::rc::Rc;
-use std::cell::RefCell;
 use math::{Vector3, Vector3f, VectorialOperations};
 use geometry::obj3d::Object;
 use light::LightObject;
@@ -27,7 +25,7 @@ impl Scene {
             Ok(file) => {
                 match serde_json::from_str(file.as_str()) {
                     Ok(val) => val,
-                    Err(e) => panic!("Error while loading world. Serde error is : {}", e),
+                    Err(e) => panic!("Error while loading world. {}", e),
                 }
             }
             Err(e) => panic!("Error while reading file {} : {}", file, e),
@@ -200,9 +198,9 @@ impl World {
 
     // Represente le fait qu'un point soit visible par un autre : on revoie true si le rayon
     // n'intersecte aucun triangle.
-    pub fn is_occluded(&self, ray: Rc<RefCell<Ray>>) -> bool {
+    pub fn is_occluded(&self, ray: &mut Ray) -> bool {
         for obj in &self.objects {
-            if obj.fast_intersection(ray.clone()) {
+            if obj.fast_intersection(ray) {
                 return true;
             }
             continue;
@@ -245,25 +243,25 @@ mod test {
         let (origin, vec1, vec2) = cam.get_canvas_base(1.0);
 
         assert!((origin -
-                     Vector3f {
-                         x: 4.0,
-                         y: 2.0,
-                         z: 4.0 + 2.0_f32.sqrt(),
-                     })
-                    .norm() < 0.001);
+                 Vector3f {
+                x: 4.0,
+                y: 2.0,
+                z: 4.0 + 2.0_f32.sqrt(),
+            })
+            .norm() < 0.001);
         assert!((vec1 -
-                     Vector3f {
-                         x: -2.0,
-                         y: 2.0,
-                         z: 0.0,
-                     })
-                    .norm() < 0.001);
+                 Vector3f {
+                x: -2.0,
+                y: 2.0,
+                z: 0.0,
+            })
+            .norm() < 0.001);
         assert!((vec2 -
-                     Vector3f {
-                         x: 0.0,
-                         y: 0.0,
-                         z: -2.0 * 2.0_f32.sqrt(),
-                     })
-                    .norm() < 0.001);
+                 Vector3f {
+                x: 0.0,
+                y: 0.0,
+                z: -2.0 * 2.0_f32.sqrt(),
+            })
+            .norm() < 0.001);
     }
 }
