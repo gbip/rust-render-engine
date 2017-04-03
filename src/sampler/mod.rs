@@ -68,17 +68,20 @@ pub trait Sampler {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(untagged)]
-pub enum SamplerObject {
-    HaltonSampler { halton : HaltonSampler},
-    DefaultSampler { default : DefaultSampler},
+pub enum SamplerFactory {
+    HaltonSampler { subdivision_sampling : u32},
+    DefaultSampler { subdivision_sampling : u32},
 }
 
-impl SamplerObject {
-    pub fn as_trait(&self) -> &Sampler {
+impl SamplerFactory {
+    pub fn create_sampler(&self) -> Box<Sampler> {
         match *self {
-            SamplerObject::HaltonSampler { ref halton} => halton,
-            SamplerObject::DefaultSampler { ref default} => default,
+            SamplerFactory::HaltonSampler { subdivision_sampling} => {
+                Box::new(HaltonSampler::new(subdivision_sampling))
+            },
+            SamplerFactory::DefaultSampler { subdivision_sampling} => {
+                Box::new(DefaultSampler::new(subdivision_sampling))
+            }
         }
     }
 }

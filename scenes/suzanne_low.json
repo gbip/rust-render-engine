@@ -214,8 +214,8 @@
     "threads":8,
     "bucket_size":10,
     "sampler": {
-      "halton": {
-        "sample_rate": 8
+      "HaltonSampler": {
+        "subdivision_sampling": 8
       }
     },
     "background_color": {

@@ -3,11 +3,9 @@ use sampler::Sampler;
 
 /** Sampler avec une distribution d'échantillon uniforme à travers les pixels
 (Stratified sampler without jittering)*/
-#[derive(Serialize, Deserialize, Debug)]
 pub struct DefaultSampler {
     sample_rate: u32,
 
-    #[serde(skip_serializing,skip_deserializing)]
     sample_square_root: u32,
 }
 
@@ -60,7 +58,6 @@ fn get_halton(a: u32, basis: u32) -> f32 {
 }
 
 /** Sampler 2D utilisant les séquences de Halton. */
-#[derive(Serialize, Deserialize, Debug)]
 pub struct HaltonSampler {
     sample_rate: u32,
 }

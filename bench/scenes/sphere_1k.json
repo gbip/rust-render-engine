@@ -27780,7 +27780,13 @@
             "y": 0.0,
             "z": 3.0
           },
-          "intensity": 10.0
+          "intensity": 10.0,
+          "color" : {
+            "r": 255,
+            "g": 0,
+            "b": 255,
+            "a": 255
+          }
         }
       }
     ]
@@ -27791,8 +27797,8 @@
     "threads":8,
     "bucket_size":10,
     "sampler": {
-      "halton": {
-        "sample_rate": 4
+      "HaltonSampler": {
+        "subdivision_sampling": 8
       }
     },
     "background_color": {

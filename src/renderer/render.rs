@@ -8,7 +8,7 @@ use std::fmt;
 use filter::{Filter, filters};
 use renderer::Pixel;
 use renderer::block::Block;
-use sampler::{samplers, SamplerObject};
+use sampler::{SamplerFactory};
 use std::sync::Mutex;
 use std::clone::Clone;
 use std::ops::DerefMut;
@@ -32,7 +32,8 @@ pub struct Renderer {
     #[serde(skip_serializing,skip_deserializing)]
     ratio: f32,
 
-    sampler: SamplerObject,
+    #[serde(rename = "sampler")]
+    sampler_factory: SamplerFactory,
 
     background_color: RGBA8,
 
@@ -44,7 +45,6 @@ pub struct Renderer {
     bucket_size: usize,
 }
 
-
 impl Renderer {
     pub fn new(res_x: usize, res_y: usize) -> Self {
         Renderer {
@@ -53,7 +53,7 @@ impl Renderer {
             ratio: (res_x as f32 / res_y as f32),
             background_color: RGBA8::new_black(),
             textures: HashMap::new(),
-            sampler: SamplerObject::HaltonSampler { halton: samplers::HaltonSampler::new(4) },
+            sampler_factory: SamplerFactory::HaltonSampler { subdivision_sampling: 4 },
             bucket_size: 10,
             threads: 1,
         }
@@ -226,7 +226,7 @@ impl Renderer {
                         shared_image: &Mutex<Image<RGBA32>>) {
 
         // Generation des samples
-        self.sampler.as_trait().create_samples(&mut block);
+        self.sampler_factory.create_sampler().create_samples(&mut block);
 
         let filter = filters::BoxFilter::default();
         /*let mut filter = filters::MitchellFilter::default();
