@@ -16,8 +16,6 @@ use std::io::Stdout;
 use scoped_pool::Pool;
 use colored::*;
 use pbr::ProgressBar;
-use std::rc::Rc;
-use std::cell::RefCell;
 
 // Le ratio n'est pas enregistré à la deserialization, il faut penser à appeler compute_ratio()
 // pour avoir un ratio autre que 0.
@@ -102,15 +100,15 @@ impl Renderer {
 
     pub fn calculate_ray_intersection<'b>(&self,
                                           objects: &[&'b Object], // TODO Changer en raytree
-                                          ray: Rc<RefCell<Ray>>)
+                                          ray: &mut Ray)
                                           -> Option<Intersection<'b>> {
 
         let mut intersection_point: Option<Intersection> = None;
         for object in objects {
             // TODO : Peut être virer le branching ici ?
             // TODO : Regarder le geometry/intersection.rs dans tray
-            if object.bounding_box().intersects(ray.clone()) {
-                if let Some(point) = object.get_intersection_point(ray.clone()) {
+            if object.bounding_box().intersects(ray) {
+                if let Some(point) = object.get_intersection_point(ray) {
                     intersection_point = Some(point);
                 }
             }
@@ -131,15 +129,14 @@ impl Renderer {
 
         for sample in &mut pixel.samples {
             // On récupère le rayon à partir du sample
-            let ray: Rc<RefCell<Ray>> =
-                Rc::new(RefCell::new(camera.create_ray_from_sample(sample,
-                                                                   self.ratio,
-                                                                   self.res_x as f32,
-                                                                   self.res_y as f32)));
+            let mut ray: Ray = camera.create_ray_from_sample(sample,
+                                                             self.ratio,
+                                                             self.res_x as f32,
+                                                             self.res_y as f32);
 
             // CALCUL DE LA COULEUR DU RAYON (TODO à mettre ailleurs)
 
-            let point = self.calculate_ray_intersection(&objects, ray);
+            let point = self.calculate_ray_intersection(&objects, &mut ray);
 
             // On détermine la couleur du rayon, simplement à partir du fragment retourné et
             // du matériau associé à l'objet intersecté.
