@@ -190,6 +190,12 @@ impl Renderer {
             }
         }
 
+        //Gestion du bloc en bas à droite
+        if offset_y != 0 || offset_x != 0 {
+            let block = Block::new(offset_x, offset_y, size_x, size_y);
+            result.push(block);
+        }
+
         // Gestion des blocs standards
         for i in 0..bloc_count_x {
             for j in 0..bloc_count_y {

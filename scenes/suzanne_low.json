@@ -212,7 +212,7 @@
     "res_x": 960,
     "res_y": 540,
     "threads":8,
-    "bucket_size":18,
+    "bucket_size":17,
     "sampler": {
       "HaltonSampler": {
         "subdivision_sampling": 4
