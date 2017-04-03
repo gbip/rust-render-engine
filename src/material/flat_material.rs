@@ -91,7 +91,8 @@ impl Material for FlatMaterial {
                 if !world.is_occluded(light_ray) {
                     let ray_vect = -light_ray.slope() / light_ray.slope().norm();
                     //let factor = cmp::max(&0.0, &ray_vect.dot_product(&frag.normal));
-                    let factor = ray_vect.dot_product(&(frag.normal / frag.normal.norm()))
+                    let factor = ray_vect
+                        .dot_product(&(frag.normal / frag.normal.norm()))
                         .abs();
                     intensity += factor / light_count as f32;
                 }
@@ -126,8 +127,8 @@ impl Material for MatCap {
                  _: Option<&TextureRegister>)
                  -> RGBA32 {
         let coef = (frag.normal
-            .dot_product(&(ray.slope() / ray.slope().norm()))
-            .abs() * 255f32) as u8;
+                        .dot_product(&(ray.slope() / ray.slope().norm()))
+                        .abs() * 255f32) as u8;
 
         RGBA8::new(&coef, &(255u8 - coef), &coef, &255u8).to_rgba32()
     }

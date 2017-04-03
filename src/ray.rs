@@ -237,9 +237,9 @@ mod tests {
                                });
 
         assert!(match plane.get_intersection_fragment(&mut ray) {
-            None => true,
-            _ => false,
-        });
+                    None => true,
+                    _ => false,
+                });
     }
 
     #[test]
@@ -264,9 +264,9 @@ mod tests {
 
         let intersection = plane.get_intersection_fragment(&mut ray);
         assert!(match intersection {
-            None => true,
-            Some(_) => false,
-        });
+                    None => true,
+                    Some(_) => false,
+                });
     }
 
     #[test]
@@ -291,17 +291,17 @@ mod tests {
 
         let intersection = plane.get_intersection_fragment(&mut ray);
         assert!(match intersection {
-            None => false,
-            Some(point) => {
-                (point.position -
-                 Vector3f {
-                        x: 0.0,
-                        y: -35.0,
-                        z: 0.0,
-                    })
-                    .norm() < 0.00001
-            }
-        });
+                    None => false,
+                    Some(point) => {
+                        (point.position -
+                             Vector3f {
+                                 x: 0.0,
+                                 y: -35.0,
+                                 z: 0.0,
+                             })
+                            .norm() < 0.00001
+                    }
+                });
     }
 
 }
