@@ -1,5 +1,3 @@
-use std::rc::Rc;
-use std::cell::Cell;
 use color::{RGBA8, RGBA32};
 use io_utils;
 use serde_json;
@@ -90,8 +88,8 @@ impl Material for FlatMaterial {
             let light_rays = light.as_trait().emit_rays(&frag.position, world);
 
             for light_ray in light_rays {
-                if !world.is_occluded(Rc::new(Cell::new(light_ray))) {
-                    let ray_vect = -light_ray.slope() / light_ray.slope().norm();
+                if !world.is_occluded(light_ray.clone()) {
+                    let ray_vect = -light_ray.borrow().slope() / light_ray.borrow().slope().norm();
                     //let factor = cmp::max(&0.0, &ray_vect.dot_product(&frag.normal));
                     let factor = ray_vect
                         .dot_product(&(frag.normal / frag.normal.norm()))

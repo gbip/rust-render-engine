@@ -17,7 +17,7 @@ use scoped_pool::Pool;
 use colored::*;
 use pbr::ProgressBar;
 use std::rc::Rc;
-use std::cell::Cell;
+use std::cell::RefCell;
 
 // Le ratio n'est pas enregistré à la deserialization, il faut penser à appeler compute_ratio()
 // pour avoir un ratio autre que 0.
@@ -102,7 +102,7 @@ impl Renderer {
 
     pub fn calculate_ray_intersection<'b>(&self,
                                           objects: &[&'b Object], // TODO Changer en raytree
-                                          ray: Rc<Cell<Ray>>)
+                                          ray: Rc<RefCell<Ray>>)
                                           -> Option<Intersection<'b>> {
 
         let mut intersection_point: Option<Intersection> = None;
@@ -131,8 +131,8 @@ impl Renderer {
 
         for sample in &mut pixel.samples {
             // On récupère le rayon à partir du sample
-            let ray: Rc<Cell<Ray>> =
-                Rc::new(Cell::new(camera.create_ray_from_sample(sample,
+            let ray: Rc<RefCell<Ray>> =
+                Rc::new(RefCell::new(camera.create_ray_from_sample(sample,
                                                                 self.ratio,
                                                                 self.res_x as f32,
                                                                 self.res_y as f32)));

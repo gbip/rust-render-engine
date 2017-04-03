@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use std::cell::Cell;
+use std::cell::RefCell;
 use math::{Vector3f, Vector2f};
 use math::VectorialOperations;
 use geometry::obj3d::Mesh;
@@ -13,13 +13,13 @@ pub struct Intersection<'a> {
     fragment: Fragment,
     geometry: &'a Mesh,
     material: &'a Material,
-    ray: Rc<Cell<Ray>>,
+    ray: Rc<RefCell<Ray>>,
 }
 
 impl<'a> Intersection<'a> {
     /** Un peu de magie sur les lifetime pour que le compilo comprenne ce qu'il se passe*/
     pub fn new<'b: 'a, T: Material>(frag: Fragment,
-                                    ray: Rc<Cell<Ray>>,
+                                    ray: Rc<RefCell<Ray>>,
                                     geo: &'b Mesh,
                                     mat: &'b T)
                                     -> Intersection<'a> {
@@ -37,13 +37,13 @@ impl<'a> Intersection<'a> {
             Some(_) => {
                 self.material
                     .get_color(&self.fragment,
-                               &self.ray.get(),
+                               &self.ray.borrow(),
                                world,
                                Some(texture_register))
             }
             None => {
                 self.material
-                    .get_color(&self.fragment, &self.ray.get(), world, None)
+                    .get_color(&self.fragment, &self.ray.borrow(), world, None)
             }
         }
     }
@@ -82,16 +82,16 @@ pub struct Fragment {
 
 pub trait Surface {
     /** Retourne le fragment crée par l'interseciton entre un rayon et de la géomètrie. Prends en
-     entrée un Rc<Cell<Ray>> pour éviter d'allouer de la mémoire à chaque création de fragment.
+     entrée un Rc<RefCell<Ray>> pour éviter d'allouer de la mémoire à chaque création de fragment.
      On aurait pu modifier le Fragment pour permettre d'avoir un borrow sur un rayon, mais à cause
      de la mutabilité d'un rayon, cela n'est pas possible.
-     Pourquoi le Cell ? Il faut lire la doc : https://doc.rust-lang.org/std/cell/index.html
+     Pourquoi le RefCell ? Il faut lire la doc : https://doc.rust-lang.org/std/cell/index.html
     */
-    fn get_intersection_fragment(&self, ray: Rc<Cell<Ray>>) -> Option<Fragment>;
+    fn get_intersection_fragment(&self, ray: Rc<RefCell<Ray>>) -> Option<Fragment>;
 
     /** Il y a une implémentation par défaut, pour éviter de s'amuser à l'implémenter pour les
      * tests unitaires. */
-    fn fast_intersection(&self, _: Rc<Cell<Ray>>) -> bool {
+    fn fast_intersection(&self, _: Rc<RefCell<Ray>>) -> bool {
         unreachable!();
     }
 }
@@ -145,10 +145,10 @@ impl Plane {
 }
 
 impl Surface for Plane {
-    fn get_intersection_fragment(&self, ray: Rc<Cell<Ray>>) -> Option<Fragment> {
+    fn get_intersection_fragment(&self, ray: Rc<RefCell<Ray>>) -> Option<Fragment> {
 
-        let slope: &Vector3f = &ray.get().slope;
-        let origin: &Vector3f = &ray.get().origin;
+        let slope: &Vector3f = &ray.borrow().slope;
+        let origin: &Vector3f = &ray.borrow().origin;
 
         // ax + by + cz + d = 0 <=> m * t = p
         let m = self.a * slope.x + self.b * slope.y + self.c * slope.z;
@@ -159,7 +159,7 @@ impl Surface for Plane {
         } else {
             let t = p / m;
 
-            if t < 0.0 || (ray.get().max_t > 0.0 && t > ray.get().max_t) {
+            if t < 0.0 || (ray.borrow().max_t > 0.0 && t > ray.borrow().max_t) {
                 //La surface est "avant" ou "après" le point d'émission du rayon
                 None
             } else {
@@ -168,8 +168,8 @@ impl Surface for Plane {
         }
     }
 
-    fn fast_intersection(&self, ray: Rc<Cell<Ray>>) -> bool {
-        let slope: &Vector3f = &ray.get().slope;
+    fn fast_intersection(&self, ray: Rc<RefCell<Ray>>) -> bool {
+        let slope: &Vector3f = &ray.borrow().slope;
         self.a * slope.x + self.b * slope.y + self.c * slope.z != 0.0
     }
 }
@@ -235,7 +235,7 @@ mod tests {
             d: 35.0,
         };
 
-        let ray = Rc::new(Cell::new(Ray::new(Vector3f {
+        let ray = Rc::new(RefCell::new(Ray::new(Vector3f {
                                                  x: 8.0,
                                                  y: 7.0,
                                                  z: 5.0,
@@ -261,7 +261,7 @@ mod tests {
             d: 35.0,
         };
 
-        let ray = Rc::new(Cell::new(Ray::new(Vector3f {
+        let ray = Rc::new(RefCell::new(Ray::new(Vector3f {
                                                  x: 0.0,
                                                  y: 0.0,
                                                  z: 0.0,
@@ -288,7 +288,7 @@ mod tests {
             d: 35.0,
         };
 
-        let ray = Rc::new(Cell::new(Ray::new(Vector3f {
+        let ray = Rc::new(RefCell::new(Ray::new(Vector3f {
                                                  x: 0.0,
                                                  y: 0.0,
                                                  z: 0.0,
@@ -312,5 +312,21 @@ mod tests {
                             .norm() < 0.00001
                     }
                 });
+    }
+
+    #[test]
+    fn test_rc_ray() {
+        let rc = Rc::new(RefCell::new(Ray::new(Vector3f {
+                                                 x: 0.0,
+                                                 y: 0.0,
+                                                 z: 0.0,
+                                             },
+                                             Vector3f {
+                                                 x: 0.0,
+                                                 y: -1.0,
+                                                 z: 0.0,
+                                             })));
+        rc.borrow_mut().max_t = 0.5;
+        assert_eq!(rc.borrow().max_t, 0.5);
     }
 }

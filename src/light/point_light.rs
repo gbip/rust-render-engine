@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use std::cell::Cell;
+use std::cell::RefCell;
 use math::Vector3f;
 use scene::World;
 use light::Light;
@@ -18,16 +18,16 @@ pub struct PointLight {
 impl Light for PointLight {
     fn visible(&self, point: &Vector3f, world: &World) -> bool {
         let slope = *point - self.position;
-        let ray: Rc<Cell<Ray>> = Rc::new(Cell::new(Ray::new(self.position, slope)));
-        ray.get().max_t = 0.999;
+        let ray: Rc<RefCell<Ray>> = Rc::new(RefCell::new(Ray::new(self.position, slope)));
+        ray.borrow_mut().max_t = 0.999;
         !world.is_occluded(ray)
     }
 
-    fn emit_rays(&self, point: &Vector3f, _: &World) -> Vec<Ray> {
-        let mut result: Vec<Ray> = vec![];
+    fn emit_rays(&self, point: &Vector3f, _: &World) -> Vec<Rc<RefCell<Ray>>> {
+        let mut result: Vec<Rc<RefCell<Ray>>> = vec![];
         let slope = *point - self.position;
-        let mut ray: Ray = Ray::new(self.position, slope);
-        ray.max_t = 0.999;
+        let ray: Rc<RefCell<Ray>> = Rc::new(RefCell::new(Ray::new(self.position, slope)));
+        ray.borrow_mut().max_t = 0.999;
         result.push(ray);
         result
     }

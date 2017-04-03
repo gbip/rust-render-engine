@@ -3,7 +3,7 @@ use ray::Ray;
 use math::Vector3f;
 use std::f32;
 use std::rc::Rc;
-use std::cell::Cell;
+use std::cell::RefCell;
 
 #[derive(Debug, Clone)]
 pub struct BoundingBox {
@@ -65,8 +65,8 @@ impl BoundingBox {
 
 
     // Algorithme issue de : http://people.csail.mit.edu/amy/papers/box-jgt.pdf
-    fn fast_intersect(&self, rc_ray: Rc<Cell<Ray>>) -> bool {
-        let ray = rc_ray.get();
+    fn fast_intersect(&self, rc_ray: Rc<RefCell<Ray>>) -> bool {
+        let ray = rc_ray.borrow();
         // X
         let mut tmin: f32;
         let mut tmax: f32;
@@ -126,7 +126,7 @@ impl BoundingBox {
         true
     }
 
-    pub fn intersects(&self, ray: Rc<Cell<Ray>>) -> bool {
+    pub fn intersects(&self, ray: Rc<RefCell<Ray>>) -> bool {
         self.fast_intersect(ray)
     }
 }
