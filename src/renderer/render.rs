@@ -5,10 +5,10 @@ use ray::{Ray, Intersection};
 use geometry::obj3d::Object;
 use std::collections::HashMap;
 use std::fmt;
-use filter::{Filter, filters};
 use renderer::Pixel;
 use renderer::block::Block;
 use sampler::{SamplerFactory};
+use filter::FilterFactory;
 use std::sync::Mutex;
 use std::clone::Clone;
 use std::ops::DerefMut;
@@ -35,6 +35,9 @@ pub struct Renderer {
     #[serde(rename = "sampler")]
     sampler_factory: SamplerFactory,
 
+    #[serde(rename = "filter")]
+    filter_factory: FilterFactory,
+
     background_color: RGBA8,
 
     #[serde(skip_serializing, skip_deserializing, default = "HashMap::new")]
@@ -54,6 +57,7 @@ impl Renderer {
             background_color: RGBA8::new_black(),
             textures: HashMap::new(),
             sampler_factory: SamplerFactory::HaltonSampler { subdivision_sampling: 4 },
+            filter_factory: FilterFactory::BoxFilter,
             bucket_size: 10,
             threads: 1,
         }
@@ -227,10 +231,7 @@ impl Renderer {
 
         // Generation des samples
         self.sampler_factory.create_sampler().create_samples(&mut block);
-
-        let filter = filters::BoxFilter::default();
-        /*let mut filter = filters::MitchellFilter::default();
-        filter.set_image_size(self.res_x as u32, self.res_y as u32);*/
+        let filter = self.filter_factory.create_filter(self.res_x as u32, self.res_y as u32);
 
         // Emission des rayons
         for pixel in block.pixels_mut() {
