@@ -8,3 +8,5 @@ template.json
 *.swp
 *.sh
 *.png
+/.idea/
+*.rs.bk

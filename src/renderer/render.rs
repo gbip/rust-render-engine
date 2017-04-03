@@ -9,13 +9,15 @@ use filter::{Filter, filters};
 use renderer::Pixel;
 use renderer::block::Block;
 use sampler::{samplers, SamplerObject};
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 use std::clone::Clone;
 use std::ops::DerefMut;
 use std::io::Stdout;
 use scoped_pool::Pool;
 use colored::*;
 use pbr::ProgressBar;
+use std::rc::Rc;
+use std::cell::Cell;
 
 // Le ratio n'est pas enregistré à la deserialization, il faut penser à appeler compute_ratio()
 // pour avoir un ratio autre que 0.
@@ -76,7 +78,8 @@ impl Renderer {
             for path in texture_paths {
                 let path_str = String::from(path.as_str());
                 println!("Ajout de la texture {}", path);
-                textures.entry(path)
+                textures
+                    .entry(path)
                     .or_insert_with(|| Image::<RGBA8>::read_from_file(path_str.as_str()));
             }
         }
@@ -99,15 +102,15 @@ impl Renderer {
 
     pub fn calculate_ray_intersection<'b>(&self,
                                           objects: &[&'b Object], // TODO Changer en raytree
-                                          mut ray: &mut Ray)
+                                          ray: Rc<Cell<Ray>>)
                                           -> Option<Intersection<'b>> {
 
         let mut intersection_point: Option<Intersection> = None;
         for object in objects {
             // TODO : Peut être virer le branching ici ?
             // TODO : Regarder le geometry/intersection.rs dans tray
-            if object.bounding_box().intersects(ray) {
-                if let Some(point) = object.get_intersection_point(ray) {
+            if object.bounding_box().intersects(ray.clone()) {
+                if let Some(point) = object.get_intersection_point(ray.clone()) {
                     intersection_point = Some(point);
                 }
             }
@@ -120,22 +123,23 @@ impl Renderer {
     le canvas passé en paramètres. */
     pub fn calculate_rays(&self, world: &scene::World, camera: &scene::Camera, pixel: &mut Pixel) {
 
-        let objects = world.objects()
+        let objects = world
+            .objects()
             .iter()
             .filter(|bbox| bbox.is_visible())
             .collect::<Vec<&Object>>();
 
         for sample in &mut pixel.samples {
             // On récupère le rayon à partir du sample
-            let mut ray =
-                camera.create_ray_from_sample(sample,
-                                              self.ratio,
-                                              self.res_x as f32,
-                                              self.res_y as f32);
+            let ray: Rc<Cell<Ray>> =
+                Rc::new(Cell::new(camera.create_ray_from_sample(sample,
+                                                                self.ratio,
+                                                                self.res_x as f32,
+                                                                self.res_y as f32)));
 
             // CALCUL DE LA COULEUR DU RAYON (TODO à mettre ailleurs)
 
-            let point = self.calculate_ray_intersection(&objects, &mut ray);
+            let point = self.calculate_ray_intersection(&objects, ray);
 
             // On détermine la couleur du rayon, simplement à partir du fragment retourné et
             // du matériau associé à l'objet intersecté.
@@ -182,8 +186,7 @@ impl Renderer {
      * recombiner dans une image finale. */
     #[allow(let_and_return)]
     pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA32> {
-        let shared_image: Arc<Mutex<Image<RGBA32>>> = Arc::new(Mutex::new(Image::new(self.res_x,
-                                                                                     self.res_y)));
+        let shared_image: Mutex<Image<RGBA32>> = Mutex::new(Image::new(self.res_x, self.res_y));
 
         // On definit le nombre de threads à utiliser
         let pool = Pool::new(self.threads);
@@ -201,14 +204,15 @@ impl Renderer {
 
         // On passe les blocs aux threads
         pool.scoped(|scope| while !blocks.is_empty() {
-            let block = blocks.pop().unwrap();
-            scope.execute(|| {
-                self.render_block(block, world, camera, &shared_image);
-                progress_bar.lock().unwrap().inc();
-            });
-        });
+                        let block = blocks.pop().unwrap();
+                        scope.execute(|| {
+                                          self.render_block(block, world, camera, &shared_image);
+                                          progress_bar.lock().unwrap().inc();
+                                      });
+                    });
 
         progress_bar.lock().unwrap().finish();
+
         // On transforme le Arc<Mutex<Image>> en Image
         let result = shared_image.lock().unwrap().deref_mut().clone();
         result
@@ -219,7 +223,7 @@ impl Renderer {
                         mut block: Block,
                         world: &scene::World,
                         camera: &scene::Camera,
-                        shared_image: &Arc<Mutex<Image<RGBA32>>>) {
+                        shared_image: &Mutex<Image<RGBA32>>) {
 
         // Generation des samples
         self.sampler.as_trait().create_samples(&mut block);
@@ -248,7 +252,8 @@ impl Renderer {
         }
 
         // Superposition de l'image rendue à l'image finale
-        shared_image.lock()
+        shared_image
+            .lock()
             .unwrap()
             .deref_mut()
             .superpose_sub_image(Image::<RGBA32>::from_vec_vec(&temp_result),

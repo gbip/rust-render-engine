@@ -1,13 +1,16 @@
+use std::rc::Rc;
+use std::cell::Cell;
 use math::Vector3f;
 use scene::World;
 use light::Light;
 use ray::Ray;
+use color::RGBA32;
 
 /** Represente une lumière ponctuelle */
 #[derive(Serialize,Deserialize, Debug)]
 pub struct PointLight {
     position: Vector3f,
-
+    color: RGBA32,
     intensity: f32,
 }
 
@@ -15,9 +18,9 @@ pub struct PointLight {
 impl Light for PointLight {
     fn visible(&self, point: &Vector3f, world: &World) -> bool {
         let slope = *point - self.position;
-        let mut ray: Ray = Ray::new(self.position, slope);
-        ray.max_t = 0.999;
-        !world.is_occluded(&mut ray)
+        let ray: Rc<Cell<Ray>> = Rc::new(Cell::new(Ray::new(self.position, slope)));
+        ray.get().max_t = 0.999;
+        !world.is_occluded(ray)
     }
 
     fn emit_rays(&self, point: &Vector3f, _: &World) -> Vec<Ray> {

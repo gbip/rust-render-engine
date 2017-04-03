@@ -1,3 +1,5 @@
+use std::rc::Rc;
+use std::cell::Cell;
 use math::{Vector3f, Vector2f};
 use math::VectorialOperations;
 use geometry::obj3d::Mesh;
@@ -11,13 +13,13 @@ pub struct Intersection<'a> {
     fragment: Fragment,
     geometry: &'a Mesh,
     material: &'a Material,
-    ray: Ray,
+    ray: Rc<Cell<Ray>>,
 }
 
 impl<'a> Intersection<'a> {
     /** Un peu de magie sur les lifetime pour que le compilo comprenne ce qu'il se passe*/
     pub fn new<'b: 'a, T: Material>(frag: Fragment,
-                                    ray: &Ray,
+                                    ray: Rc<Cell<Ray>>,
                                     geo: &'b Mesh,
                                     mat: &'b T)
                                     -> Intersection<'a> {
@@ -25,7 +27,7 @@ impl<'a> Intersection<'a> {
             fragment: frag,
             geometry: geo,
             material: mat,
-            ray: *ray,
+            ray: ray.clone(),
         }
     }
 
@@ -34,9 +36,15 @@ impl<'a> Intersection<'a> {
         match self.fragment.tex {
             Some(_) => {
                 self.material
-                    .get_color(&self.fragment, &self.ray, world, Some(texture_register))
+                    .get_color(&self.fragment,
+                               &self.ray.get(),
+                               world,
+                               Some(texture_register))
             }
-            None => self.material.get_color(&self.fragment, &self.ray, world, None),
+            None => {
+                self.material
+                    .get_color(&self.fragment, &self.ray.get(), world, None)
+            }
         }
     }
 }
@@ -47,9 +55,11 @@ pub struct Ray {
     slope: Vector3f,
     // L'origine du rayon
     origin: Vector3f,
-    // Un paramètre qui indique l'extrémité du rayon. Par exemple, lorsque le rayon est arrêté par
-    // une surface il ne se propage pas sur les surfaces situées derrière.
+    // Un paramètre qui indique l'extrémité du rayon. Par exemple, lorsque le rayon est arrêté
+    // par une surface il ne se propage pas sur les surfaces situées derrière.
     pub max_t: f32,
+
+    inv_slope: Vector3f,
 }
 
 #[derive(Debug, Clone)]
@@ -71,13 +81,17 @@ pub struct Fragment {
 
 
 pub trait Surface {
-    /** @returns the intersection fragment between the surface and
-    the ray given. */
-    fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment>;
+    /** Retourne le fragment crée par l'interseciton entre un rayon et de la géomètrie. Prends en
+     entrée un Rc<Cell<Ray>> pour éviter d'allouer de la mémoire à chaque création de fragment.
+     On aurait pu modifier le Fragment pour permettre d'avoir un borrow sur un rayon, mais à cause
+     de la mutabilité d'un rayon, cela n'est pas possible.
+     Pourquoi le Cell ? Il faut lire la doc : https://doc.rust-lang.org/std/cell/index.html
+    */
+    fn get_intersection_fragment(&self, ray: Rc<Cell<Ray>>) -> Option<Fragment>;
 
     /** Il y a une implémentation par défaut, pour éviter de s'amuser à l'implémenter pour les
      * tests unitaires. */
-    fn fast_intersection(&self, _: &mut Ray) -> bool {
+    fn fast_intersection(&self, _: Rc<Cell<Ray>>) -> bool {
         unreachable!();
     }
 }
@@ -90,7 +104,14 @@ impl Ray {
             origin: origin,
             slope: slope,
             max_t: -1.0,
+            inv_slope: Vector3f::new(1.0 / slope.x, 1.0 / slope.y, 1.0 / slope.z),
         }
+    }
+
+    /** Renvoies 1/slope, utile pour accélerer les calcules d'intersection avec les bounding box
+    ! */
+    pub fn inv_slope(&self) -> Vector3f {
+        self.inv_slope
     }
 
     pub fn slope(&self) -> Vector3f {
@@ -124,10 +145,10 @@ impl Plane {
 }
 
 impl Surface for Plane {
-    fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment> {
+    fn get_intersection_fragment(&self, ray: Rc<Cell<Ray>>) -> Option<Fragment> {
 
-        let slope: &Vector3f = &ray.slope;
-        let origin: &Vector3f = &ray.origin;
+        let slope: &Vector3f = &ray.get().slope;
+        let origin: &Vector3f = &ray.get().origin;
 
         // ax + by + cz + d = 0 <=> m * t = p
         let m = self.a * slope.x + self.b * slope.y + self.c * slope.z;
@@ -138,7 +159,7 @@ impl Surface for Plane {
         } else {
             let t = p / m;
 
-            if t < 0.0 || (ray.max_t > 0.0 && t > ray.max_t) {
+            if t < 0.0 || (ray.get().max_t > 0.0 && t > ray.get().max_t) {
                 //La surface est "avant" ou "après" le point d'émission du rayon
                 None
             } else {
@@ -147,8 +168,8 @@ impl Surface for Plane {
         }
     }
 
-    fn fast_intersection(&self, ray: &mut Ray) -> bool {
-        let slope: &Vector3f = &ray.slope;
+    fn fast_intersection(&self, ray: Rc<Cell<Ray>>) -> bool {
+        let slope: &Vector3f = &ray.get().slope;
         self.a * slope.x + self.b * slope.y + self.c * slope.z != 0.0
     }
 }
@@ -214,24 +235,21 @@ mod tests {
             d: 35.0,
         };
 
-        let mut ray = Ray {
-            origin: Vector3f {
-                x: 8.0,
-                y: 7.0,
-                z: 5.0,
-            },
-            slope: Vector3f {
-                x: 1.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            max_t: -1.0,
-        };
+        let ray = Rc::new(Cell::new(Ray::new(Vector3f {
+                                                 x: 8.0,
+                                                 y: 7.0,
+                                                 z: 5.0,
+                                             },
+                                             Vector3f {
+                                                 x: 1.0,
+                                                 y: 0.0,
+                                                 z: 0.0,
+                                             })));
 
-        assert!(match plane.get_intersection_fragment(&mut ray) {
-            None => true,
-            _ => false,
-        });
+        assert!(match plane.get_intersection_fragment(ray) {
+                    None => true,
+                    _ => false,
+                });
     }
 
     #[test]
@@ -243,25 +261,22 @@ mod tests {
             d: 35.0,
         };
 
-        let mut ray = Ray {
-            origin: Vector3f {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            slope: Vector3f {
-                x: 0.0,
-                y: 1.0,
-                z: 0.0,
-            },
-            max_t: -1.0,
-        };
+        let ray = Rc::new(Cell::new(Ray::new(Vector3f {
+                                                 x: 0.0,
+                                                 y: 0.0,
+                                                 z: 0.0,
+                                             },
+                                             Vector3f {
+                                                 x: 0.0,
+                                                 y: 1.0,
+                                                 z: 0.0,
+                                             })));
 
-        let intersection = plane.get_intersection_fragment(&mut ray);
+        let intersection = plane.get_intersection_fragment(ray);
         assert!(match intersection {
-            None => true,
-            Some(_) => false,
-        });
+                    None => true,
+                    Some(_) => false,
+                });
     }
 
     #[test]
@@ -273,32 +288,29 @@ mod tests {
             d: 35.0,
         };
 
-        let mut ray = Ray {
-            origin: Vector3f {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0,
-            },
-            slope: Vector3f {
-                x: 0.0,
-                y: -1.0,
-                z: 0.0,
-            },
-            max_t: -1.0,
-        };
+        let ray = Rc::new(Cell::new(Ray::new(Vector3f {
+                                                 x: 0.0,
+                                                 y: 0.0,
+                                                 z: 0.0,
+                                             },
+                                             Vector3f {
+                                                 x: 0.0,
+                                                 y: -1.0,
+                                                 z: 0.0,
+                                             })));
 
-        let intersection = plane.get_intersection_fragment(&mut ray);
+        let intersection = plane.get_intersection_fragment(ray);
         assert!(match intersection {
-            None => false,
-            Some(point) => {
-                (point.position -
-                 Vector3f {
-                        x: 0.0,
-                        y: -35.0,
-                        z: 0.0,
-                    })
-                    .norm() < 0.00001
-            }
-        });
+                    None => false,
+                    Some(point) => {
+                        (point.position -
+                             Vector3f {
+                                 x: 0.0,
+                                 y: -35.0,
+                                 z: 0.0,
+                             })
+                            .norm() < 0.00001
+                    }
+                });
     }
 }

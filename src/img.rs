@@ -38,7 +38,9 @@ impl<T: Pixel> Image<T> {
         }
 
         let file_output = &mut File::create(&Path::new(pathname)).unwrap();
-        image::ImageRgb8(buffer).save(file_output, image::PNG).expect("Error while saving file");
+        image::ImageRgb8(buffer)
+            .save(file_output, image::PNG)
+            .expect("Error while saving file");
     }
 
     pub fn get_pixel_at(&self, x: u32, y: u32) -> T {

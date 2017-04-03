@@ -2,6 +2,8 @@ use geometry::obj3d::{Object, Triangle};
 use ray::Ray;
 use math::Vector3f;
 use std::f32;
+use std::rc::Rc;
+use std::cell::Cell;
 
 #[derive(Debug, Clone)]
 pub struct BoundingBox {
@@ -63,7 +65,8 @@ impl BoundingBox {
 
 
     // Algorithme issue de : http://people.csail.mit.edu/amy/papers/box-jgt.pdf
-    fn fast_intersect(&self, ray: &Ray) -> bool {
+    fn fast_intersect(&self, rc_ray: Rc<Cell<Ray>>) -> bool {
+        let ray = rc_ray.get();
         // X
         let mut tmin: f32;
         let mut tmax: f32;
@@ -76,28 +79,23 @@ impl BoundingBox {
         let tzmin: f32;
         let tzmax: f32;
 
-
-        let divx: f32 = 1.0 / ray.slope().x;
-        let divy: f32 = 1.0 / ray.slope().y;
-        let divz: f32 = 1.0 / ray.slope().z;
-
         // X
-        if divx >= 0f32 {
-            tmin = (self.min.x - ray.origin().x) * divx;
-            tmax = (self.max.x - ray.origin().x) * divx;
+        if ray.inv_slope().x >= 0f32 {
+            tmin = (self.min.x - ray.origin().x) * ray.inv_slope().x;
+            tmax = (self.max.x - ray.origin().x) * ray.inv_slope().x;
 
         } else {
-            tmin = (self.max.x - ray.origin().x) * divx;
-            tmax = (self.min.x - ray.origin().x) * divx;
+            tmin = (self.max.x - ray.origin().x) * ray.inv_slope().x;
+            tmax = (self.min.x - ray.origin().x) * ray.inv_slope().x;
         }
 
         // Y
-        if divy >= 0f32 {
-            tymin = (self.min.y - ray.origin().y) * divy;
-            tymax = (self.max.y - ray.origin().y) * divy;
+        if ray.inv_slope().y >= 0f32 {
+            tymin = (self.min.y - ray.origin().y) * ray.inv_slope().y;
+            tymax = (self.max.y - ray.origin().y) * ray.inv_slope().y;
         } else {
-            tymin = (self.max.y - ray.origin().y) * divy;
-            tymax = (self.min.y - ray.origin().y) * divy;
+            tymin = (self.max.y - ray.origin().y) * ray.inv_slope().y;
+            tymax = (self.min.y - ray.origin().y) * ray.inv_slope().y;
         }
 
         // Cas facile, pas besoin de traiter les Z
@@ -113,12 +111,12 @@ impl BoundingBox {
 
 
         // Z
-        if divz >= 0f32 {
-            tzmin = (self.min.z - ray.origin().z) * divz;
-            tzmax = (self.max.z - ray.origin().z) * divz;
+        if ray.inv_slope().z >= 0f32 {
+            tzmin = (self.min.z - ray.origin().z) * ray.inv_slope().z;
+            tzmax = (self.max.z - ray.origin().z) * ray.inv_slope().z;
         } else {
-            tzmin = (self.max.z - ray.origin().z) * divz;
-            tzmax = (self.min.z - ray.origin().z) * divz;
+            tzmin = (self.max.z - ray.origin().z) * ray.inv_slope().z;
+            tzmax = (self.min.z - ray.origin().z) * ray.inv_slope().z;
         }
 
         if tmin > tzmax || tzmin > tmax {
@@ -128,7 +126,7 @@ impl BoundingBox {
         true
     }
 
-    pub fn intersects(&self, ray: &Ray) -> bool {
+    pub fn intersects(&self, ray: Rc<Cell<Ray>>) -> bool {
         self.fast_intersect(ray)
     }
 }
