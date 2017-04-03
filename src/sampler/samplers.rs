@@ -5,6 +5,7 @@ use sampler::Sampler;
 (Stratified sampler without jittering)*/
 pub struct DefaultSampler {
     sample_rate: u32,
+
     sample_square_root: u32,
 }
 
