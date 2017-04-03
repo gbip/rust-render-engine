@@ -1,7 +1,7 @@
 use std::vec::Vec;
 use std::f32;
 use std::rc::Rc;
-use std::cell::Cell;
+use std::cell::RefCell;
 use math::{Vector3, Vector3f, Vector2f, VectorialOperations, AlmostEq};
 use material::flat_material::FlatMaterial;
 use ray::{Ray, Plane, Surface, Fragment, Intersection};
@@ -139,7 +139,7 @@ impl Triangle {
 
 
 impl Surface for Triangle {
-    fn get_intersection_fragment(&self, ray: Rc<Cell<Ray>>) -> Option<Fragment> {
+    fn get_intersection_fragment(&self, ray: Rc<RefCell<Ray>>) -> Option<Fragment> {
         let pt_a = self.u.pos;
         let pt_b = self.v.pos;
         let pt_c = self.w.pos;
@@ -169,7 +169,7 @@ impl Surface for Triangle {
                 return None;
             }
 
-            ray.get().max_t = point.param;
+            ray.borrow_mut().max_t = point.param;
 
             let global_area_x2: f32 = vec_ab.cross_product(&vec_bc).norm();
             let u = cp_c.norm() / global_area_x2;
@@ -192,11 +192,11 @@ impl Surface for Triangle {
     /** Source : https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
     */
     #[allow(non_snake_case)]
-    fn fast_intersection(&self, ray: Rc<Cell<Ray>>) -> bool {
+    fn fast_intersection(&self, ray: Rc<RefCell<Ray>>) -> bool {
 
         let e1: Vector3f = self.v.pos() - self.u.pos(); // Rapide
         let e2: Vector3f = self.w.pos() - self.u.pos(); // Rapide
-        let P: Vector3f = ray.get().slope().cross_product(&e2); // Moyen
+        let P: Vector3f = ray.borrow().slope().cross_product(&e2); // Moyen
 
         let det: f32 = e1.dot_product(&P); // Moyen
 
@@ -207,7 +207,7 @@ impl Surface for Triangle {
 
         let inv_det: f32 = 1f32 / det; // Lent
 
-        let T: Vector3f = ray.get().origin() - self.u.pos(); // Rapide
+        let T: Vector3f = ray.borrow().origin() - self.u.pos(); // Rapide
         let u: f32 = T.dot_product(&P) * inv_det; // Moyen
 
         if u < 0f32 || u > 1f32 {
@@ -217,7 +217,7 @@ impl Surface for Triangle {
 
         let Q: Vector3f = T.cross_product(&e1); // Moyen
 
-        let v: f32 = ray.get().slope().dot_product(&Q) * inv_det; // Moyen
+        let v: f32 = ray.borrow().slope().dot_product(&Q) * inv_det; // Moyen
 
         if v < 0f32 || u + v > 1f32 {
             // Rapide
@@ -226,9 +226,9 @@ impl Surface for Triangle {
 
         let t: f32 = e2.dot_product(&Q) * inv_det; // Moyen
 
-        if t > f32::EPSILON && ray.get().max_t > t {
+        if t > f32::EPSILON && ray.borrow().max_t > t {
             // Rapide
-            ray.get().max_t = t;
+            ray.borrow_mut().max_t = t;
             return true;
         }
         false
@@ -500,7 +500,7 @@ impl Object {
         &self.position
     }
 
-    pub fn get_intersection_point(&self, ray: Rc<Cell<Ray>>) -> Option<Intersection> {
+    pub fn get_intersection_point(&self, ray: Rc<RefCell<Ray>>) -> Option<Intersection> {
 
         match self.get_intersection_fragment(ray.clone()) {
             Some(frag) => Some(Intersection::new(frag, ray.clone(), &self.mesh, &self.material)),
@@ -510,7 +510,7 @@ impl Object {
 }
 
 impl Surface for Object {
-    fn get_intersection_fragment(&self, ray: Rc<Cell<Ray>>) -> Option<Fragment> {
+    fn get_intersection_fragment(&self, ray: Rc<RefCell<Ray>>) -> Option<Fragment> {
 
         let points: Vec<Option<Fragment>> = self.triangles()
             .map(|tri| tri.get_intersection_fragment(ray.clone()))
@@ -523,7 +523,7 @@ impl Surface for Object {
         }
     }
 
-    fn fast_intersection(&self, ray: Rc<Cell<Ray>>) -> bool {
+    fn fast_intersection(&self, ray: Rc<RefCell<Ray>>) -> bool {
         if self.visible && self.bbox.intersects(ray.clone()) {
             for tri in self.triangles() {
                 if tri.fast_intersection(ray.clone()) {
@@ -538,7 +538,7 @@ impl Surface for Object {
 #[cfg(test)]
 mod test {
     use std::rc::Rc;
-    use std::cell::Cell;
+    use std::cell::RefCell;
     use math::{Vector3, Vector3f};
     use ray::{Surface, Ray};
     use super::{GeoPoint, Triangle};
@@ -552,7 +552,7 @@ mod test {
         let tri1 = Triangle::new(p1, p2, p3);
 
         // Ce rayon doit intersecter le triangle en (0,0,0)
-        let r1 = Rc::new(Cell::new(Ray::new(Vector3f::new(0.0, -1.0, 0.0),
+        let r1 = Rc::new(RefCell::new(Ray::new(Vector3f::new(0.0, -1.0, 0.0),
                                             Vector3f::new(0.0, 1.0, 0.0))));
 
         let frag1 = tri1.get_intersection_fragment(r1);
@@ -560,14 +560,14 @@ mod test {
 
         // Normalement, l'intersection du triangle est en (0.5,0,0), donc ce rayon ne doit pas
         // intersecter avec le triangle
-        let r2 = Rc::new(Cell::new(Ray::new(Vector3f::new(0.0, -1.0, 0.0),
+        let r2 = Rc::new(RefCell::new(Ray::new(Vector3f::new(0.0, -1.0, 0.0),
                                             Vector3f::new(0.51, 1.0, 0.0))));
 
         let frag2 = tri1.get_intersection_fragment(r2);
         assert_eq!(frag2, None);
 
         // Celui là par contre devrait :
-        let r3 = Rc::new(Cell::new(Ray::new(Vector3f::new(0.0, -1.0, 0.0),
+        let r3 = Rc::new(RefCell::new(Ray::new(Vector3f::new(0.0, -1.0, 0.0),
                                             Vector3f::new(0.5, 1.0, 0.0))));
 
         let frag3 = tri1.get_intersection_fragment(r3);
