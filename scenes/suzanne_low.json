@@ -209,10 +209,10 @@
     ]
   },
   "renderer": {
-    "res_x": 900,
+    "res_x": 960,
     "res_y": 540,
     "threads":8,
-    "bucket_size":16,
+    "bucket_size":18,
     "sampler": {
       "HaltonSampler": {
         "subdivision_sampling": 4
