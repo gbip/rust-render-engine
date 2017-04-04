@@ -30,6 +30,7 @@ pub extern crate num;
 pub extern crate colored;
 pub extern crate scoped_pool;
 pub extern crate pbr;
+pub extern crate rand;
 
 pub use scene::Scene;
 pub use img::Image;

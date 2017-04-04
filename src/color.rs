@@ -40,7 +40,8 @@ pub fn make_average_color(colors: &[RGBA32]) -> RGBA32 {
     // Calcul de la couleur moyenne
 
     let number_of_colors = colors.len();
-    let squared_colors: Vec<(u64, u64, u64)> = colors.into_iter()
+    let squared_colors: Vec<(u64, u64, u64)> = colors
+        .into_iter()
         .map(|color| (color.r as u64, color.g as u64, color.b as u64))
         .collect();
     let mut acc: (u64, u64, u64) = (0, 0, 0);

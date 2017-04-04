@@ -8,11 +8,13 @@ use lib_render::*;
 // Generate a template file at the location [path]
 fn generate_template(path: &str) {
     let mut scene = Scene::new_empty();
-    scene.world
+    scene
+        .world
         .add_camera(Vector3::new(0_f32, 0_f32, 5_f32),
                     Vector3::new(10_f32, 0_f32, 0_f32));
 
-    scene.world
+    scene
+        .world
         .add_object(Vector3::new(10_f32, 0.56_f32, 2_f32),
                     "models/plane_no_uv.obj".to_string(),
                     "Example".to_string());
@@ -82,9 +84,9 @@ fn parse_arg() {
     // Handling the template case
     if matches.opt_present("g") {
         generate_template(match matches.opt_str("g") {
-            Some(ref path) => path,
-            None => "template.json",
-        });
+                              Some(ref path) => path,
+                              None => "template.json",
+                          });
     }
 
     // Handling the case where we need to render

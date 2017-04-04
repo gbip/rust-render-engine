@@ -1,4 +1,5 @@
 pub mod samplers;
+pub mod monte_carlo;
 
 use color::RGBA32;
 use math::Vector2f;

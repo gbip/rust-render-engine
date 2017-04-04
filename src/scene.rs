@@ -243,25 +243,25 @@ mod test {
         let (origin, vec1, vec2) = cam.get_canvas_base(1.0);
 
         assert!((origin -
-                 Vector3f {
-                x: 4.0,
-                y: 2.0,
-                z: 4.0 + 2.0_f32.sqrt(),
-            })
-            .norm() < 0.001);
+                     Vector3f {
+                         x: 4.0,
+                         y: 2.0,
+                         z: 4.0 + 2.0_f32.sqrt(),
+                     })
+                    .norm() < 0.001);
         assert!((vec1 -
-                 Vector3f {
-                x: -2.0,
-                y: 2.0,
-                z: 0.0,
-            })
-            .norm() < 0.001);
+                     Vector3f {
+                         x: -2.0,
+                         y: 2.0,
+                         z: 0.0,
+                     })
+                    .norm() < 0.001);
         assert!((vec2 -
-                 Vector3f {
-                x: 0.0,
-                y: 0.0,
-                z: -2.0 * 2.0_f32.sqrt(),
-            })
-            .norm() < 0.001);
+                     Vector3f {
+                         x: 0.0,
+                         y: 0.0,
+                         z: -2.0 * 2.0_f32.sqrt(),
+                     })
+                    .norm() < 0.001);
     }
 }

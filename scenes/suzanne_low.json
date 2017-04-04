@@ -218,7 +218,7 @@
         "subdivision_sampling": 4
       }
     },
-    "filter": "BoxFilter",
+    "filter": "MitchellFilter",
     "background_color": {
       "r": 0,
       "g": 0,
