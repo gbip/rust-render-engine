@@ -5,6 +5,7 @@ use material::Material;
 use scene::World;
 use color::RGBA32;
 use renderer::TextureRegister;
+use std::f32;
 
 /** Represente un point d'intresection entre un rayon et de la géometrie */
 pub struct Intersection<'a> {
@@ -152,7 +153,7 @@ impl Surface for Plane {
         } else {
             let t = p / m;
 
-            if t < 0.0 || (ray.max_t > 0.0 && t > ray.max_t) {
+            if t < 0.0 || (ray.max_t > f32::EPSILON && t > ray.max_t) {
                 //La surface est "avant" ou "après" le point d'émission du rayon
                 None
             } else {

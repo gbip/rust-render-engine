@@ -229,7 +229,7 @@ impl Surface for Triangle {
 
         let t: f32 = e2.dot_product(&Q) * inv_det; // Moyen
 
-        if t > 5.0*f32::EPSILON && ray.max_t > t {
+        if t > f32::EPSILON && ray.max_t > t {
             // Rapide
             ray.max_t = t;
             return true;

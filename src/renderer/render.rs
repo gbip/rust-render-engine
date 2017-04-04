@@ -16,6 +16,7 @@ use std::io::Stdout;
 use scoped_pool::Pool;
 use colored::*;
 use pbr::ProgressBar;
+use std::f32;
 
 // Le ratio n'est pas enregistré à la deserialization, il faut penser à appeler compute_ratio()
 // pour avoir un ratio autre que 0.
@@ -176,8 +177,8 @@ impl Renderer {
         let size_y: u32 = self.res_y as u32 - offset_y;
 
         // Le nombre de blocs en x et en y sans compter les blocs non standards
-        let bloc_count_x: u32 = size_x / bloc_size as u32;
-        let bloc_count_y: u32 = size_y / bloc_size as u32;
+        let bloc_count_x: u32 = f32::floor(size_x as f32 / bloc_size as f32) as u32;
+        let bloc_count_y: u32 = f32::floor(size_y as f32 / bloc_size as f32) as u32;
 
 
         // Gestion des blocs non standards

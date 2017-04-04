@@ -26,21 +26,26 @@ impl Texture for AmbientOcclusionMap {
                  world: &World)
                  -> RGBA32 {
         // Pseudo code :
-
         let samples: Vec<Vector3f> = monte_carlo::sample_uniform_hemisphere(self.samples, frag);
         let mut rays: Vec<Ray> = vec![];
         for point in samples {
             let mut ray = Ray::new(frag.position, point - frag.position);
             ray.max_t = self.radius;
+            rays.push(ray);
         }
         let mut contributions: u32 = 0;
         for ray in &mut rays {
             if world.is_occluded(ray) {
+                //println!("max_t is : {}",ray.max_t);
+                //println!("radius is : {}",self.radius);
+                //if ray.max_t < 0.01 {
+                //    println!("self intersect, shit");
+                //}
                 contributions += 1;
             }
         }
         let mut result = RGBA32::new_white();
-        let greyness: f32 = contributions as f32 / self.samples as f32;
+        let greyness: f32 = 1.0 - contributions as f32 / self.samples as f32;
         result.r = (result.r as f32 * greyness) as u32;
         result.b = (result.b as f32 * greyness) as u32;
         result.g = (result.g as f32 * greyness) as u32;

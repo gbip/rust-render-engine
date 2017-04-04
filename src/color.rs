@@ -1,6 +1,6 @@
 use img;
 use std::u8;
-use std::ops::Mul;
+use std::ops::{Add, Mul};
 
 // A struct for all internal color management, but not for textures and objecs colors.
 #[derive(Clone,Debug,Copy,Serialize,Deserialize,PartialEq)]
@@ -197,6 +197,20 @@ impl Mul<RGBA32> for RGBA32 {
             b: (self.b as u64 * other.b as u64 / u32::max_value() as u64) as u32,
             a: (self.a as u64 * other.a as u64 / u32::max_value() as u64) as u32,
         }
+    }
+}
+
+impl Add<RGBA32> for RGBA32 {
+    type Output = RGBA32;
+    fn add(self, other: RGBA32) -> Self::Output {
+        RGBA32 {
+            r: self.r + other.r,
+            b: self.b + other.b,
+            g: self.g + other.g,
+            a: self.a + other.a,
+        }
+
+
     }
 }
 

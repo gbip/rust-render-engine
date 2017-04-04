@@ -128,7 +128,8 @@ impl Channel {
             (None, None, None, &Channel::AmbientOcclusionMap { ref ambient_occlusion }) => {
                 ambient_occlusion.get_color(frag, None, None, None, world)
             }
-            (None, None, None, &Channel::Solid { ref color }) => color.to_rgba32(),
+            (_, _, _, &Channel::Solid { ref color }) => color.to_rgba32(),
+
             _ => panic!("Error get_color"),
         }
     }

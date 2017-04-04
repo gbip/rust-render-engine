@@ -197,7 +197,7 @@ impl World {
     }
 
     // Represente le fait qu'un point soit visible par un autre : on revoie true si le rayon
-    // n'intersecte aucun triangle.
+    // intersecte un triangle.
     pub fn is_occluded(&self, ray: &mut Ray) -> bool {
         for obj in &self.objects {
             if obj.fast_intersection(ray) {

@@ -79,7 +79,7 @@
         "obj_path": "models/plane_no_uv.obj",
         "name": "Green Wall",
 	"visible": true,
-	"material" : "scenes/materials/solid_green.json"
+	"material" : "scenes/materials/solid_grey.json"
       },
 
       {
@@ -100,7 +100,7 @@
         },
         "obj_path": "models/plane_no_uv.obj",
         "name": "Red Wall",
-	"material" : "scenes/materials/solid_red.json",
+	"material" : "scenes/materials/solid_grey.json",
 	"visible": true
       },
 	{
@@ -143,7 +143,7 @@
         "obj_path": "models/uv_plane.obj",
         "name": "Checker Floor",
 	"visible": true,
-	"material": "scenes/materials/checker.json"
+	"material": "scenes/materials/solid_grey.json"
       },
 {
               "position": {
@@ -182,7 +182,7 @@
           "y": 0.0,
           "z": 270.0
         },
-        "obj_path": "models/suzanne_low.obj",
+        "obj_path": "models/smoothed_suzanne.obj",
         "name": "Suzanne",
 	"visible": true ,
 	"material" : "scenes/materials/ambient_occlusion.json"
@@ -190,29 +190,14 @@
 
     ],
     "lights": [
-      {
-        "point": {
-          "position": {
-            "x": 10.0,
-            "y": 1.0,
-            "z": 8.0
-          },
-          "intensity": 10.0,
-          "color" : {
-            "r": 255,
-            "g": 0,
-            "b": 255,
-            "a": 255
-          }
-        }
-      }
+
     ]
   },
   "renderer": {
     "res_x": 960,
     "res_y": 540,
     "threads":8,
-    "bucket_size":16,
+    "bucket_size":17,
     "sampler": {
       "HaltonSampler": {
         "subdivision_sampling": 4
