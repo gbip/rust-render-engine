@@ -71,6 +71,8 @@ pub struct Fragment {
     pub normal: Vector3f,
     pub tex: Option<Vector2f>,
     pub param: f32,
+    pub du: Vector3f,
+    pub dv: Vector3f,
 }
 
 
@@ -135,6 +137,7 @@ impl Plane {
 }
 
 impl Surface for Plane {
+    // TODO : Dérivée de la surface selon u et v
     fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment> {
 
         let slope: &Vector3f = &ray.slope;
@@ -153,7 +156,10 @@ impl Surface for Plane {
                 //La surface est "avant" ou "après" le point d'émission du rayon
                 None
             } else {
-                Some(Fragment::new(t * slope + *origin, t))
+                Some(Fragment::new(t * slope + *origin,
+                                   t,
+                                   Vector3f::new(0.0, 0.0, 0.0),
+                                   Vector3f::new(0.0, 0.0, 0.0)))
             }
         }
     }
@@ -165,7 +171,7 @@ impl Surface for Plane {
 }
 
 impl Fragment {
-    pub fn new(position: Vector3f, param: f32) -> Fragment {
+    pub fn new(position: Vector3f, param: f32, dp_du: Vector3f, dp_dv: Vector3f) -> Fragment {
         Fragment {
             position: position,
             normal: Vector3f {
@@ -175,6 +181,8 @@ impl Fragment {
             },
             tex: None,
             param: param,
+            du: dp_du,
+            dv: dp_dv,
         }
     }
 }

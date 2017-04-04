@@ -45,6 +45,17 @@ impl Texture for AmbientOcclusionMap {
         let grey_value = contributions/????
         */
 
+
+
+
+
+
+
+
+
+
+
+
         unimplemented!()
     }
 }
