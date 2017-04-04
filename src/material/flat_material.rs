@@ -103,7 +103,9 @@ impl Material for FlatMaterial {
         }
 
         // Calcul de la couleur du matériau
-        let color = self.diffuse.get_color(frag, u, v, tex_reg).to_rgba8();
+        let color = self.diffuse
+            .get_color(frag, u, v, tex_reg, world)
+            .to_rgba8();
 
         // Application
         RGBA8 {

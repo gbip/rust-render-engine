@@ -1,5 +1,7 @@
 /// Un fichier qui regroupe les différentes façons d'évaluer une intégrale à travers les
 /// méthodes d'évaluation de Monte Carlo.
+/// Ce fichier ne fonctionne que dans le système de coordonnée de shading, pas dans le système
+/// cartésien !
 
 use math::{Vector2f, Vector3f};
 use std::f32;
@@ -18,7 +20,6 @@ fn generate_random_point() -> Vector2f {
 
 /// Crée un échantillon sur le disque unité, avec une distribution uniforme.
 /// * `u` - C'est un point dont chacune des coordonnées doit appartenir à [-1;1]
-/// Renvoie un point en coordonnées polaires !
 fn sample_disk_concentric(u: Vector2f) -> Vector2f {
     let offset: Vector2f = 2.0 * u - Vector2f::new(1f32, 1f32);
     if offset.x == 0.0 && offset.y == 0.0 {
@@ -63,13 +64,13 @@ fn probability_density_function_cosine_hemisphere(cos_theta: f32) -> f32 {
     cos_theta * f32::consts::FRAC_1_PI
 }
 
-/// Renvoie un vecteur de `samples` points distribuées de manière aléatoire sur l'hémisphère
-/// centré en `u` et orienté selon `n`.
+/// Renvoie un vecteur de `samples` points distribuées de manière aléatoire, selon la
+/// distribution de probabilité d'un cosinus, sur l'hémisphère centré en `u` et orienté selon
+/// `n`.
 /// # Arguments
 /// * `u` - un point autour duquel il faut générer les samples
-/// * `n` - la normal au point `u`
 /// * `samples` - le nombre de samples à générer
-fn sample_cosine_hemisphere(u: &Vector3f, n: &Vector3f, samples: u32) -> Vec<Vector3f> {
+pub fn sample_cosine_hemisphere(u: &Vector3f, samples: u32) -> Vec<Vector3f> {
     let mut result: Vec<Vector3f> = vec![];
 
     for _ in 1..samples {
@@ -82,6 +83,22 @@ fn sample_cosine_hemisphere(u: &Vector3f, n: &Vector3f, samples: u32) -> Vec<Vec
 
         result.push(corrected_sampled_point);
 
+    }
+    result
+}
+
+/// Renvoie un vecteur de `samples` points distribuées de manière aléatoire, selon la
+/// distribution de probabilité uniforme, sur l'hémisphère centré en `u` et orienté selon
+/// `n`.
+/// # Arguments
+/// * `u` - un point autour duquel il faut générer les samples
+/// * `samples` - le nombre de samples à générer
+pub fn sample_uniform_hemisphere(u: &Vector3f, samples: u32) -> Vec<Vector3f> {
+    let mut result: Vec<Vector3f> = vec![];
+    for _ in 1..samples {
+        let sampled_point = generate_sample_uniform_hemisphere(generate_random_point());
+        let corrected_sampled_point = &sampled_point + u;
+        result.push(corrected_sampled_point);
     }
     result
 }

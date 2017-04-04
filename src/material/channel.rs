@@ -3,6 +3,7 @@ use img::Image;
 use std::collections::HashMap;
 use ray::Fragment;
 use math::VectorialOperations;
+use scene::World;
 
 /** Represente le fait qu'une structure de donnée soit une texture utilisable dans un canal d'un
  * matériau  */
@@ -11,7 +12,8 @@ pub trait Texture {
                  frag: &Fragment,
                  u: Option<f32>,
                  v: Option<f32>,
-                 texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
+                 texture_registry: Option<&HashMap<String, Image<RGBA8>>>,
+                 world: &World)
                  -> RGBA32;
 }
 
@@ -49,7 +51,8 @@ impl Texture for TextureMap {
                  _: &Fragment,
                  u: Option<f32>,
                  v: Option<f32>,
-                 texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
+                 texture_registry: Option<&HashMap<String, Image<RGBA8>>>,
+                 _: &World)
                  -> RGBA32 {
 
         let texture = &texture_registry
@@ -76,7 +79,8 @@ impl Texture for NormalMap {
                  frag: &Fragment,
                  _: Option<f32>,
                  _: Option<f32>,
-                 _: Option<&HashMap<String, Image<RGBA8>>>)
+                 _: Option<&HashMap<String, Image<RGBA8>>>,
+                 _: &World)
                  -> RGBA32 {
         let normal = frag.normal / frag.normal.norm();
 
@@ -108,15 +112,16 @@ impl Channel {
                      frag: &Fragment,
                      u: Option<f32>,
                      v: Option<f32>,
-                     texture_registry: Option<&HashMap<String, Image<RGBA8>>>)
+                     texture_registry: Option<&HashMap<String, Image<RGBA8>>>,
+                     world: &World)
                      -> RGBA32 {
 
         match (u, v, texture_registry, self) {
             (Some(u), Some(v), Some(texture_registry), &Channel::TextureMap { ref texture }) => {
-                texture.get_color(frag, Some(u), Some(v), Some(texture_registry))
+                texture.get_color(frag, Some(u), Some(v), Some(texture_registry), world)
             }
             (None, None, None, &Channel::NormalMap { ref normal }) => {
-                normal.get_color(frag, None, None, None)
+                normal.get_color(frag, None, None, None, world)
             }
 
             (None, None, None, &Channel::Solid { ref color }) => color.to_rgba32(),

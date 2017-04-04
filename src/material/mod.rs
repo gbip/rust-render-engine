@@ -5,6 +5,8 @@ use renderer::TextureRegister;
 
 pub mod channel;
 pub mod flat_material;
+pub mod bsdf;
+pub mod ambient_occlusion;
 
 pub trait Material {
     fn get_color(&self,

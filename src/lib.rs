@@ -20,6 +20,7 @@ pub mod geometry;
 pub mod filter;
 pub mod light;
 pub mod material;
+pub mod tools;
 #[macro_use]
 pub extern crate serde_derive;
 pub extern crate serde_json;
