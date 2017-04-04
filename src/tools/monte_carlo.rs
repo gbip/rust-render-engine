@@ -7,6 +7,8 @@ use math::{Vector2f, Vector3f};
 use std::f32;
 use rand::weak_rng;
 use rand::distributions::{IndependentSample, Range};
+use material::ShadingCoordinateSystem;
+use ray::Fragment;
 
 /// Retourne un point dont les coordonnées sont aléatoires, selon une distribution uniforme, et
 /// comprises entre -1 et 1.
@@ -87,18 +89,33 @@ pub fn sample_cosine_hemisphere(u: &Vector3f, samples: u32) -> Vec<Vector3f> {
     result
 }
 
-/// Renvoie un vecteur de `samples` points distribuées de manière aléatoire, selon la
-/// distribution de probabilité uniforme, sur l'hémisphère centré en `u` et orienté selon
-/// `n`.
+/// Renvoie un vecteur avec `samples` points distribués de manière aléatoire, selon la
+/// distribution de probabilité uniforme.
 /// # Arguments
 /// * `u` - un point autour duquel il faut générer les samples
 /// * `samples` - le nombre de samples à générer
-pub fn sample_uniform_hemisphere(u: &Vector3f, samples: u32) -> Vec<Vector3f> {
+fn sample_uniform_hemisphere_shading_coordinates(samples: u32) -> Vec<Vector3f> {
     let mut result: Vec<Vector3f> = vec![];
     for _ in 1..samples {
         let sampled_point = generate_sample_uniform_hemisphere(generate_random_point());
-        let corrected_sampled_point = &sampled_point + u;
-        result.push(corrected_sampled_point);
+        result.push(sampled_point);
     }
     result
+}
+
+/// Renvoie un vecteur avec `samples` points distribués de manière aléatoire. Cette fonction
+/// s'occupe de construire le système de coordonnée adéquat à partir du Fragment.
+/// * `frag` - le fragment qui represente la géomètrie locale
+/// * `samples` - le nombre de samples à générer
+pub fn sample_uniform_hemisphere(samples: u32, frag: &Fragment) -> Vec<Vector3f> {
+    // On initialise le changeur de système de coordonnées.
+    let coordinates_transformator = ShadingCoordinateSystem::new_from_frag(frag);
+    // On sample dans un repère de reflexion locale.
+    let points = sample_uniform_hemisphere_shading_coordinates(samples);
+
+    // On convertis les coordonnées et on déplace le centre de la sphère en position
+    points
+        .into_iter()
+        .map(|p| coordinates_transformator.local_into_world_space(&p) + frag.position)
+        .collect::<Vec<Vector3f>>()
 }

@@ -32,7 +32,7 @@ pub struct ShadingCoordinateSystem {
 
 impl ShadingCoordinateSystem {
     /// Permet de créer un système de coordonnées de reflexion locale à partir d'un fragment.
-    fn new_from_frag(frag: &Fragment) -> Self {
+    pub fn new_from_frag(frag: &Fragment) -> Self {
         let n: Vector3f = frag.du.cross_product_ref(&frag.dv);
         ShadingCoordinateSystem {
             n: n,
@@ -43,7 +43,7 @@ impl ShadingCoordinateSystem {
 
     /// Permet de transformer un vecteur exprimé dans le repère cartésien du monde, en un vecteur
     /// exprimé dans le repère `self`
-    fn world_into_local_space(&self, u: &Vector3f) -> Vector3f {
+    pub fn world_into_local_space(&self, u: &Vector3f) -> Vector3f {
         Vector3f::new(u.dot_product_ref(&self.s),
                       u.dot_product_ref(&self.t),
                       u.dot_product_ref(&self.n))
@@ -51,7 +51,7 @@ impl ShadingCoordinateSystem {
 
     /// Permet de transformer un vecteur exprimé dans le système de coordonnée `self` dans le
     /// système de coordonnée cartésien du monde
-    fn local_into_world_space(&self, u: &Vector3f) -> Vector3f {
+    pub fn local_into_world_space(&self, u: &Vector3f) -> Vector3f {
         Vector3f::new(self.s.x * u.x + self.t.x * u.y + self.n.x * u.z,
                       self.s.y * u.x + self.t.y * u.y + self.n.y * u.z,
                       self.s.z * u.z + self.t.z * u.y + self.n.z * u.z)
