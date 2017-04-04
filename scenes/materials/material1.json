@@ -1,26 +1,25 @@
 {
   "diffuse": {
-    "r": 200,
-    "g": 200,
-    "b": 200,
-    "a": 200
+    "texture": {
+      "map_path": "scenes/textures/texture.jpg",
+      "tiling_x": 1.0,
+      "tiling_y": 1.0
+    }
   },
   "specular": {
-    "r": 255,
-    "g": 255,
-    "b": 255,
-    "a": 255
+    "color": {
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a":255
+    }
   },
   "ambient": {
-    "r": 0,
-    "g": 0,
-    "b": 0,
-    "a": 0
-  },
-  "map_diffuse": 
-  { 
-	  "map_path" : "scenes/textures/checker_2k.jpg",
-	  "tiling_x": 10.0,
-	  "tiling_y": 10.0
+    "color": {
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a":255
+    }
   }
 }

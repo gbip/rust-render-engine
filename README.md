@@ -14,19 +14,21 @@ Pour générer un fichier d'exemple de scène `template.json`il faut lancer : `r
 
 Pour charger une scène et la rendre, il faut lancer : `render_engine --read <chemin_scene> --write <chemin_fichier>.png`
 
-## Features impémentées
+## Features implémentées
 
 - [x] Support de la géomètrie à travers des fichiers .obj
 - [x] Benchmarking du code
 - [x] Rendu dans une résolution arbitraire
-- [x] Choisir le sampling des rayons
+- [x] Choix de la méthode d'échantillonnage des rayons
+- [x] Choix de la méthode de filtrage des échantillons récoltés
 - [x] Le support des textures
 - [x] Le support des lumières
 - [ ] Materiaux basés sur la physique
 
 ## Performances
 
-Très mauvaises pour le moment...
+Le moteur de rendu n'est pour l'instant pas très performant...
+Benchmark à venir.
 
 # English
 ## Compiling & Using
@@ -47,10 +49,12 @@ In order to load a scene from a file, and save it to a .png, you can run : `rend
 - [x]  Arbitrary geometry support through .obj files (wavefront specification)
 - [x] Benchmarks for the code
 - [x] Rendering in an arbitrary resolution
-- [x] Choose the subdivision sampling
-- [x] Use textures
+- [x] Choose the sampler
+- [x] Choose the filter
+- [x] Support of textures
 - [x] Support of lights
 - [ ] Physic based materials
 
 ## Performances
-The render engine has some terrible performances for the moment...
+The render engine is currently quite slow...
+Benchmarking incoming.
