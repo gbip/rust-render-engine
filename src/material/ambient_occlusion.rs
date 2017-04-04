@@ -8,7 +8,7 @@ use ray::{Ray, Fragment};
 use material::channel::Texture;
 use math::Vector3f;
 
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize,Deserialize,Debug,Clone)]
 pub struct AmbientOcclusionMap {
     /// La distance à partir de laquelle on arrête de regarder l'occlusion ambiante
     radius: f32,
@@ -42,6 +42,8 @@ impl Texture for AmbientOcclusionMap {
         let mut result = RGBA32::new_white();
         let greyness: f32 = contributions as f32 / self.samples as f32;
         result.r = (result.r as f32 * greyness) as u32;
+        result.b = (result.b as f32 * greyness) as u32;
+        result.g = (result.g as f32 * greyness) as u32;
         result
     }
 }

@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use ray::Fragment;
 use math::VectorialOperations;
 use scene::World;
+use material::ambient_occlusion::AmbientOcclusionMap;
 
 /** Represente le fait qu'une structure de donnée soit une texture utilisable dans un canal d'un
  * matériau  */
@@ -101,6 +102,7 @@ pub enum Channel {
     Solid { color: RGBA8 },
     TextureMap { texture: TextureMap },
     NormalMap { normal: NormalMap },
+    AmbientOcclusionMap { ambient_occlusion: AmbientOcclusionMap, },
 }
 
 impl Channel {
@@ -123,7 +125,9 @@ impl Channel {
             (None, None, None, &Channel::NormalMap { ref normal }) => {
                 normal.get_color(frag, None, None, None, world)
             }
-
+            (None, None, None, &Channel::AmbientOcclusionMap { ref ambient_occlusion }) => {
+                ambient_occlusion.get_color(frag, None, None, None, world)
+            }
             (None, None, None, &Channel::Solid { ref color }) => color.to_rgba32(),
             _ => panic!("Error get_color"),
         }

@@ -8,6 +8,7 @@ use angle::{Rad, Deg};
 use colored::*;
 use geometry::bounding_box::BoundingBox;
 use geometry::obj_parser;
+use tools::orthogonalize_vec;
 
 #[derive(Clone,Debug,Copy,PartialEq)]
 pub struct GeoPoint {
@@ -167,6 +168,10 @@ impl Surface for Triangle {
                 return None;
             }
 
+            let (dp_du, dp_dv) = orthogonalize_vec(vec_ab, vec_bc);
+            point.du = dp_du;
+            point.dv = dp_dv;
+
             ray.max_t = point.param;
 
             let global_area_x2: f32 = vec_ab.cross_product(&vec_bc).norm();
@@ -224,7 +229,7 @@ impl Surface for Triangle {
 
         let t: f32 = e2.dot_product(&Q) * inv_det; // Moyen
 
-        if t > f32::EPSILON && ray.max_t > t {
+        if t > 5.0*f32::EPSILON && ray.max_t > t {
             // Rapide
             ray.max_t = t;
             return true;

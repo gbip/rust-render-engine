@@ -185,7 +185,7 @@
         "obj_path": "models/suzanne_low.obj",
         "name": "Suzanne",
 	"visible": true ,
-	"material" : "scenes/materials/solid_green.json"
+	"material" : "scenes/materials/ambient_occlusion.json"
       }
 
     ],
@@ -218,7 +218,7 @@
         "subdivision_sampling": 4
       }
     },
-    "filter": "MitchellFilter",
+    "filter": "BoxFilter",
     "background_color": {
       "r": 0,
       "g": 0,

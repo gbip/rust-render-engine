@@ -42,7 +42,7 @@ impl ShadingCoordinateSystem {
     }
 
     /// Permet de transformer un vecteur exprimé dans le repère cartésien du monde, en un vecteur
-    /// exprimé dans le repère `self`
+    /// exprimé dans le repère `self`.
     pub fn world_into_local_space(&self, u: &Vector3f) -> Vector3f {
         Vector3f::new(u.dot_product_ref(&self.s),
                       u.dot_product_ref(&self.t),
@@ -50,7 +50,7 @@ impl ShadingCoordinateSystem {
     }
 
     /// Permet de transformer un vecteur exprimé dans le système de coordonnée `self` dans le
-    /// système de coordonnée cartésien du monde
+    /// système de coordonnée cartésien du monde.
     pub fn local_into_world_space(&self, u: &Vector3f) -> Vector3f {
         Vector3f::new(self.s.x * u.x + self.t.x * u.y + self.n.x * u.z,
                       self.s.y * u.x + self.t.y * u.y + self.n.y * u.z,
