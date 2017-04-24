@@ -23,13 +23,19 @@ Cependant, depuis 2015 il existe un nouveau langage, poussé par Mozilla, nommé
 [Wikipedia](https://fr.wikipedia.org/wiki/Rust_(langage))
 
 Les principaux points forts de Rust sont :
- - La sûreté de la mémoire est assurée à la compilation, il n'existe pas de `segfault` en Rust.
- - La concurrence est gerée de manière interne au langage: il n'existe pas de course au donnée en Rust. Ce point nous a été très utile pour paralléliser le moteur de rendu.
- - L'écosystème moderne (gestionnaire de paquet, compilateur, libraire standard, etc.). En effet, pour installer une libraire il suffit d'ajouter une ligne: toutes les dépendances sont gerées par `cargo` qui est le gestionnaire de projet de Rust. Un autre avantage de l'écosystème moderne est le compilateur, qui contrairement à g++/clang++ (deux compilateurs C++) offre des erreurs compréhensibles, et avec cette erreur, la méthode pour la résoudre.
+
+ * La sûreté de la mémoire est assurée à la compilation, il n'existe pas de `segfault` en Rust.
+
+ * La concurrence est gerée de manière interne au langage: il n'existe pas de course au donnée en Rust. Ce point nous a été très utile pour paralléliser le moteur de rendu.
+
+ * L'écosystème moderne (gestionnaire de paquet, compilateur, libraire standard, etc.). En effet, pour installer une libraire il suffit d'ajouter une ligne: toutes les dépendances sont gerées par `cargo` qui est le gestionnaire de projet de Rust. Un autre avantage de l'écosystème moderne est le compilateur, qui contrairement à g++/clang++ (deux compilateurs C++) offre des erreurs compréhensibles, et avec cette erreur, la méthode pour la résoudre.
+
 
 Il existe aussi des points faibles vis à vis de ce langage, la plupart découlant de la jeunesse du langage :
- - Les librairies sont généralement encore jeune et pas toujours stable.
- - La compilation est lente, le compilateur ne parallèlise pas les tâches
+
+ * Les librairies sont généralement encore jeune et pas toujours stable.
+
+ * La compilation est lente, le compilateur ne parallèlise pas les tâches.
 
 Ainsi avoir choisis Rust nous a permis de drastiquement résoudre notre temps passer à débugger le programme, puisque les seuls erreurs que nous pouvions commettre étaient dues à des erreurs d'algorithmies.
 
@@ -42,13 +48,28 @@ En plus du compilateur, nous avons utilisé [Clippy](https://github.com/Manishea
 Avoir un outil qui analyse notre code a été un gros avantage, puisque cela nous a permis d'avoir un code qui respecte à 100% la manière de penser du langage Rust.
 Nous avons aussi pu éviter quelques erreurs d'innatentions avant l'execution.
 
-### Formatage du code
-
 ### Git
+
+Afin de pouvoir travailler collaborativement, nous avons utiliser le logiciel de gestionnaire de version `git`. Il s'agit d'un gestionnaire de version décentralisé.
+Avec git chaque programmeur regroupe ses modifications en commits. Lorsque une ligne a été modifiée par plusieurs programmeurs, il y a conflit, et il faut le résoudre à la main.
+Enfin le code se trouve sur un repertoire distant, ce qui permet d'assurer la synchronisation des versions à travers internet.
+
+
+Vous pouvez accéder au répertoire distant du projet sur [github](https://github.com/gbip/rust-render-engine).
 
 ### Test unitaires
 
+Afin de s'assurer du fonctionnement de chaque fonctionnalitée nous avons écris des tests unitaires au fur et à mesure du devellopement.
+Le projet final comporte 20 tests unitaires, ce qui est peu, mais chaque test réalise en réalité plusieurs vérifications.
+
+
+
+
 ### Travis
+
+### Formatage du code
+
+### Documentation
 
 ## Compiler le projet
 
@@ -57,8 +78,9 @@ Pour installer le projet il faut commencer par installer [rustup](https://rustup
 curl https://sh.rustup.rs -sSf | sh
 ```
 
-Ensuite vous pouvez télécharger le repertoire et compiler le projet.
+Ensuite vous pouvez télécharger le repertoire avec git, et compiler le projet.
 ```
+sudo apt-get install git
 git clone https://github.com/gbip/rust-render-engine
 rustup override set nightly
 cargo build --release
