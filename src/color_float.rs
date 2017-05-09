@@ -75,17 +75,30 @@ impl Mul<f32> for LinearColor {
     }
 }
 
+const GAMMA : f32 = 2.2;
+const INV_GAMMA : f32 = 1 / GAMMA;
+
 /// Conversion entre l'espace `sRGB` et l'espace linéaire.
 impl Into<LinearColor> for RGBColor {
     fn into(self) -> LinearColor {
-        unimplemented!()
+        LinearColor {
+            internal_color: InternalColor::new(self.internal_color.r.pow(INV_GAMMA).min(1f32),
+                                                self.internal_color.g.pow(INV_GAMMA).min(1f32),
+                                                self.internal_color.b.pow(INV_GAMMA).min(1f32),
+                                                self.internal_color.a.pow(INV_GAMMA).min(1f32)),
+        }
     }
 }
 
 /// Conversion entre un espace linéaire et l'espace `sRGB`.
 impl Into<RGBColor> for LinearColor {
     fn into(self) -> RGBColor {
-        unimplemented!()
+        LinearColor {
+            internal_color: InternalColor::new(self.internal_color.r.pow(GAMMA).min(1f32),
+                                                self.internal_color.g.pow(GAMMA).min(1f32),
+                                                self.internal_color.b.pow(GAMMA).min(1f32),
+                                                self.internal_color.a.pow(GAMMA).min(1f32)),
+        }
     }
 }
 
@@ -112,7 +125,7 @@ impl RGBColor {
 
 // Deux constantes utiles pour passer d'un entier allant de 0 a 255 à un flot compris entre 0 et 1.
 const STEP: f32 = 1f32 / 255f32;
-const INV_STEP: f32 = 1f32 / STEP;
+const INV_STEP: f32 = 255f32;
 
 impl Mul<f32> for RGBColor {
     type Output = RGBColor;
@@ -129,12 +142,12 @@ impl Mul<f32> for RGBColor {
 }
 
 impl Into<(u8, u8, u8)> for RGBColor {
-    fn into(mut self) -> (u8, u8, u8) {
-        // On se raméne entre 0 et 1.
-        self.clamp();
+    fn into(self) -> (u8, u8, u8) {
         // On se raméne entre 0 et 255
-        self = self * INV_STEP;
-        (self.internal_color.r as u8, self.internal_color.g as u8, self.internal_color.b as u8)
+        let r = 255f32.min(self.internal_color.r * INV_STEP);
+        let g = 255f32.min(self.internal_color.g * INV_STEP);
+        let b = 255f32.min(self.internal_color.b * INV_STEP);
+        (r as u8, g as u8, b as u8)
     }
 }
 
