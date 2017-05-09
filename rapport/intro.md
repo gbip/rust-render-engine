@@ -37,18 +37,20 @@ Il existe aussi des points faibles vis à vis de ce langage, la plupart découla
 
  * La compilation est lente, le compilateur ne parallèlise pas les tâches.
 
+ * le langage est "verbeux"
+
 Ainsi avoir choisis Rust nous a permis de drastiquement résoudre notre temps passer à débugger le programme, puisque les seuls erreurs que nous pouvions commettre étaient dues à des erreurs d'algorithmies.
 
 
-## Notre méthode de travail
+# Notre méthode de travail
 
-### Clippy
+## Clippy
 
 En plus du compilateur, nous avons utilisé [Clippy](https://github.com/Manishearth/rust-clippy). Il s'agit d'un analyseur statique de code qui ajoute 197 warnings au compilateur, allant de l'erreur d'algorithmie au respect des conventions de code.
 Avoir un outil qui analyse notre code a été un gros avantage, puisque cela nous a permis d'avoir un code qui respecte à 100% la manière de penser du langage Rust.
 Nous avons aussi pu éviter quelques erreurs d'innatentions avant l'execution.
 
-### Git
+## Git
 
 Afin de pouvoir travailler collaborativement, nous avons utiliser le logiciel de gestionnaire de version `git`. Il s'agit d'un gestionnaire de version décentralisé.
 Avec git chaque programmeur regroupe ses modifications en commits. Lorsque une ligne a été modifiée par plusieurs programmeurs, il y a conflit, et il faut le résoudre à la main.
@@ -57,21 +59,41 @@ Enfin le code se trouve sur un repertoire distant, ce qui permet d'assurer la sy
 
 Vous pouvez accéder au répertoire distant du projet sur [github](https://github.com/gbip/rust-render-engine).
 
-### Test unitaires
+## Test unitaires
 
 Afin de s'assurer du fonctionnement de chaque fonctionnalitée nous avons écris des tests unitaires au fur et à mesure du devellopement.
 Le projet final comporte 20 tests unitaires, ce qui est peu, mais chaque test réalise en réalité plusieurs vérifications.
 
+## Travis
 
+A chaque fois que quelqu'un envoie des commits sur le repertoire distant, le service d'intégration continue Travis se met en route.
+Celui-ci récupère le code et lance plusieurs commandes :
+```
+cargo fmt -- --write-mode=diff
+cargo build
+cargo test
+```
+La première commande vérifie que le code est bien formatté, elle quitte avec un code d'erreur différent de 0 si il est nécessaire de formatter le code.
+La deuxième commande compile le code.
+La troisième commande compile et lance les test unitaires.
+Si jamais une de ces étapes échoue, nous recevons un mail, et les commits sont marqués comme échouant les test d'intégrations continues.
+Il est possible de voir à tout moment le statut du projet [sur le site internet de Travis](https://travis-ci.org/gbip/rust-render-engine).
 
+## Formatage du code
 
-### Travis
+Afin d'avoir une base de code avec un style constant, nous utilisons l'outil [rustfmt](https://github.com/rust-lang-nursery/rustfmt).
+Ce programme est lancé à travers cargo, et lors de son execution il va parcourir tous les fichiers sources et les formatter selon des règles de style définies dans un fichier.
+Nous utilisons les règles de style par défaut.
+Enfin, il est possible de mettre en place des script permettant de lancer cet outil automatiquement. Par exemple, sur Vim, rustfmt est lancé à chaque fois que l'on sauvegarde le buffer courant.
+Sur Intellij IDEA il est possible de lancer le formattage du code avant toute compilation.
 
-### Formatage du code
+## Documentation
 
-### Documentation
+Nous avons essayé de documenter au maximum le projet. Malheuresement, la documentation est quand même très éparse.
+En effet, nous avons beaucoup documenté le fonctionnement des fonctions via des commentaires décrivant les différentes lignes composant une fonction,
+cependant il y a peu de documentation décrivant le fonctionnement du code en général.
 
-## Compiler le projet
+## Compiler le projet, générer la documentation et lancer les test unitaires.
 
 Pour installer le projet il faut commencer par installer [rustup](https://rustup.rs/).
 ```
@@ -85,3 +107,15 @@ git clone https://github.com/gbip/rust-render-engine
 rustup override set nightly
 cargo build --release
 ```
+
+Pour lancer les test unitaires, il faut executer `cargo test` dans le repertoire du projet.
+Pour compiler la documentation, il faut executer `cargo doc` dans le repertoire du projet.
+
+# Scénario de fonctionnement
+
+# Implémentation
+## Choix des structures de données
+## Amélioration qualitatives
+## Optimisations
+
+# Quelques problèmes notables
