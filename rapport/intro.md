@@ -84,6 +84,7 @@ Il est possible de voir à tout moment le statut du projet [sur le site internet
 Afin d'avoir une base de code avec un style constant, nous utilisons l'outil [rustfmt](https://github.com/rust-lang-nursery/rustfmt).
 Ce programme est lancé à travers cargo, et lors de son execution il va parcourir tous les fichiers sources et les formatter selon des règles de style définies dans un fichier.
 Nous utilisons les règles de style par défaut.
+
 Enfin, il est possible de mettre en place des script permettant de lancer cet outil automatiquement. Par exemple, sur Vim, rustfmt est lancé à chaque fois que l'on sauvegarde le buffer courant.
 Sur Intellij IDEA il est possible de lancer le formattage du code avant toute compilation.
 
@@ -111,10 +112,179 @@ cargo build --release
 Pour lancer les test unitaires, il faut executer `cargo test` dans le repertoire du projet.
 Pour compiler la documentation, il faut executer `cargo doc` dans le repertoire du projet.
 
+## Langue des variables, du code et de l'interface
+Nous sommes partis du principe que le standard, en informatique est l'anglais. Ainsi tous les noms de variables, de fonctions, de modules et de structure de données 
+sont en anglais.
+De plus, l'interface en ligne de commande est elle aussi en anglais.
+Cependant, afin de faciliter leur rédaction, leur lecture et leur éventuelle compréhension, les commentaires sont en français.
+
 # Scénario de fonctionnement
+Nous avons choisi, pour des raisons de simplicité, de nous contacter d'une interface en ligne de commande pour l'interaction avec l'utilisateur.
+## Interface de commande avec l'utilisateur
+Lorsque l'on lance le logiciel sans argumment, un message d'aide s'affiche indiquant à l'utilisateur comment utiliser le logiciel.
+C'est une pratique standard dans l'environnement UNIX:
+```
+./render_engine
+Usage : ./render_engine -g FILE -r FILE -w FILE
+```
+
+Détaillons les différents arguments :
+
+ * > -g FILE or --generate FILE : Generate a template file in the location FILE for creating a scene
+
+ Il s'agit là d'une option qui doit être utilisée toute seule : le logiciel est en mode "génération de structure" et ne cherchera même pas à charger le fichier de scène si il est spécifié.
+ Les fichiers générés montrent comment créer une scène:
+
+  * *template.json* : la description de la scène
+
+  * *template_material_solid.json* : un exemple de matériau sans texture (couleur unie)
+
+  * *template_material_texture.json* : un exemple de matériau avec une texture
+
+ Nous détaillons dans la partie [Fichiers d'objets, de matériau et de scène] les différents fichiers nécessaires à la création d'une scène.
+
+
+ * > -r FILE or --read FILE : Read FILE to load the scene before rendering. Needed for rendering, without a scene specified, the program will not render.
+
+Cette option précise au logiciel quel fichier il doit lire pour créer la scène. Si cette option n'est pas spécifiée, le programme ne pourra pas lancer le rendu d'une scène.
+Cette option est suffisante pour lancer la procédure de rendu, le logiciel sauvegardera alors l'image sous le nom 'untitled.png'
+
+* > -w FILE or --write FILE : Write the output to FILE. The default is 'untitled.png'
+
+Cette option indique au logiciel où doit être enregistrée l'image de sortie. Si cette option n'est pas présente, l'image sera enregistrée dans le fichier 'untitled.png'
+
+## Fichiers d'objets, de matériau et de scène
+La principale interaction avec l'utilisateur se fait au travers des fichiers décrivant respectivement, la scène, les matériau et les objets. Nous avons choisi d'utiliser le format [JSON](https://fr.wikipedia.org/wiki/JavaScript_Object_Notation) car il est plus simple à modifier que du XML, et est lui aussi lisible très facilement par un humain.
+Enfin, il existe deux structures qui se retrouvent régulièrement dans les fichiers de scènes :
+
+* Les coordonnées cartésiennes d'un point dans l'espace :
+```json
+"point": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 5.0
+}
+```
+
+* les différents composantes d'une couleur : il s'agit de quatres entiers compris entre 0 et 255 pour chaque composante Red Green Blue Alpha (transparence) RGBA :
+```json
+"background_color": {
+	"r": 0,
+    "g": 127,
+    "b": 254,
+    "a": 255
+}
+```
+        
+### La scène
+Le fichier de scène correspond au fichier principal qui décris :
+
+* la géométrie présente dans la scène, et le matériau qui y est affecté
+
+* la ou les caméras présentent dans la scène
+
+* la ou les lumières qui éclairent la scène
+
+* les paramètres de rendu
+
+
+Voici la description des différents champs qui composent ce fichier :
+
+* `base_vector` : ce champ indique quels sont les trois vecteurs formant la base orthonormée pour représenter la géomètrie dans l'espace
+
+* `cameras` : il s'agit d'une tableau de [Caméra]
+
+* `objects`  : les différents objets  composant la scènne (géomètrie et matériau)
+
+* `lights` : il s'agit d'un tableau de [Lumières]
+
+* `renderer `  : les différents paramètres du rendu :
+	* `res_x`,`res_y` : la résolution de l'image a calculer
+	* `threads` : le nombre de coeurs à utiliser pour le calcul
+	* `bucket_size` : taille des blocs subdivisant l'image pour la répartition du travail entre les coeurs
+	* `sampler` : les paramètres de la génération des échantillons :
+		* `HaltonSampler` ou `UniformSampler` permettent de choisir la méthode de génération des échantillons sur l'image 2D. `Haltonsampler` offre la meilleur qualité.
+		* `subdivision_sampling` : le paramètre crucial qui va énormèment jouer sur la qualité de l'image finale. Il s'agit du nombre de rayons qui vont être lancés par pixel.
+	* `filter` : les paramètres pour la reconstruction des pixels à partir des rayons :
+		* `BoxFilter` ou `MitchellFilter` permettent de choisir quelle méthode utiliser lors du rendu. MichellFilter offre en théorie la meilleur qualité.
+	* `background_color` : la color de fond lorsqu'aucun n'objet ne viens obstruer le rayon.
+
+
+```json
+{
+  "world": {
+    "base_vector": [],
+    "cameras": [],
+    "objects": [],
+    "lights": []
+  },
+  "renderer": {
+    "res_x": 960,
+    "res_y": 540,
+    "threads":8,
+    "bucket_size":17,
+    "sampler": {
+      "HaltonSampler": {
+        "subdivision_sampling": 4
+      }
+    },
+    "filter": "BoxFilter",
+    "background_color": {
+      "r": 0,
+      "g": 0,
+      "b": 0,
+      "a": 255
+    }
+  }
+}
+```
+
+Le nombre de paramètre exposé est relativement important, et avec du recul certains n'ont pas leur place ici. 
+Par exemple `base_vector` ne devrait même pas être exposé à l'utilisateur, c'est une convention que nous utilisons en interne.
+De plus certains arguments pourrait être donnés en ligne de commande, comme le nombre de coeur à utiliser pour le calcul.
+
+
+#### Caméra
+La caméra est composé des champs suivants :
+* `world_position` : la position de la caméra dans le monde. C'est le point à partir duquel on voit la scène.
+* `target_position` : un point de l'espace vers lequel on regarde. Celui-ci est au centre de l'écran. Il permet d'orienter la caméra.
+* `up` : un vecteur qui indique le 'haut' de l'image, utiliser pour faire tourner la caméra
+* `fov` : de l'acronyme 'Field of View', indique le champ de vision en degré de la caméra. Une valeur plus petite correspond à un effet de zoom.
+* `clip` : la distance à partir de laquelle les rayons sont arrêtés par les objets. Dans notre exemple, si un objet se trouve à moins de 0.001 de la caméra, il ne sera pas visible.
+
+```json
+{
+	"world_position": {
+        "x": 0.0,
+        "y": 0.0,
+    	"z": 5.0
+    },
+	"target_position": {
+        "x": 10.0,
+        "y": 0.0,
+    	"z": 5.0
+    },
+    "up": {
+        "x": 0.0,
+        "y": 0.0,
+    	"z": 1.0
+    },
+    "fov": 70.0,
+	"clip": 0.001
+}
+```
+
+
+#### Objets
+
+#### Lumières
+## Fonctionnement général du programme
+
+
 
 # Implémentation
 ## Choix des structures de données
+## Description de chaque module
 ## Amélioration qualitatives
 ## Optimisations
 
