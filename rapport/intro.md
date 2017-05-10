@@ -433,9 +433,26 @@ Le champ *ambient* se voit assigner la texture spéciale *normal* (la seule text
 # Implémentation
 ## Choix des structures de données
 
+Pour faire fonctionner notre moteur de rendu, il est nécessaire de mettre en place une structure de données qui contiendra la géometrie 
+des objets à rendre et leurs différentes caractéristiques. Cette structure de données doit permettre un accès efficace pour accélerer les
+calculs, mais on doit aussi limiter son coût en mémoire. En effet, la scène à rendre peut contenir plusieurs millions de polygones.
+
+Nous avons considéré qu'une scène est constitué de plusieurs objets, possèdant chacun une géométrie et un matériau. Nos scènes contenant peu
+d'objets, il n'était pas nécessaire d'adopter une structure complexe pour les stocker. Nous avons donc utilisé une simple liste à accès direct
+(type `Vec` en rust).
+
+Pour la géométrie, nous avions les contraintes suivantes :
+* les faces sont triangulaires, elles ont donc trois sommets
+* chaque sommet contient des informations de textures et de normales.
+
+Comme certaines faces peuvent partager un même sommet, nous avons d'abord envisager d'avoir une liste de faces et une liste de sommets, chaque face
+faisant référence à ses trois sommets. Malheureusement, l'utilisation des références pose problème en Rust car le langage impose un contrôle
+explicite de la mémoire. Plus particulièrement, dans ce cas le fait que la structure `Mesh` contienne des références vers certains de ses champs,
+la rendait impossible à passer en paramètres.
+
 ## Dépendances
 
-Nous avons 8 dépendances :
+Nous avons 7 dépendances :
 
 * *serde* nous permet de facilement sérialiser et déserialiser des structures de données.
 
