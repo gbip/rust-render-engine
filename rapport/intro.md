@@ -1,5 +1,7 @@
 # Introduction
 
+Par la suite, les commandes bash seront prefixés par un $.
+
 ## L'histoire du raytracing
 
 Le raytracing est une technique devellopée dans les anénes 60 permettant la synthèse d'images par un ordinateur.
@@ -69,9 +71,9 @@ Le projet final comporte 20 tests unitaires, ce qui est peu, mais chaque test r�
 A chaque fois que quelqu'un envoie des commits sur le repertoire distant, le service d'intégration continue Travis se met en route.
 Celui-ci récupère le code et lance plusieurs commandes :
 ```
-cargo fmt -- --write-mode=diff
-cargo build
-cargo test
+$ cargo fmt -- --write-mode=diff
+$ cargo build
+$ cargo test
 ```
 La première commande vérifie que le code est bien formatté, elle quitte avec un code d'erreur différent de 0 si il est nécessaire de formatter le code.
 La deuxième commande compile le code.
@@ -98,15 +100,15 @@ cependant il y a peu de documentation décrivant le fonctionnement du code en g�
 
 Pour installer le projet il faut commencer par installer [rustup](https://rustup.rs/).
 ```
-curl https://sh.rustup.rs -sSf | sh
+$ curl https://sh.rustup.rs -sSf | sh
 ```
 
 Ensuite vous pouvez télécharger le repertoire avec git, et compiler le projet.
 ```
-sudo apt-get install git
-git clone https://github.com/gbip/rust-render-engine
-rustup override set nightly
-cargo build --release
+$ sudo apt-get install git
+$ git clone https://github.com/gbip/rust-render-engine
+$ rustup override set nightly
+$ cargo build --release
 ```
 
 Pour lancer les test unitaires, il faut executer `cargo test` dans le repertoire du projet.
@@ -124,7 +126,7 @@ Nous avons choisi, pour des raisons de simplicité, de nous contacter d'une inte
 Lorsque l'on lance le logiciel sans argumment, un message d'aide s'affiche indiquant à l'utilisateur comment utiliser le logiciel.
 C'est une pratique standard dans l'environnement UNIX:
 ```
-./render_engine
+$ ./render_engine
 Usage : ./render_engine -g FILE -r FILE -w FILE
 ```
 
@@ -190,24 +192,24 @@ Le fichier de scène correspond au fichier principal qui décris :
 
 Voici la description des différents champs qui composent ce fichier :
 
-* `base_vector` : ce champ indique quels sont les trois vecteurs formant la base orthonormée pour représenter la géomètrie dans l'espace
+* *base_vector* : ce champ indique quels sont les trois vecteurs formant la base orthonormée pour représenter la géomètrie dans l'espace
 
-* `cameras` : il s'agit d'une tableau de [Caméra]
+* *cameras* : il s'agit d'une tableau de [Caméra]
 
-* `objects`  : les différents objets  composant la scènne (géomètrie et matériau)
+* *objects*  : les différents objets  composant la scènne (géomètrie et matériau)
 
-* `lights` : il s'agit d'un tableau de [Lumières]
+* *lights* : il s'agit d'un tableau de [Lumières]
 
-* `renderer `  : les différents paramètres du rendu :
-	* `res_x`,`res_y` : la résolution de l'image a calculer
-	* `threads` : le nombre de coeurs à utiliser pour le calcul
-	* `bucket_size` : taille des blocs subdivisant l'image pour la répartition du travail entre les coeurs
-	* `sampler` : les paramètres de la génération des échantillons :
-		* `HaltonSampler` ou `UniformSampler` permettent de choisir la méthode de génération des échantillons sur l'image 2D. `Haltonsampler` offre la meilleur qualité.
-		* `subdivision_sampling` : le paramètre crucial qui va énormèment jouer sur la qualité de l'image finale. Il s'agit du nombre de rayons qui vont être lancés par pixel.
-	* `filter` : les paramètres pour la reconstruction des pixels à partir des rayons :
-		* `BoxFilter` ou `MitchellFilter` permettent de choisir quelle méthode utiliser lors du rendu. MichellFilter offre en théorie la meilleur qualité.
-	* `background_color` : la color de fond lorsqu'aucun n'objet ne viens obstruer le rayon.
+* *renderer *  : les différents paramètres du rendu :
+	* *res_x*,*res_y* : la résolution de l'image a calculer
+	* *threads* : le nombre de coeurs à utiliser pour le calcul
+	* *bucket_size* : taille des blocs subdivisant l'image pour la répartition du travail entre les coeurs
+	* *sampler* : les paramètres de la génération des échantillons :
+		* *HaltonSampler* ou *UniformSampler* permettent de choisir la méthode de génération des échantillons sur l'image 2D. *Haltonsampler* offre la meilleur qualité.
+		* *subdivision_sampling* : le paramètre crucial qui va énormèment jouer sur la qualité de l'image finale. Il s'agit du nombre de rayons qui vont être lancés par pixel.
+	* *filter* : les paramètres pour la reconstruction des pixels à partir des rayons :
+		* *BoxFilter* ou *MitchellFilter* permettent de choisir quelle méthode utiliser lors du rendu. MichellFilter offre en théorie la meilleur qualité.
+	* *background_color* : la color de fond lorsqu'aucun n'objet ne viens obstruer le rayon.
 
 
 ```json
@@ -240,17 +242,17 @@ Voici la description des différents champs qui composent ce fichier :
 ```
 
 Le nombre de paramètre exposé est relativement important, et avec du recul certains n'ont pas leur place ici. 
-Par exemple `base_vector` ne devrait même pas être exposé à l'utilisateur, c'est une convention que nous utilisons en interne.
+Par exemple *base_vector* ne devrait même pas être exposé à l'utilisateur, c'est une convention que nous utilisons en interne.
 De plus certains arguments pourrait être donnés en ligne de commande, comme le nombre de coeur à utiliser pour le calcul.
 
 
 #### Caméra
 La caméra est composé des champs suivants :
-* `world_position` : la position de la caméra dans le monde. C'est le point à partir duquel on voit la scène.
-* `target_position` : un point de l'espace vers lequel on regarde. Celui-ci est au centre de l'écran. Il permet d'orienter la caméra.
-* `up` : un vecteur qui indique le 'haut' de l'image, utiliser pour faire tourner la caméra
-* `fov` : de l'acronyme 'Field of View', indique le champ de vision en degré de la caméra. Une valeur plus petite correspond à un effet de zoom.
-* `clip` : la distance à partir de laquelle les rayons sont arrêtés par les objets. Dans notre exemple, si un objet se trouve à moins de 0.001 de la caméra, il ne sera pas visible.
+* *world_position* : la position de la caméra dans le monde. C'est le point à partir duquel on voit la scène.
+* *target_position* : un point de l'espace vers lequel on regarde. Celui-ci est au centre de l'écran. Il permet d'orienter la caméra.
+* *up* : un vecteur qui indique le 'haut' de l'image, utiliser pour faire tourner la caméra.
+* *fov* : de l'acronyme 'Field of View', indique le champ de vision en degré de la caméra. Une valeur plus petite correspond à un effet de zoom.
+* *clip* : la distance à partir de laquelle les rayons sont arrêtés par les objets. Dans notre exemple, si un objet se trouve à moins de 0.001 de la caméra, il ne sera pas visible.
 
 ```json
 {
@@ -277,15 +279,206 @@ La caméra est composé des champs suivants :
 
 #### Objets
 
-#### Lumières
-## Fonctionnement général du programme
 
+L'utilisation d'un objet fait appel à plusieurs fichiers : 
+
+* le fichier qui contiens les informations de géométrie
+
+* la section dans le fichier de scène qui indique la position de l'objet
+
+* un matériau
+
+
+##### Dans la scène
+
+Ajouter un objet dans une scène consiste à spécifier les champs suivants :
+
+* *position* : la position de l'objet.
+
+* *scale* : un facteur d'échelle permettant de modifier la taille de l'objet selon plusieurs axes.
+
+* *rotation* : la rotation de l'objet autour de chacun des axes.
+
+* *obj_path* : le chemin vers un fichier .obj qui contiens les informations sur la géométrie.
+
+* *visible* : ce booléen indique si l'objet est visible ou non. Si le booléen est à false, alors l'objet ne sera pas affiché.
+
+* *material* : le chemin vers un fichier JSON indiquant les propriétés du matériau dont est fait l'objet. La description d'un matériau se trouve dans [Matériau]
+
+```json 
+{
+	"position": {
+        "x": 15.0,
+        "y": 0.0,
+    	"z": 5.0
+    },
+	"scale": {
+        "x": 2.0,
+        "y": 1.0,
+    	"z": 2.0
+    },
+	"rotation": {
+        "x": 0.0,
+        "y": 0.0,
+    	"z": 90.0
+    },
+    "obj_path": "models/plane_no_uv.obj",
+    "name": "Example",
+	"visible":false,
+	"material" : "scenes/materials/solid_grey.json"
+}
+```
+
+##### Format de stockage de la géomètrie
+
+La géométrie est stockée sous le format [Wavefront Obj](https://fr.wikipedia.org/wiki/Objet_3D_(format_de_fichier)) qui est un format libre.
+Un fichier .obj est un fichier texte, qui décris point par point, face par face, la géométrie d'un objet.
+Nous ne supportons que les fonctionnalités 'de base' du standard Wavefront.
+Notamment, il est impossible :
+* de spécifier le matériau d'un objet dans le .obj
+* de grouper plusieurs objets dans un .obj
+
+Concrétement, il existe trois types de ligne que nous supportons :
+
+* `o Plane` définit un nouvel objet.
+* `v -0.500000 -0.500000 0.000000` définit un nouveau point de coordonnée (0.5,-0.5,0).
+* `vt 0.999900 0.000100` définit des nouvelles coordonnées de textures dans le plan 2D.
+* `vn 0.000000 0.000000 1.000000` définit un nouveau vecteur normal
+
+* `f 2/1/1 4/2/1 3/3/1` définit un nouveau triangle composée des 3 points suivants :
+	* le premier point a pour coordonnée spatiale le deuxième vertex *v* défini dans le fichier. Il a pour coordonnée de textures le premier point *vt* défini dans le fichier. Il a pour normale le premier vecteur de normal *vn* défini dans le fichier.
+	* le deuxième point va chercher le 4éme *v* pour les coordonées spatiales, le deuxième *vt* pour les textures et le premier *vn* pour les normales
+	* le troisième point a pour coordonée spatiale le troisième *v*, comme coordonée de texture le troisième *vt* et comme vecteur normal le premier *v*
+
+Un exemple de fichier de géométrie est présent dans la partie [Exemple de fichier .obj].
+
+A l'utilisation, la géométrie est générée par [Blender](https://www.blender.org/) car il est impensable d'écrire un fichier .obj à la main.
+
+#### Lumières
+
+Pour décrire une lumière il suffit de spécifier les trois champs suivants :
+
+* *point* la position de la lumière
+
+* *intensity* l'intensité de la lumière. Plus la valeur est grande, plus la source est lumineuse
+
+* *color* la couleur de la lumière. Permet de créer des lumières de toutes les couleurs, même noires.
+
+```json
+{
+	"point": {
+        "position": {
+            "x": 10.0,
+            "y": 1.0,
+        	"z": 8.0
+        },
+        "intensity": 10.0,
+        "color" : {
+            "r": 255,
+            "g": 0,
+            "b": 255,
+        	"a": 255
+    	}
+	}
+}
+```
+
+#### Matériaux
+
+Le seul type de matériau implémenté actuellement dans le programme est un matériau qui se rapproche beaucoup du [matériau de Phong](https://fr.wikipedia.org/wiki/Ombrage_de_Phong).
+Il est composé de trois couleurs ou textures qui represente chacune une composante spécifique du matériau : *ambient* , *diffuse* et *specular*.
+
+Le fichier JSON d'un matériau se découpe aussi ainsi.A chaque champ est assignable au choix, une couleur unie, une texture ou une texture spéciale :
+```json
+{
+  "diffuse": {
+    "color": {
+      "r": 204,
+      "g": 29,
+      "b": 20,
+      "a": 255
+    }
+  },
+  "specular": {
+    "texture": {
+      "map_path": "scenes/textures/checker_2k.jpg",
+      "tiling_x": 10.0,
+      "tiling_y": 10.0
+    }
+  },
+  "ambient": {
+     "normal":{}
+  }
+}
+```
+
+Ici, le champ *diffuse* se voit assigner une couleur unie, le champ *specular* une texture.
+Pour la texture, il y a trois paramètres :
+
+* *map_path* qui est le chemin vers le fichier d'image.
+
+* *tiling_x* qui est le nombre de fois que la texture doit se répéter selon l'axe x.
+
+* *tiling_y* qui est le nombre de fois que la texture doit se répéter selon l'axe y.
+
+Le champ *ambient* se voit assigner la texture spéciale *normal* (la seule texture spéciale implémentée) qui va afficher le vecteur normal de l'objet en tout point de la surface.
+
+
+## Fonctionnement général du programme
+### Décodage des fichiers de scène
+### Rendu
+### Ecriture de l'image
 
 
 # Implémentation
 ## Choix des structures de données
+
+## Dépendances
+
+Nous avons 8 dépendances :
+
+* *serde* nous permet de facilement sérialiser et déserialiser des structures de données.
+
+* *image* nous permet de charger en mémoire des images, et d'écrire des images sur le disque.
+
+* *getopts* nous permet de réaliser facilement l'analyse des arguments fourni au programme en ligne de commande.
+
+* *num* rajoute des traits utiles pour manipuler des nombres de manière générique (libraire très peu utilisée au final).
+
+* *colored* permet de facilement coloré les messages que l'on affiche sur la sortie standard.
+
+* *scoped-pool* permet de mettre en place un groupe de thread qui vont travailler collaborativement sur la même tâche, et rajoute des garanties sur les threads.
+Par exemple, scoped-pool permet de garantir au compilateur qu'un thread aura terminé de s'executer à la fin d'un bloc.
+
+* *pbr* permet d'afficher une barre de progression dans le terminal.
+
+
 ## Description de chaque module
 ## Amélioration qualitatives
 ## Optimisations
 
 # Quelques problèmes notables
+
+# Annexes
+
+
+## Exemple de fichier .obj
+
+
+
+Le fichier suivant décris un plan avec des coordonées de textures :
+```obj
+o Plane
+v -0.500000 -0.500000 0.000000
+v 0.500000 -0.500000 0.000000
+v -0.500000 0.500000 0.000000
+v 0.500000 0.500000 0.000000
+vt 0.999900 0.000100
+vt 0.999900 0.999900
+vt 0.000100 0.999900
+vt 0.000100 0.000100
+vn 0.000000 0.000000 1.000000
+s off
+f 2/1/1 4/2/1 3/3/1
+f 1/4/1 2/1/1 3/3/1
+```
