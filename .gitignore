@@ -10,3 +10,4 @@ template.json
 /.idea/
 *.rs.bk
 *.pdf
+/models
