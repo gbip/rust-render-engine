@@ -75,17 +75,17 @@ impl Mul<f32> for LinearColor {
     }
 }
 
-const GAMMA : f32 = 2.2;
-const INV_GAMMA : f32 = 1 / GAMMA;
+const GAMMA: f32 = 2.2;
+const INV_GAMMA: f32 = 1f32 / GAMMA;
 
 /// Conversion entre l'espace `sRGB` et l'espace linéaire.
 impl Into<LinearColor> for RGBColor {
     fn into(self) -> LinearColor {
         LinearColor {
             internal_color: InternalColor::new(self.internal_color.r.pow(INV_GAMMA).min(1f32),
-                                                self.internal_color.g.pow(INV_GAMMA).min(1f32),
-                                                self.internal_color.b.pow(INV_GAMMA).min(1f32),
-                                                self.internal_color.a.pow(INV_GAMMA).min(1f32)),
+                                               self.internal_color.g.pow(INV_GAMMA).min(1f32),
+                                               self.internal_color.b.pow(INV_GAMMA).min(1f32),
+                                               self.internal_color.a.pow(INV_GAMMA).min(1f32)),
         }
     }
 }
@@ -95,9 +95,9 @@ impl Into<RGBColor> for LinearColor {
     fn into(self) -> RGBColor {
         LinearColor {
             internal_color: InternalColor::new(self.internal_color.r.pow(GAMMA).min(1f32),
-                                                self.internal_color.g.pow(GAMMA).min(1f32),
-                                                self.internal_color.b.pow(GAMMA).min(1f32),
-                                                self.internal_color.a.pow(GAMMA).min(1f32)),
+                                               self.internal_color.g.pow(GAMMA).min(1f32),
+                                               self.internal_color.b.pow(GAMMA).min(1f32),
+                                               self.internal_color.a.pow(GAMMA).min(1f32)),
         }
     }
 }
