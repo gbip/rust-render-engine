@@ -114,8 +114,7 @@ pub fn sample_uniform_hemisphere(samples: u32, frag: &Fragment) -> Vec<Vector3f>
     let points = sample_uniform_hemisphere_shading_coordinates(samples);
 
     // On convertis les coordonnées et on déplace le centre de la sphère en position
-    points
-        .into_iter()
+    points.into_iter()
         .map(|p| coordinates_transformator.local_into_world_space(&p) + frag.position)
         .collect::<Vec<Vector3f>>()
 }

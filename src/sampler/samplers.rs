@@ -25,9 +25,9 @@ impl Sampler for DefaultSampler {
         for i in 0..self.sample_square_root {
             for j in 0..self.sample_square_root {
                 result.push(Vector2f {
-                                x: (i as f32 + 0.5) / self.sample_square_root as f32,
-                                y: (j as f32 + 0.5) / self.sample_square_root as f32,
-                            });
+                    x: (i as f32 + 0.5) / self.sample_square_root as f32,
+                    y: (j as f32 + 0.5) / self.sample_square_root as f32,
+                });
                 if result.len() >= self.sample_rate as usize {
                     break;
                 }
@@ -73,9 +73,9 @@ impl Sampler for HaltonSampler {
         let mut result: Vec<Vector2f> = vec![];
         for i in 0..self.sample_rate {
             result.push(Vector2f {
-                            x: get_halton(i, 2),
-                            y: get_halton(i, 3),
-                        });
+                x: get_halton(i, 2),
+                y: get_halton(i, 3),
+            });
         }
 
         result

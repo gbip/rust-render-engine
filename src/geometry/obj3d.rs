@@ -438,8 +438,8 @@ impl Object {
                      format!("Warning, the object {} is not centered in (0,0,0) but in {}",
                              self.name,
                              &barycenter)
-                             .yellow()
-                             .dimmed());
+                         .yellow()
+                         .dimmed());
             // On centre l'objet à l'origine.
             self.position = -barycenter;
             self.apply_position();

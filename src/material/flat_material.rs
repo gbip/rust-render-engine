@@ -106,7 +106,7 @@ impl Material for FlatMaterial {
             .get_color(frag, u, v, tex_reg, world)
             .to_rgba8();
 
-        // Application
+        /* Application
         let diffuse = RGBA8 {
                 r: (color.r as f32 * intensity) as u8,
                 g: (color.g as f32 * intensity) as u8,
@@ -114,10 +114,17 @@ impl Material for FlatMaterial {
                 a: color.a,
             }
             .to_rgba32();
-        //println!("Je somme");
+        println!("Je somme");
         let result = diffuse; //;+ self.ambient.get_color(frag, None, None, None, world);
-        //println!("J'ai finis de sommer");
-        result
+        println!("J'ai finis de sommer");
+        */
+        RGBA8 {
+                r: (color.r as f32 * intensity) as u8,
+                g: (color.g as f32 * intensity) as u8,
+                b: (color.b as f32 * intensity) as u8,
+                a: color.a,
+            }
+            .to_rgba32()
     }
 }
 
