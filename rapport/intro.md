@@ -1,6 +1,11 @@
+% Implémentation d'un moteur de rendu en lancer de rayon basé sur un modèle physique réaliste.
+% Paul FLORENCE; Louis JEAN
+% 25 Mai 2017
+
 # Introduction
 
 Par la suite, les commandes bash seront prefixés par un $.
+Tout code issu du projet sera précédé d'un commentaire indiquant le chemin où il se trouve.
 
 ## L'histoire du raytracing
 
@@ -15,7 +20,9 @@ De plus c'est un sujet qui nous interressait personellement, puisque nous avons 
 Enfin, le sujet se prêtait particulièrement bien au cadre de ce projet, puisque il est très motivant.
 En effet, nous avons directement un retour sur investissement à travers les images qui sortent directement de notre moteur de rendu.
 
-## Pourquoi Rust
+# Notre méthode de travail
+
+## Pourquoi Rust ?
 
 Dès le départ nous avons voulu partir sur un langage de programmation système, afin d'obtenir le maximum de performances.
 Le seul langage sur ce créneau est le C/C++, cependant nous avons déjà eu plusieurs experiences tous les deux avec C++, et le fait que la langage soit très permissif à la compilation, retardant les bugs à l'execution nous dérangeait.
@@ -42,9 +49,6 @@ Il existe aussi des points faibles vis à vis de ce langage, la plupart découla
  * le langage est "verbeux"
 
 Ainsi avoir choisis Rust nous a permis de drastiquement résoudre notre temps passer à débugger le programme, puisque les seuls erreurs que nous pouvions commettre étaient dues à des erreurs d'algorithmies.
-
-
-# Notre méthode de travail
 
 ## Clippy
 
@@ -115,14 +119,18 @@ Pour lancer les test unitaires, il faut executer `cargo test` dans le repertoire
 Pour compiler la documentation, il faut executer `cargo doc` dans le repertoire du projet.
 
 ## Langue des variables, du code et de l'interface
+
 Nous sommes partis du principe que le standard, en informatique est l'anglais. Ainsi tous les noms de variables, de fonctions, de modules et de structure de données 
 sont en anglais.
 De plus, l'interface en ligne de commande est elle aussi en anglais.
 Cependant, afin de faciliter leur rédaction, leur lecture et leur éventuelle compréhension, les commentaires sont en français.
 
 # Scénario de fonctionnement
+
 Nous avons choisi, pour des raisons de simplicité, de nous contacter d'une interface en ligne de commande pour l'interaction avec l'utilisateur.
+
 ## Interface de commande avec l'utilisateur
+
 Lorsque l'on lance le logiciel sans argumment, un message d'aide s'affiche indiquant à l'utilisateur comment utiliser le logiciel.
 C'est une pratique standard dans l'environnement UNIX:
 ```
@@ -179,6 +187,7 @@ Enfin, il existe deux structures qui se retrouvent régulièrement dans les fich
 ```
         
 ### La scène
+
 Le fichier de scène correspond au fichier principal qui décris :
 
 * la géométrie présente dans la scène, et le matériau qui y est affecté
@@ -246,7 +255,8 @@ Par exemple *base_vector* ne devrait même pas être exposé à l'utilisateur, c
 De plus certains arguments pourrait être donnés en ligne de commande, comme le nombre de coeur à utiliser pour le calcul.
 
 
-#### Caméra
+### Caméra
+
 La caméra est composé des champs suivants :
 * *world_position* : la position de la caméra dans le monde. C'est le point à partir duquel on voit la scène.
 * *target_position* : un point de l'espace vers lequel on regarde. Celui-ci est au centre de l'écran. Il permet d'orienter la caméra.
@@ -277,7 +287,7 @@ La caméra est composé des champs suivants :
 ```
 
 
-#### Objets
+### Objets
 
 
 L'utilisation d'un objet fait appel à plusieurs fichiers : 
@@ -289,7 +299,7 @@ L'utilisation d'un objet fait appel à plusieurs fichiers :
 * un matériau
 
 
-##### Dans la scène
+#### Dans la scène
 
 Ajouter un objet dans une scène consiste à spécifier les champs suivants :
 
@@ -329,7 +339,7 @@ Ajouter un objet dans une scène consiste à spécifier les champs suivants :
 }
 ```
 
-##### Format de stockage de la géomètrie
+#### Format de stockage de la géométrie
 
 La géométrie est stockée sous le format [Wavefront Obj](https://fr.wikipedia.org/wiki/Objet_3D_(format_de_fichier)) qui est un format libre.
 Un fichier .obj est un fichier texte, qui décris point par point, face par face, la géométrie d'un objet.
@@ -354,7 +364,7 @@ Un exemple de fichier de géométrie est présent dans la partie [Exemple de fic
 
 A l'utilisation, la géométrie est générée par [Blender](https://www.blender.org/) car il est impensable d'écrire un fichier .obj à la main.
 
-#### Lumières
+### Lumières
 
 Pour décrire une lumière il suffit de spécifier les trois champs suivants :
 
@@ -383,7 +393,7 @@ Pour décrire une lumière il suffit de spécifier les trois champs suivants :
 }
 ```
 
-#### Matériaux
+### Matériaux
 
 Le seul type de matériau implémenté actuellement dans le programme est un matériau qui se rapproche beaucoup du [matériau de Phong](https://fr.wikipedia.org/wiki/Ombrage_de_Phong).
 Il est composé de trois couleurs ou textures qui represente chacune une composante spécifique du matériau : *ambient* , *diffuse* et *specular*.
@@ -421,16 +431,144 @@ Pour la texture, il y a trois paramètres :
 
 * *tiling_y* qui est le nombre de fois que la texture doit se répéter selon l'axe y.
 
-Le champ *ambient* se voit assigner la texture spéciale *normal* (la seule texture spéciale implémentée) qui va afficher le vecteur normal de l'objet en tout point de la surface.
+![Une texture avec un tiling de 10 en x, et de 10 en y.](images/tex_checker_1.png "Une texture avec un tiling de 10 en x, et de 10 en y.")
 
+![La même texture, mais avec un tiling de 1 en x, et de 1 en y.](images/tex_checker_2.png "Une texture avec un tiling de 10 en x, et de 10 en y.")
+
+![La même texture, mais avec un tiling de 5 en x, et de 1 en y.](images/tex_checker_3.png "Une texture avec un tiling de 10 en x, et de 10 en y.")
+
+Le champ *ambient* se voit assigner la texture spéciale *normal* (la seule texture spéciale implémentée) qui va afficher le vecteur normal de l'objet en tout point de la surface. La couleur est déterminée par le produit entre la couleur gris et la normale au point d'intersection.
+
+```rust
+// material/channel.rs
+// Création d'une couleur gris
+let mut white = RGBA8::new(&128, &128, &128, &128);
+
+// normal est le vecteur normal au point d'intersection normé. Ses coordonnées sont comprises entre 0 et 1.
+white.r = (white.r as f32 * normal.x) as u8; 
+white.g = (white.g as f32 * normal.y) as u8; 
+white.b = (white.b as f32 * normal.z) as u8; 
+white.to_rgba32()
+```
+
+![Un exemple de texture spéciale : suzanne rendue avec la texture *normal*](images/tex_normal_1.png)
+
+## Interaction avec l'utilisateur lors du rendu
+
+Lors du rendu, nous communiquons avec l'utilisateur pour le tenir informé du processus de rendu.
+
+Ainsi, nous rappelons le fichier de scène qui est chargé avant de lancer le rendu, au cas où l'utilisateur se serait trompé.
+Nous affichons aussi des warnings si jamais le barycentre d'un objet chargé depuis un .obj n'est pas (0,0,0).
+
+
+Au moment de lancer le rendu, nous rappelons les paramètres essentiels de celui ci : la résolution de l'image finale et le nombre de coeur qui vont être utilisé.
+
+Lors du rendu, nous affichons une barre de progression avec le temps restant estimé et le pourcentage de complétion. Cela permet d'être un peu plus patient lors d'un long rendu, surtout quand celui ci peut durer plusieurs minutes !
+Il faut cependant faire attention au temps estimé qui n'est pas toujours très fiable, notamment quand la scène contiens des zones très difficiles à calculer et des zones plus simples.
+
+Enfin, après le rendu nous affichons le temps écoulé, et l'emplacement du fichier de sortie.
 
 ## Fonctionnement général du programme
+
+Dans cette partie, nous allons expliquer le fonctionnement du programme, de manière chronologique.
+
 ### Décodage des fichiers de scène
+
+La première partie consiste à déserializer les fichiers de scènes. Si les arguments sont corrects, main va effectivement appeler la fonction load_from_file :
+
+```rust
+//scene.rs
+//Implémentation de Scene.
+pub fn load_from_file(file: &str) -> Self {
+	println!("Loading scene from file : {} ", file);
+	let mut scene: Scene = io_utils::open_file_as_string(file); // 1
+	// ...
+    scene.world.load_objects(); // 2
+    scene.renderer.initialize(&scene.world); // 3
+    scene // 4
+    }
+```
+
+La déserialization se fait en quatre étapes, si une erreur surviens lors de ces étapes, l'execution s'arrête et l'erreur est transmise à l'utilisateur : 
+
+1. Serde deserialize les structures de données, la géométrie n'est pas chargée, à la place les objets possèdent le chemin vers le fichier .obj qu'ils doivent charger.
+
+2. On charge la géométrie, et on applique les corrections nécessaires. Pour cela on appelle la méthode `initialize()` sur chaque objet.
+
+```rust
+// geometry/obj3d.rs
+//Implémentation de Object3D.
+pub fn initialize(&mut self) {
+	// Important, on charge le mesh avant de commencer à rendre car sinon le calcul du
+    // barycentre n'a pas de sens.
+    self.load_mesh();
+    self.center();
+    self.apply_scale();
+    self.apply_rotation();
+    self.apply_position();
+    self.bbox = BoundingBox::new_from_object(self);
+    self.load_material();
+    }   
+```
+
+Pour intialiser un objet, on commence par charger le mesh (la géométrie). Cette fonction est réalisée par le module *obj_parser*.
+
+Une fois la géométrie en mémoire, on peut calculer le barycentre, et si le barycentre de l'objet n'est pas (0,0,0), afficher un warning pour l'utilisateur et recentrer l'objet en (0,0,0).
+
+Ensuite, nous appliquons la mise à l'échelle (scale), la rotation, et le décallage de position.
+
+Enfin, nous calculons la boîte englobante de l'objet.
+
+Pour finir, nous chargeons le matériau de l'objet. Si celui-ci ne possède pas de matériau, nous lui assignons un matériau par défaut.
+
+3. On initialise la scène.
+
+```rust
+//scene.rs
+//Implémentation de Scene.
+pub fn initialize(&mut self, world: &scene::World) {
+    self.compute_ratio();
+    self.free_textures();
+	self.load_textures(world);
+}
+```
+
+L'appel à `initialize()` va charger les textures dans le registre de texture, et calculer le ratio de l'image qui est nécessaire pour générer les échantillons. 
+
+4. La scène est prête au calcul et peut être retournée pour lancer le rendu.
+
 ### Rendu
+
+Le point d'entré du rendu est `Scene::render_to_file`.
+
+```rust
+//scene.rs
+//Implémentation de Scene.
+pub fn render_to_file(&self, file_path: &str) {
+    // Affichage de quelques informations pour l'utilisateur
+	self.renderer.show_information();
+    println!("Starting to render...");
+    // Chronométrage du rendu : on récupère l'heure de début
+    let now = Instant::now();
+    // Calcul du rendu
+    let image = self.renderer
+    	.render(&self.world, self.world.get_camera(0));
+    // Affichage du temps écoulé
+    println!("Render done in {} s, writting result to file {}",
+    	now.elapsed().as_secs() as f64 + (now.elapsed().subsec_nanos() as f64 *
+    	(1.0/1_000_000_000_f64)),
+        &file_path,);
+    // Sauvegarde de l'image
+	image.write_to_file(file_path)
+    }   
+```
+
 ### Ecriture de l'image
 
 
+
 # Implémentation
+
 ## Choix des structures de données
 
 Pour faire fonctionner notre moteur de rendu, il est nécessaire de mettre en place une structure de données qui contiendra la géometrie 
@@ -471,9 +609,12 @@ Par exemple, scoped-pool permet de garantir au compilateur qu'un thread aura ter
 
 * *rand* permet de générer des nombres aléatoires.
 
+## Séparation fichier binaire/libraire 
 
 ## Description de chaque module
+
 ## Amélioration qualitatives
+
 ## Optimisations
 
 # Quelques problèmes notables
