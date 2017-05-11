@@ -448,6 +448,7 @@ Le champ *ambient* se voit assigner la texture spéciale *normal* (la seule text
 
 ```rust
 // material/channel.rs
+// Implémentation de NormalMap
 // Création d'une couleur gris
 let mut white = RGBA8::new(&128, &128, &128, &128);
 
@@ -481,11 +482,11 @@ Dans cette partie, nous allons expliquer le fonctionnement du programme, d'appel
 
 ### Décodage des fichiers de scène
 
-La première partie consiste à déserializer les fichiers de scènes. Si les arguments sont corrects, main va effectivement appeler la fonction load_from_file :
+La première partie consiste à déserializer les fichiers de scènes à partir du fichier fourni en argument. Si les arguments sont corrects, `main()` va effectivement appeler la fonction load_from_file :
 
 ```rust
-//scene.rs
-//Implémentation de Scene.
+// scene.rs
+// Implémentation de Scene.
 pub fn load_from_file(file: &str) -> Self {
 	println!("Loading scene from file : {} ", file);
 	let mut scene: Scene = io_utils::open_file_as_string(file); // 1
@@ -504,7 +505,7 @@ La déserialization se fait en quatre étapes, si une erreur surviens lors de ce
 
 ```rust
 // geometry/obj3d.rs
-//Implémentation de Object3D.
+// Implémentation de Object3D.
 pub fn initialize(&mut self) {
 	// Important, on charge le mesh avant de commencer à rendre car sinon le calcul du
     // barycentre n'a pas de sens.
@@ -552,23 +553,69 @@ Le point d'entré du rendu est `Scene::render_to_file`.
 //scene.rs
 //Implémentation de Scene.
 pub fn render_to_file(&self, file_path: &str) {
-    // Affichage de quelques informations pour l'utilisateur
+    // Affichage de quelques informations pour l'utilisateur.
 	self.renderer.show_information();
     println!("Starting to render...");
-    // Chronométrage du rendu : on récupère l'heure de début
+    // Chronométrage du rendu : on récupère l'heure de début.
     let now = Instant::now();
     // Calcul du rendu
     let image = self.renderer
     	.render(&self.world, self.world.get_camera(0));
-    // Affichage du temps écoulé
+    // Affichage du temps écoulé.
     println!("Render done in {} s, writting result to file {}",
     	now.elapsed().as_secs() as f64 + (now.elapsed().subsec_nanos() as f64 *
     	(1.0/1_000_000_000_f64)),
         &file_path,);
-    // Sauvegarde de l'image
+    // Sauvegarde de l'image.
 	image.write_to_file(file_path)
     }   
 ```
+
+Tout la logique du lancer de rayon se trouve dans l'appel à la méthode `render` de la structure `renderer`.
+
+Cette fonction est décrite dans la partie [Multithreading].
+
+Pour plus de simplicité nous allons nous contenter de décrire le fonctionnement de la méthode
+
+```rust$
+// scene.rs
+/// Implémentation de Renderer. 
+pub fn calculate_ray_intersection(objects: &[&Object],
+                                  ray: &mut Ray)
+                                  -> Option<Intersection> {
+
+    // Initialisation du résultat.
+    let mut intersection_point: Option<Intersection> = None;
+    // Itération sur tout les objets de la scène.
+    for object in objects {
+    	// En cas d'intersection avec la boîte englobante, on lance la procédure d'intersection avec la géométrie.
+        if object.bounding_box().intersects(ray) {
+        	// On regarde si le rayon est intersecté par la géométrie.
+            if let Some(point) = object.get_intersection_point(ray) {
+                intersection_point = Some(point);
+            }
+        }
+    }
+    intersection_point
+```
+
+Tout d'abord, la signature de cette fonction indique qu'elle renvoie potentiellement un point d'intersection.
+Si le rayon n'intersecte pas la géométrie, cette fonction renvoie *None*.
+De plus, on peut remarquer que c'est dans cette fonction que se trouve l'implémentation du principe des boîtes englobantes décris dans la partie [Boîtes englobantes].
+
+Enfin, il y a un point important à noter, c'est le type des arguments de cette fonction.
+On peut noter les choses suivantes :
+
+* le premier argument, objects, est un tableau de pointeurs en lecture seule sur des *Object*.
+
+* le deuxième argument, ray, est un pointeur sur un *Ray* mutable
+
+Le premier point est très important puisqu'il veut dire que, une fois la géométrie chargée, elle peut être partagée sans soucis entre plusieurs processus car la fonction de calcul d'intersection rayon/objet n'a besoin que d'un accés en lecture seule sur la géométrie. Or, en informatique partager une ressource en lecture seule entre plusieurs personnes ne pose aucun problème, il n'y aura pas de courses de données.
+
+Enfin, la mutabilité du deuxi_me argument indique que l'on le modifie dans l'appel de fonction.
+
+En effet, le paramètre *t* du rayon parametré est modifié en fonction du point d'interseciton avec un objet, et ceux afin de tenir compte de l'occlusion des objets par rapport à la caméra (un objet devant un autre le cache).
+
 
 ### Ecriture de l'image
 
@@ -623,6 +670,48 @@ Par exemple, scoped-pool permet de garantir au compilateur qu'un thread aura ter
 ## Amélioration qualitatives
 
 ## Optimisations
+
+### Boîtes englobantes
+
+### Multithreading
+
+```rust
+// renderer/render.rs
+// Implémentation de Renderer.
+pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA32> {
+	// 1
+	let shared_image: Mutex<Image<RGBA32>> = Mutex::new(Image::new(self.res_x, self.res_y));
+
+    // 2
+    let pool = Pool::new(self.threads);
+
+    // 3
+    let mut blocks : Vec<Blocks> = self.generate_blocks();
+
+    // 4
+    pool.scoped(|scope| while !blocks.is_empty() {
+    	let block = blocks.pop().unwrap();
+        scope.execute(|| {
+        	self.render_block(block, world, camera, &shared_image);
+        }); 
+	}); 
+
+    // 5
+    let result = shared_image.lock().unwrap().deref_mut().clone();
+    result
+    }   
+```
+
+1. Nous commençons par créer une ressource partagée de type *Mutex*. Le *Mutex* permet de garantir qu'un seul processus à la fois possède la ressource en écriture.
+Cela permet d'éviter les courses de données.
+
+2. Nous initialisons le groupe de thread (pool), en lui donnant en entrée le nombre maximum de thread qui peuvent s'executer simultanément.
+
+3. Nous découpons l'image en un tableau de *Blocks* pour pouvoir distribuer le travail.
+
+4. On demande au groupe de thread de calculer, pour chaque bloc dans le tableau, la zone de l'image qu'il represente. Cela lance la procédure de lancer de rayon décrite dans la partie [Rendu].
+
+5. Maintenant que tous les blocs ont été calculés, ont peut extraire l'image des structures qui permettait sa synchronisation entre les processus.
 
 # Conclusion
 
