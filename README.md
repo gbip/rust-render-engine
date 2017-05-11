@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/gbip/rust-render-engine.svg?branch=master)](https://travis-ci.org/gbip/rust-render-engine)
-
+[![LoC](https://tokei.rs/b1/github/gbip/rust-render-engine?category=code)](https://github.com/gbip/rust-render-engine)
 ##### Pour compiler un fichier .md en pdf :
-`pandoc intro.md -f markdown -t latex -o intro.pdf`
+`pandoc intro.md -f markdown -t latex -o intro.pdf --toc`
 
 # Français (English speakers see below)
 ## Compilation & Utilisation
