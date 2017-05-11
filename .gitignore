@@ -6,7 +6,6 @@ Cargo.lock
 /bench_output/*
 template.json
 *.swp
-*.sh
 /.idea/
 *.rs.bk
 *.pdf

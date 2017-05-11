@@ -2,6 +2,9 @@
 % Paul FLORENCE; Louis JEAN
 % 25 Mai 2017
 
+
+\newpage
+
 # Introduction
 
 Par la suite, les commandes bash seront prefixés par un $.
@@ -50,13 +53,17 @@ Il existe aussi des points faibles vis à vis de ce langage, la plupart découla
 
 Ainsi avoir choisis Rust nous a permis de drastiquement résoudre notre temps passer à débugger le programme, puisque les seuls erreurs que nous pouvions commettre étaient dues à des erreurs d'algorithmies.
 
-## Clippy
+## Organisation et planification du projet
+
+## Les outils que nous avons utilisés
+
+### Clippy
 
 En plus du compilateur, nous avons utilisé [Clippy](https://github.com/Manishearth/rust-clippy). Il s'agit d'un analyseur statique de code qui ajoute 197 warnings au compilateur, allant de l'erreur d'algorithmie au respect des conventions de code.
 Avoir un outil qui analyse notre code a été un gros avantage, puisque cela nous a permis d'avoir un code qui respecte à 100% la manière de penser du langage Rust.
 Nous avons aussi pu éviter quelques erreurs d'innatentions avant l'execution.
 
-## Git
+### Git
 
 Afin de pouvoir travailler collaborativement, nous avons utiliser le logiciel de gestionnaire de version `git`. Il s'agit d'un gestionnaire de version décentralisé.
 Avec git chaque programmeur regroupe ses modifications en commits. Lorsque une ligne a été modifiée par plusieurs programmeurs, il y a conflit, et il faut le résoudre à la main.
@@ -65,12 +72,12 @@ Enfin le code se trouve sur un repertoire distant, ce qui permet d'assurer la sy
 
 Vous pouvez accéder au répertoire distant du projet sur [github](https://github.com/gbip/rust-render-engine).
 
-## Test unitaires
+### Test unitaires
 
 Afin de s'assurer du fonctionnement de chaque fonctionnalitée nous avons écris des tests unitaires au fur et à mesure du devellopement.
 Le projet final comporte 20 tests unitaires, ce qui est peu, mais chaque test réalise en réalité plusieurs vérifications.
 
-## Travis
+### Travis
 
 A chaque fois que quelqu'un envoie des commits sur le repertoire distant, le service d'intégration continue Travis se met en route.
 Celui-ci récupère le code et lance plusieurs commandes :
@@ -85,7 +92,7 @@ La troisième commande compile et lance les test unitaires.
 Si jamais une de ces étapes échoue, nous recevons un mail, et les commits sont marqués comme échouant les test d'intégrations continues.
 Il est possible de voir à tout moment le statut du projet [sur le site internet de Travis](https://travis-ci.org/gbip/rust-render-engine).
 
-## Formatage du code
+### Formatage du code
 
 Afin d'avoir une base de code avec un style constant, nous utilisons l'outil [rustfmt](https://github.com/rust-lang-nursery/rustfmt).
 Ce programme est lancé à travers cargo, et lors de son execution il va parcourir tous les fichiers sources et les formatter selon des règles de style définies dans un fichier.
@@ -94,13 +101,13 @@ Nous utilisons les règles de style par défaut.
 Enfin, il est possible de mettre en place des script permettant de lancer cet outil automatiquement. Par exemple, sur Vim, rustfmt est lancé à chaque fois que l'on sauvegarde le buffer courant.
 Sur Intellij IDEA il est possible de lancer le formattage du code avant toute compilation.
 
-## Documentation
+### Documentation
 
 Nous avons essayé de documenter au maximum le projet. Malheuresement, la documentation est quand même très éparse.
 En effet, nous avons beaucoup documenté le fonctionnement des fonctions via des commentaires décrivant les différentes lignes composant une fonction,
 cependant il y a peu de documentation décrivant le fonctionnement du code en général.
 
-## Compiler le projet, générer la documentation et lancer les test unitaires.
+### Compiler le projet, générer la documentation et lancer les test unitaires.
 
 Pour installer le projet il faut commencer par installer [rustup](https://rustup.rs/).
 ```
@@ -118,7 +125,7 @@ $ cargo build --release
 Pour lancer les test unitaires, il faut executer `cargo test` dans le repertoire du projet.
 Pour compiler la documentation, il faut executer `cargo doc` dans le repertoire du projet.
 
-## Langue des variables, du code et de l'interface
+### Langue des variables, du code et de l'interface
 
 Nous sommes partis du principe que le standard, en informatique est l'anglais. Ainsi tous les noms de variables, de fonctions, de modules et de structure de données 
 sont en anglais.
@@ -163,7 +170,7 @@ Cette option est suffisante pour lancer la procédure de rendu, le logiciel sauv
 
 Cette option indique au logiciel où doit être enregistrée l'image de sortie. Si cette option n'est pas présente, l'image sera enregistrée dans le fichier 'untitled.png'
 
-## Fichiers d'objets, de matériau et de scène
+## Formats de fichiers d'objets, de matériaux et de scènes
 La principale interaction avec l'utilisateur se fait au travers des fichiers décrivant respectivement, la scène, les matériau et les objets. Nous avons choisi d'utiliser le format [JSON](https://fr.wikipedia.org/wiki/JavaScript_Object_Notation) car il est plus simple à modifier que du XML, et est lui aussi lisible très facilement par un humain.
 Enfin, il existe deux structures qui se retrouvent régulièrement dans les fichiers de scènes :
 
@@ -451,7 +458,7 @@ white.b = (white.b as f32 * normal.z) as u8;
 white.to_rgba32()
 ```
 
-![Un exemple de texture spéciale : suzanne rendue avec la texture *normal*](images/tex_normal_1.png)
+![Un exemple de texture spéciale : suzanne rendue avec la texture *normal*.](images/tex_normal_1.png)
 
 ## Interaction avec l'utilisateur lors du rendu
 
@@ -468,9 +475,9 @@ Il faut cependant faire attention au temps estimé qui n'est pas toujours très 
 
 Enfin, après le rendu nous affichons le temps écoulé, et l'emplacement du fichier de sortie.
 
-## Fonctionnement général du programme
+## Fonctionnement séquentiel du programme
 
-Dans cette partie, nous allons expliquer le fonctionnement du programme, de manière chronologique.
+Dans cette partie, nous allons expliquer le fonctionnement du programme, d'appel de fonction en appel de fonction.
 
 ### Décodage des fichiers de scène
 
@@ -617,7 +624,7 @@ Par exemple, scoped-pool permet de garantir au compilateur qu'un thread aura ter
 
 ## Optimisations
 
-# Quelques problèmes notables
+# Conclusion
 
 # Annexes
 
