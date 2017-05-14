@@ -4,12 +4,34 @@ use image::GenericImage;
 use image::Pixel as ImgPixel;
 use std::vec;
 use std::path::Path;
-use color::{RGBA32, RGBA8};
 use std::fs::File;
 
 pub trait Pixel: Copy {
     fn to_rgb_pixel(&self) -> (u8, u8, u8);
     fn to_rgba_pixel(&self) -> (u8, u8, u8, u8);
+}
+
+pub type RGBPixel = (u8, u8, u8);
+pub type RGBAPixel = (u8, u8, u8, u8);
+
+impl Pixel for RGBPixel {
+    fn to_rgb_pixel(&self) -> (u8, u8, u8) {
+        (self.0, self.1, self.2)
+    }
+
+    fn to_rgba_pixel(&self) -> (u8, u8, u8, u8) {
+        (self.0, self.1, self.2, 255u8)
+    }
+}
+
+impl Pixel for RGBAPixel {
+    fn to_rgb_pixel(&self) -> (u8, u8, u8) {
+        (self.0, self.1, self.2)
+    }
+
+    fn to_rgba_pixel(&self) -> (u8, u8, u8, u8) {
+        (self.0, self.1, self.2, 255u8)
+    }
 }
 
 #[derive(Clone)]
@@ -70,41 +92,39 @@ impl<T: Pixel> Image<T> {
     }
 }
 
-impl Image<RGBA8> {
-    pub fn read_from_file(pathname: &str) -> Image<RGBA8> {
+impl Image<RGBAPixel> {
+    pub fn new(sizex: usize, sizey: usize) -> Self {
+        let px: Vec<Vec<RGBAPixel>> = vec![vec![(255u8, 255u8, 255u8, 255u8);sizey]; sizex];
+        Image {
+            width: sizex,
+            height: sizey,
+            pixels: px,
+        }
+    }
+
+    pub fn read_from_file(pathname: &str) -> Image<RGBAPixel> {
 
         let img = image::open(&Path::new(pathname)).unwrap();
         let dims = img.dimensions();
 
         let width = dims.0;
         let height = dims.1;
-        let mut result = Image::<RGBA8> {
+        let mut result = Image::<RGBAPixel> {
             width: width as usize,
             height: height as usize,
             pixels: vec![],
         };
 
         for x in 0..width {
-            let mut col: Vec<RGBA8> = vec![];
+            let mut col: Vec<RGBAPixel> = vec![];
             for y in 0..height {
                 let pix = img.get_pixel(x, y);
-                col.push(RGBA8::new(&pix.data[0], &pix.data[1], &pix.data[2], &pix.data[3]));
+                col.push((pix.data[0], pix.data[1], pix.data[2], pix.data[3]));
             }
             result.pixels.push(col);
         }
 
         result
-    }
-}
-
-impl Image<RGBA32> {
-    pub fn new(sizex: usize, sizey: usize) -> Self {
-        let px: Vec<Vec<RGBA32>> = vec![vec![RGBA32::new_black();sizey]; sizex];
-        Image {
-            width: sizex,
-            height: sizey,
-            pixels: px,
-        }
     }
 }
 
@@ -114,17 +134,17 @@ mod test {
     use super::*;
     #[test]
     fn test_image_superposition() {
-        let mut image1: Image<RGBA32> = Image::new(40, 40);
-        let mut image2: Image<RGBA32> = Image::new(10, 10);
+        let mut image1: Image<RGBAPixel> = Image::new(40, 40);
+        let mut image2: Image<RGBAPixel> = Image::new(10, 10);
 
         for x in 0..image2.width() {
             for y in 0..image2.height() {
-                image2.write_pixel_at(x, y, RGBA32::new_white());
+                image2.write_pixel_at(x, y, (255u8, 255u8, 255u8, 255u8));
             }
         }
-        assert_eq!(image2.get_pixel_at(5, 5), RGBA32::new_white());
+        assert_eq!(image2.get_pixel_at(5, 5), (255u8, 255u8, 255u8, 255u8));
         println!("{}x{}", image1.width, image1.height);
         image1.superpose_sub_image(image2, 30, 30);
-        assert_eq!(image1.get_pixel_at(39, 39), RGBA32::new_white());
+        assert_eq!(image1.get_pixel_at(39, 39), (255u8, 255u8, 255u8, 255u8));
     }
 }

@@ -8,6 +8,7 @@ use light::point_light::PointLight;
 pub trait Light {
     fn visible(&self, point: &Vector3f, world: &World) -> bool;
     fn emit_rays(&self, point: &Vector3f, world: &World) -> Vec<Ray>;
+    fn intensity(&self) -> f32;
 }
 
 // Pour la sérialisation

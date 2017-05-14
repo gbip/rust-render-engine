@@ -1,12 +1,12 @@
 pub mod filters;
 
-use RGBA32;
+use color_float::LinearColor;
 use renderer::Pixel;
 use filter::filters::{BoxFilter, MitchellFilter};
 
 /** Un trait qui représente un filtre */
 pub trait Filter {
-    fn compute_color(&self, data: &Pixel, position: (u32, u32)) -> RGBA32;
+    fn compute_color(&self, data: &Pixel, position: (u32, u32)) -> LinearColor;
 }
 
 #[derive(Serialize,Deserialize, Debug)]

@@ -1,6 +1,6 @@
 use ray::{Fragment, Ray};
 use scene::World;
-use color::RGBA32;
+use color_float::LinearColor;
 use renderer::TextureRegister;
 use math::{VectorialOperations, Vector3f};
 
@@ -15,7 +15,7 @@ pub trait Material {
                  ray: &Ray,
                  world: &World,
                  texture_data: Option<&TextureRegister>)
-                 -> RGBA32;
+                 -> LinearColor;
 }
 
 /// Une structure de données qui contiens les méthodes permettant de passer d'un système de

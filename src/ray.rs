@@ -3,7 +3,7 @@ use math::VectorialOperations;
 use geometry::obj3d::Mesh;
 use material::Material;
 use scene::World;
-use color::RGBA32;
+use color_float::{LinearColor};
 use renderer::TextureRegister;
 use std::f32;
 
@@ -30,7 +30,7 @@ impl<'a> Intersection<'a> {
         }
     }
 
-    pub fn get_point_color(&self, world: &World, texture_register: &TextureRegister) -> RGBA32 {
+    pub fn get_point_color(&self, world: &World, texture_register: &TextureRegister) -> LinearColor {
         // TODO à simplifier (tout en gardant la gestion des cas anormaux)
         match self.fragment.tex {
             Some(_) => {

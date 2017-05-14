@@ -119,7 +119,7 @@ fn show_usage(program: &str) {
 }
 
 fn test_image() {
-    let image = Image::<RGBA32>::new(500, 600);
+    let image = Image::<RGBAPixel>::new(500, 600);
     image.write_to_file("object.png");
 }
 

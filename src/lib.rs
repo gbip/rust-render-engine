@@ -35,7 +35,7 @@ pub extern crate pbr;
 pub extern crate rand;
 
 pub use scene::Scene;
-pub use img::Image;
+pub use img::{Image, RGBAPixel};
 pub use color::{RGBA8, RGBA32};
 pub use math::Vector3;
 pub use getopts::Options;

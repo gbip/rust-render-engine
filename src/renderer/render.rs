@@ -1,6 +1,6 @@
 use scene;
-use img::Image;
-use color::{RGBA8, RGBA32};
+use img::{Image, RGBAPixel};
+use color_float::{FloatColor, LinearColor, RGBColor};
 use ray::{Ray, Intersection};
 use geometry::obj3d::Object;
 use std::collections::HashMap;
@@ -37,10 +37,10 @@ pub struct Renderer {
     #[serde(rename = "filter")]
     filter_factory: FilterFactory,
 
-    background_color: RGBA8,
+    background_color: RGBColor,
 
     #[serde(skip_serializing, skip_deserializing, default = "HashMap::new")]
-    textures: HashMap<String, Image<RGBA8>>,
+    textures: HashMap<String, Image<RGBAPixel>>,
 
     threads: usize,
 
@@ -53,7 +53,7 @@ impl Renderer {
             res_x: res_x,
             res_y: res_y,
             ratio: (res_x as f32 / res_y as f32),
-            background_color: RGBA8::new_black(),
+            background_color: (0u8, 0u8, 0u8).into(),
             textures: HashMap::new(),
             sampler_factory: SamplerFactory::HaltonSampler { subdivision_sampling: 4 },
             filter_factory: FilterFactory::BoxFilter,
@@ -74,7 +74,7 @@ impl Renderer {
     }
 
     pub fn load_textures(&mut self, world: &scene::World) {
-        let mut textures: HashMap<String, Image<RGBA8>> = HashMap::new();
+        let mut textures: HashMap<String, Image<RGBAPixel>> = HashMap::new();
         for obj in world.objects() {
             let texture_paths = obj.material().get_texture_paths();
 
@@ -82,7 +82,7 @@ impl Renderer {
                 let path_str = String::from(path.as_str());
                 println!("Ajout de la texture {}", path);
                 textures.entry(path)
-                    .or_insert_with(|| Image::<RGBA8>::read_from_file(path_str.as_str()));
+                    .or_insert_with(|| Image::<RGBAPixel>::read_from_file(path_str.as_str()));
             }
         }
 
@@ -149,7 +149,7 @@ impl Renderer {
                     sample.color = p.get_point_color(world, &self.textures);
                 }
                 _ => {
-                    sample.color = self.background_color.to_rgba32();
+                    sample.color = self.background_color.into();
                 }
             }
         }
@@ -217,8 +217,8 @@ impl Renderer {
     /** Fonction principale, qui génére les blocs de l'image et les rends, pour enfin les
      * recombiner dans une image finale. */
     #[allow(let_and_return)]
-    pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA32> {
-        let shared_image: Mutex<Image<RGBA32>> = Mutex::new(Image::new(self.res_x, self.res_y));
+    pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBAPixel> {
+        let shared_image: Mutex<Image<RGBAPixel>> = Mutex::new(Image::new(self.res_x, self.res_y));
 
         // On definit le nombre de threads à utiliser
         let pool = Pool::new(self.threads);
@@ -255,7 +255,7 @@ impl Renderer {
                         mut block: Block,
                         world: &scene::World,
                         camera: &scene::Camera,
-                        shared_image: &Mutex<Image<RGBA32>>) {
+                        shared_image: &Mutex<Image<RGBAPixel>>) {
 
         // Generation des samples
         self.sampler_factory
@@ -271,15 +271,15 @@ impl Renderer {
         }
 
 
-        let mut temp_result: Vec<Vec<RGBA32>> = vec![];
+        let mut temp_result: Vec<Vec<RGBAPixel>> = vec![];
 
         // Reconstruction de l'image à partir des samples et du filtre
         for x in 0..block.dimensions().0 {
-            let mut col: Vec<RGBA32> = vec![];
+            let mut col: Vec<RGBAPixel> = vec![];
 
             for y in 0..block.dimensions().1 {
-                col.push(filter.compute_color(block.get_pixel(x, y),
-                                              (block.position_x(), block.position_y())));
+                let color : RGBColor = filter.compute_color(block.get_pixel(x, y), (block.position_x(), block.position_y())).into();
+                col.push(color.into());
             }
             temp_result.push(col);
         }
@@ -288,7 +288,7 @@ impl Renderer {
         shared_image.lock()
             .unwrap()
             .deref_mut()
-            .superpose_sub_image(Image::<RGBA32>::from_vec_vec(&temp_result),
+            .superpose_sub_image(Image::<RGBAPixel>::from_vec_vec(&temp_result),
                                  block.position_x(),
                                  block.position_y());
     }

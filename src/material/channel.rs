@@ -1,5 +1,5 @@
-use color::{RGBA8, RGBA32};
-use img::Image;
+use color_float::{RGBColor, LinearColor, FloatColor, Color};
+use img::{Image, RGBAPixel};
 use std::collections::HashMap;
 use ray::Fragment;
 use math::VectorialOperations;
@@ -13,9 +13,9 @@ pub trait Texture {
                  frag: &Fragment,
                  u: Option<f32>,
                  v: Option<f32>,
-                 texture_registry: Option<&HashMap<String, Image<RGBA8>>>,
+                 texture_registry: Option<&HashMap<String, Image<RGBAPixel>>>,
                  world: &World)
-                 -> RGBA32;
+                 -> LinearColor;
 }
 
 
@@ -52,9 +52,9 @@ impl Texture for TextureMap {
                  _: &Fragment,
                  u: Option<f32>,
                  v: Option<f32>,
-                 texture_registry: Option<&HashMap<String, Image<RGBA8>>>,
+                 texture_registry: Option<&HashMap<String, Image<RGBAPixel>>>,
                  _: &World)
-                 -> RGBA32 {
+                 -> LinearColor {
 
         let texture = &texture_registry.unwrap()
             .get(self.map_path.as_str())
@@ -63,7 +63,7 @@ impl Texture for TextureMap {
                            texture.width()),
                           ((v.unwrap() * self.tiling_y * texture.height() as f32) as u32 %
                            texture.height()))
-            .to_rgba32()
+            .into()
 
     }
 }
@@ -78,18 +78,14 @@ impl Texture for NormalMap {
                  frag: &Fragment,
                  _: Option<f32>,
                  _: Option<f32>,
-                 _: Option<&HashMap<String, Image<RGBA8>>>,
+                 _: Option<&HashMap<String, Image<RGBAPixel>>>,
                  _: &World)
-                 -> RGBA32 {
+                 -> LinearColor {
         let normal = frag.normal / frag.normal.norm();
 
-        //let mut white = RGBA32::new_white();
-        let mut white = RGBA8::new(&128, &128, &128, &128);
-        white.r = (white.r as f32 * normal.x) as u8;
-        white.g = (white.g as f32 * normal.y) as u8;
-        white.b = (white.b as f32 * normal.z) as u8;
-        white.to_rgba32()
-
+        LinearColor::new(
+            FloatColor::new(0.5 * (1f32 + normal.x), 0.5 * (1f32 + normal.y), 0.5 * (1f32 + normal.z))
+        )
     }
 }
 
@@ -97,7 +93,7 @@ impl Texture for NormalMap {
 #[derive(Serialize,Deserialize,Debug,Clone)]
 #[serde(untagged)]
 pub enum Channel {
-    Solid { color: RGBA8 },
+    Solid { color: RGBColor },
     TextureMap { texture: TextureMap },
     NormalMap { normal: NormalMap },
     AmbientOcclusionMap { ambient_occlusion: AmbientOcclusionMap, },
@@ -112,9 +108,9 @@ impl Channel {
                      frag: &Fragment,
                      u: Option<f32>,
                      v: Option<f32>,
-                     texture_registry: Option<&HashMap<String, Image<RGBA8>>>,
+                     texture_registry: Option<&HashMap<String, Image<RGBAPixel>>>,
                      world: &World)
-                     -> RGBA32 {
+                     -> LinearColor {
 
         match (u, v, texture_registry, self) {
             (Some(u), Some(v), Some(texture_registry), &Channel::TextureMap { ref texture }) => {
@@ -126,7 +122,7 @@ impl Channel {
             (None, None, None, &Channel::AmbientOcclusionMap { ref ambient_occlusion }) => {
                 ambient_occlusion.get_color(frag, None, None, None, world)
             }
-            (_, _, _, &Channel::Solid { ref color }) => color.to_rgba32(),
+            (_, _, _, &Channel::Solid { color }) => color.into(),
 
             _ => panic!("Error get_color"),
         }

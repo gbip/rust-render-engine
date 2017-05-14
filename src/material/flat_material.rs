@@ -1,4 +1,4 @@
-use color::{RGBA8, RGBA32};
+use color_float::{LinearColor, RGBColor, FloatColor};
 use io_utils;
 use serde_json;
 use material::channel::Channel;
@@ -18,9 +18,9 @@ pub struct FlatMaterial {
 impl FlatMaterial {
     pub fn new_empty() -> FlatMaterial {
         FlatMaterial {
-            diffuse: Channel::Solid { color: RGBA8::new(&200u8, &200u8, &200u8, &255u8) },
-            specular: Channel::Solid { color: RGBA8::new(&255u8, &255u8, &255u8, &255u8) },
-            ambient: Channel::Solid { color: RGBA8::new_black() },
+            diffuse: Channel::Solid { color: (200u8, 200u8, 200u8).into() },
+            specular: Channel::Solid { color: (255u8, 255u8, 255u8).into() },
+            ambient: Channel::Solid { color: (0u8, 0u8, 0u8).into() },
         }
     }
 
@@ -66,7 +66,7 @@ impl Material for FlatMaterial {
                  _: &Ray,
                  world: &World,
                  texture_data: Option<&TextureRegister>)
-                 -> RGBA32 {
+                 -> LinearColor {
 
         let (u, v, tex_reg) = match (frag.tex, texture_data) {
             (Some(tex_coords), Some(texture_register)) => {
@@ -93,7 +93,7 @@ impl Material for FlatMaterial {
                     //let factor = cmp::max(&0.0, &ray_vect.dot_product(&frag.normal));
                     let factor = ray_vect.dot_product(&(frag.normal / frag.normal.norm()))
                         .abs();
-                    intensity += factor / light_count as f32;
+                    intensity += factor * light.as_trait().intensity();
                 }
             }
             /*if light.as_trait().visible(&frag.position, world) {
@@ -103,45 +103,14 @@ impl Material for FlatMaterial {
 
         // Calcul de la couleur du matériau
         let color = self.diffuse
-            .get_color(frag, u, v, tex_reg, world)
-            .to_rgba8();
+            .get_color(frag, u, v, tex_reg, world) * intensity;
 
         /* Application
-        let diffuse = RGBA8 {
-                r: (color.r as f32 * intensity) as u8,
-                g: (color.g as f32 * intensity) as u8,
-                b: (color.b as f32 * intensity) as u8,
-                a: color.a,
-            }
-            .to_rgba32();
+        let diffuse = ...
         println!("Je somme");
         let result = diffuse; //;+ self.ambient.get_color(frag, None, None, None, world);
         println!("J'ai finis de sommer");
         */
-        RGBA8 {
-                r: (color.r as f32 * intensity) as u8,
-                g: (color.g as f32 * intensity) as u8,
-                b: (color.b as f32 * intensity) as u8,
-                a: color.a,
-            }
-            .to_rgba32()
-    }
-}
-
-// C'est très le fun
-pub struct MatCap {}
-
-impl Material for MatCap {
-    fn get_color(&self,
-                 frag: &Fragment,
-                 ray: &Ray,
-                 _: &World,
-                 _: Option<&TextureRegister>)
-                 -> RGBA32 {
-        let coef = (frag.normal
-            .dot_product(&(ray.slope() / ray.slope().norm()))
-            .abs() * 255f32) as u8;
-
-        RGBA8::new(&coef, &(255u8 - coef), &coef, &255u8).to_rgba32()
+        color
     }
 }
