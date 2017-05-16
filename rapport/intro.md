@@ -55,6 +55,49 @@ Ainsi avoir choisis Rust nous a permis de drastiquement résoudre notre temps pa
 
 ## Organisation et planification du projet
 
+### Découpage du projet en tâches, versionnement
+
+Afin de découper le projet en tâches, nos avons choisi la liste des fonctionnalités qui devait être implémenté pour chaque nouvelle version du logiciel.
+Ainsi, dès le début nous avions une visibilité assez claire sur le fonctionnement final du logiciel.
+
+Ainsi nous avions prévu assez grossiérement d'avoir un projet qui se déroule ainsi :
+
+* v0.1 : 
+	* Support de la géométrie dans des fichiers .obj
+	* Benchmarking du code
+	* Choix de la résolution
+* v0.2.1 :
+	* Support des textures
+	* Support des matériaux basiques
+* v0.2.2 :
+	* Support du multithreading
+	* Optimisation via les boîtes englobantes
+* v0.3 :
+	* Base des lumières
+	* Meilleur échantillonneur
+	* Meilleur filtre de reconstruction
+
+Les versions suivants n'ont pas été implémentée faute de temps :
+
+* v0.4 :
+	* [Path-tracing](https://fr.wikipedia.org/wiki/Path_tracing)
+* v0.5 :
+	* Matériaux avances : reflexion, refraction, etc.
+
+### Organisation du travail
+
+Pour travailler collaborativement de manière efficace nous avons décidé de chacun travailler sur des modules séparés, tout en se tenant au courant réguliérement de nos avancées.
+
+En général, nous avons plutôt bien réussi à faire en sorte que chacun travaille sur un module différent, même si il n'est pas rare que l'on ai a touché tous les deux en même temps un module déjà écrit. Heuresement, Git nous a permis de partager le code sans problème, nous n'avons jamais perdu une ligne de code.
+
+Nous nous tenons au courant des dernières modifications sur le répertoire distant Github au jour le jour, et on discute des modifications faîtes dans la section commentaire des commits  ([Exemple 1](hhttps://github.com/gbip/rust-render-engine/commit/6560550e0675f733d3add030f5daca220005c9b9) , [Exemple 2](https://github.com/gbip/rust-render-engine/commit/14bb527cb97e96f17ed9523136d8eb6259d800c6)).
+
+Enfin, nous profitons des créneaux de projet pour se mettre d'accord sur l'architecture du logiciel et le découpage des modules.
+
+Cela a vraiment bien marché, car nous avons réussi à être très productif, et nous n'avons pas eu de problème majeur avec la synchronisation des fichiers.
+
+De plus, cela a permis à chacun de faire ce qui lui plaisait le plus, quitte à travailler en même temps sur la même fonctionnalité si il y avait un module que l'on voulait tous les deux implémenter.
+
 ## Les outils que nous avons utilisés
 
 ### Clippy
@@ -541,89 +584,123 @@ pub fn initialize(&mut self, world: &scene::World) {
 }
 ```
 
-L'appel à `initialize()` va charger les textures dans le registre de texture, et calculer le ratio de l'image qui est nécessaire pour générer les échantillons. 
+L'appel à `initialize()` va charger les textures dans le *registre de texture* (voir la partie [Choix des structures de données]), et calculer le ratio de l'image qui est nécessaire pour générer les échantillons. 
 
 4. La scène est prête au calcul et peut être retournée pour lancer le rendu.
 
 ### Rendu
 
-Le point d'entré du rendu est `Scene::render_to_file`.
+Une fois la scène chargée l'algorithme de rendu est assez basique, on peut le résumer ainsi :
 
-```rust
-//scene.rs
-//Implémentation de Scene.
-pub fn render_to_file(&self, file_path: &str) {
-    // Affichage de quelques informations pour l'utilisateur.
-	self.renderer.show_information();
-    println!("Starting to render...");
-    // Chronométrage du rendu : on récupère l'heure de début.
-    let now = Instant::now();
-    // Calcul du rendu
-    let image = self.renderer
-    	.render(&self.world, self.world.get_camera(0));
-    // Affichage du temps écoulé.
-    println!("Render done in {} s, writting result to file {}",
-    	now.elapsed().as_secs() as f64 + (now.elapsed().subsec_nanos() as f64 *
-    	(1.0/1_000_000_000_f64)),
-        &file_path,);
-    // Sauvegarde de l'image.
-	image.write_to_file(file_path)
-    }   
-```
+* Echantilloner des points sur l'image 2D qui va être rendue. Pour cela on utilise un échantilloneur aléatoire à faible divergence. En pratique on utilise la méthode des points de Halton pour générer les échantilons. **ICI IL FAUT METTRE LA SOURCE : Raytracing from theory to implémentation**  
 
-Tout la logique du lancer de rayon se trouve dans l'appel à la méthode `render` de la structure `renderer`.
+* Convertir les coordonées de ces points en coordonnées 3D grâce à la caméra. Nous avons maintenant le vecteur d'un rayon en calculant `position_de_la_camera - point_de_l_echantillon`. A partir de ce vecteur, on en déduit une équation paramétrique.
 
-Cette fonction est décrite dans la partie [Multithreading].
+* On traverse toute la liste des objets, et pour chaque objet on regarde si il existe un point d'intersection avec le rayon. Pour ce faire, on analyse triangle par triangle si il y a un point d'intersection.
 
-Pour plus de simplicité nous allons nous contenter de décrire le fonctionnement de la méthode
-
-```rust$
-// scene.rs
-/// Implémentation de Renderer. 
-pub fn calculate_ray_intersection(objects: &[&Object],
-                                  ray: &mut Ray)
-                                  -> Option<Intersection> {
-
-    // Initialisation du résultat.
-    let mut intersection_point: Option<Intersection> = None;
-    // Itération sur tout les objets de la scène.
-    for object in objects {
-    	// En cas d'intersection avec la boîte englobante, on lance la procédure d'intersection avec la géométrie.
-        if object.bounding_box().intersects(ray) {
-        	// On regarde si le rayon est intersecté par la géométrie.
-            if let Some(point) = object.get_intersection_point(ray) {
-                intersection_point = Some(point);
-            }
-        }
-    }
-    intersection_point
-```
-
-Tout d'abord, la signature de cette fonction indique qu'elle renvoie potentiellement un point d'intersection.
-Si le rayon n'intersecte pas la géométrie, cette fonction renvoie *None*.
-De plus, on peut remarquer que c'est dans cette fonction que se trouve l'implémentation du principe des boîtes englobantes décris dans la partie [Boîtes englobantes].
-
-Enfin, il y a un point important à noter, c'est le type des arguments de cette fonction.
-On peut noter les choses suivantes :
-
-* le premier argument, objects, est un tableau de pointeurs en lecture seule sur des *Object*.
-
-* le deuxième argument, ray, est un pointeur sur un *Ray* mutable
-
-Le premier point est très important puisqu'il veut dire que, une fois la géométrie chargée, elle peut être partagée sans soucis entre plusieurs processus car la fonction de calcul d'intersection rayon/objet n'a besoin que d'un accés en lecture seule sur la géométrie. Or, en informatique partager une ressource en lecture seule entre plusieurs personnes ne pose aucun problème, il n'y aura pas de courses de données.
-
-Enfin, la mutabilité du deuxi_me argument indique que l'on le modifie dans l'appel de fonction.
-
-En effet, le paramètre *t* du rayon parametré est modifié en fonction du point d'interseciton avec un objet, et ceux afin de tenir compte de l'occlusion des objets par rapport à la caméra (un objet devant un autre le cache).
-
+* Pour chaque pixel de l'image finale, nous avons maintenant tous les rayons qui ont été calculés. Nous reconstituons l'image à partir des échantillons grâce à un filtre de [Mitchell-Netravali](https://www.cs.utexas.edu/~fussell/courses/cs384g-fall2013/lectures/mitchell/Mitchell.pdf).
 
 ### Ecriture de l'image
 
+L'image finale étant maintenant en mémoire, il suffit de l'écrire sur le disque. Pour cela on utilise la librairie *image* (voir dans la partie [Dépendances]).
 
+Le programme peut maintenant se terminer
 
 # Implémentation
 
 ## Choix des structures de données
+
+### Géométrie
+
+Mathématiquement parlant, pour calculer l'intersection entre un rayon et une surface, la méthode la plus simple et la plus rapide consiste à utiliser des triangles (sauf pour des surfaces bien particulières comme les sphères qui peuvent être décrites par une équation). C'est donc naturellement que nous sommes venus à utiliser des triangles pour représenter notre géométrie. Nous avons passer beaucoup de temps à chercher les meilleurs structures car la géométrie est vraiment le coeur du programme, et si on veut pouvoir charger un objet très lourd, il est important d'avoir fait les bons choix. 
+
+Tout d'abord nous avons defini des structures de données permettant de représenter des points et des vecteurs en 2D et en 3D. Les points et les vecteurs sont representé par la même structure : 
+
+```rust
+// math.rs
+// Un vecteur dans l'espace 2D.
+struct Vector2f {
+	x: f32,
+	y: f32,
+}
+
+// Un vecteur dans l'espace 3D.
+struct Vector3f {
+    x: f32,
+    y: f32,
+    z: f32,
+}
+```
+
+
+Les points qui constitue un triangle, sont constitués de trois champs. Les coordonnées de textures sont optionnelles, toute géométrie n'a pas forcémment de coordonnée de texture.
+```rust
+// geometry/obj3d.rs
+struct GeoPoint {
+	// La normal en ce point.
+    norm: Vector3f,
+    // Les coordonnées de textures, si elles existent.
+    tex: Option<Vector2f>,
+    // La position du point dans l'espace.
+    pos: Vector3f,
+}
+```
+
+
+Un triangle est juste constitué de trois GeoPoint.
+```rust
+// geometry/obj3d.rs
+struct Triangle {
+    u: GeoPoint,
+    v: GeoPoint,
+    w: GeoPoint,
+}
+```
+
+
+Enfin, un maillage complet representant un objet est juste un tableau de triangles alloué dynamiquement à l'execution.
+```rust
+// geometry/obj3d.rs
+struct Mesh {
+    triangles: Vec<Triangle>,
+}
+```
+
+Au final cette organisation implique de la duplication de données, car en général, chaque point sers à trois triangle différents (en moyenne).
+
+![Exemple de maillage 2D avec des triangles.](images/maillage_1.png "http://60.251.192.207/online/Mesh/MM_Ch05_HTML/5-11-5.files/image005a.png")
+
+Comme certaines faces peuvent partager un même sommet, nous avons d'abord envisager d'avoir une liste de faces et une liste de sommets, chaque face
+faisant référence à ses trois sommets.
+
+Cette solution à un coût en mémoire, pour trois triangles ayant les trois points en communs et sur une machine avec une architecture de 64 bits :
+
+
+$$
+\begin{aligned} 
+\frac{
+(3 triangles \times 3 points \times 3 champs \times 3 coordonnées \times 64 bits}{3} \\
++
+\frac{ 
+3 points \times 3 champs \times 3 coordonnées \times 32 bits par coordonnée)}{3} \\
+ = 2016bits/triangle
+\end{aligned}
+$$
+
+Avec notre solution actuelle le coût est de :
+$$
+\begin{aligned}
+\frac{
+3 triangles * 3 points \times 3 champs \times 3 coordonnées \times 32 bits}{3} = 864bits/triangle  
+\end{aligned}
+$$
+
+Nous sommes donc parties sur des données dupliquées dans chaque points.
+
+### Couleurs
+
+
+### Stockage des objets dans la scène 
 
 Pour faire fonctionner notre moteur de rendu, il est nécessaire de mettre en place une structure de données qui contiendra la géometrie 
 des objets à rendre et leurs différentes caractéristiques. Cette structure de données doit permettre un accès efficace pour accélerer les
@@ -637,8 +714,7 @@ Pour la géométrie, nous avions les contraintes suivantes :
 * les faces sont triangulaires, elles ont donc trois sommets
 * chaque sommet contient des informations de textures et de normales.
 
-Comme certaines faces peuvent partager un même sommet, nous avons d'abord envisager d'avoir une liste de faces et une liste de sommets, chaque face
-faisant référence à ses trois sommets. Malheureusement, l'utilisation des références pose problème en Rust car le langage impose un contrôle
+ Malheureusement, l'utilisation des références pose problème en Rust car le langage impose un contrôle
 explicite de la mémoire. Plus particulièrement, dans ce cas le fait que la structure `Mesh` contienne des références vers certains de ses champs,
 la rendait impossible à passer en paramètres.
 
@@ -665,7 +741,19 @@ Par exemple, scoped-pool permet de garantir au compilateur qu'un thread aura ter
 
 ## Séparation fichier binaire/libraire 
 
-## Description de chaque module
+Nous avons choisi une stratégie particulière pour la compilation :
+
+ 1. D'abord le compilateur compile la librairie qui permet de faire le rendu. Il s'agit de tous le code que nous avons écrit, et nous y exposons une interface  qui d'importer notre librairie pour faire du rendu en lancer de rayon. Le point d'entrée de la librairie (là où sont exposés les fonctions utilisables depuis l'exterieur) est `src/lib.rs`.
+ 
+ 2. Ensuite, nous compilons le fichier binaire du logiciel qui utilise la librairie compilée précédement. Le point d'entrée du logiciel (là où se trouve la fonction `main()`) est `src/main.rs`
+
+
+```
+ render-engine <= librender
+ 			importe
+```
+
+
 
 ## Amélioration qualitatives
 
@@ -717,10 +805,7 @@ Cela permet d'éviter les courses de données.
 
 # Annexes
 
-
 ## Exemple de fichier .obj
-
-
 
 Le fichier suivant décris un plan avec des coordonées de textures :
 ```obj
@@ -738,3 +823,41 @@ s off
 f 2/1/1 4/2/1 3/3/1
 f 1/4/1 2/1/1 3/3/1
 ```
+
+## Description de chaque module
+
+Cette section contiens une description module par module du logiciel.
+En Rust, un module est un dossier ou un fichier.
+Ne sont décris dans cette section que les modules majeurs afin de rester concis.
+
+### Filter
+
+Le filtre est ce qui permis de reconstruire l'image une fois que tous les rayons ont été calculés.
+
+Le fichier `src/filter/mod.rs` expose le trait implémenté par tous les filtres, ainsi que l'interface qui est exposé dans le fichier json.
+
+Le fichier `src/filter/filter.rs`, lui contiens l'implémentation des deux filtres : `BoxFilter` et `MNFilter`.
+
+### Geometry
+
+Le fichier `src/geometry/mod.rs` se contente de reexporter les sous-modules.
+
+Le fichier `src/geometry/bounding_box.rs` contiens l'implémentation de tout ce qui concerne les boîtes englobantes.
+
+Le fichier `src/geometry/obj3d.rs` contiens tout ce qui concerne la géométrie: `Triangle`, `Mesh`, et `Object` (principalement). Il contiens aussi le code d'intersection rayon/géométrie.
+
+Enfin, `src/geometry/obj_parser` contiens tout le code qui permet de lire un fichier obj. 
+
+### Renderer
+
+Le fichier `src/renderer/mod.rs` contiens tout ce qui traite des structures de données intermédiaires entre l'image 2D et la scène 3D. Il contiens aussi la definition du registre de texture.
+
+`src/renderer/block.rs` contiens l'implémentation des blocs pour le multithreading.
+
+Le coeur du moteur de rendu est `src/renderer/render.rs` qui contiens vraiment toute la logique du rendu.
+
+### Sampler
+
+Le fichier `src/sampler/mod.rs` défini les différents traits implémentés par les échantillonneurs et les zones échantillonables.
+
+Le fichier `src/sampler/sampler.rs` contiens l'implémentation des deux échantilloneurs : `DefaultSampler` et `HaltonSampler`.
