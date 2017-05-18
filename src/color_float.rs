@@ -1,6 +1,7 @@
 use std::ops::{Mul, Add, AddAssign, Div};
-use serde::ser::{Serialize, Serializer};
-use serde::de::{Deserialize, Deserializer};
+use std::fmt;
+use serde::ser::{Serialize, Serializer, SerializeStruct};
+use serde::de::{self, Deserialize, Deserializer, Visitor, MapAccess};
 
 // Represente les types de couleur que l'on manipule.
 /// Espace linéaire.
@@ -16,14 +17,14 @@ pub struct RGBColor {
 
 impl LinearColor {
     pub fn new_white() -> LinearColor {
-        LinearColor {internal_color: FloatColor::new_white(),}
+        LinearColor { internal_color: FloatColor::new_white() }
     }
 
     pub fn new_black() -> LinearColor {
-        LinearColor {internal_color: FloatColor::new_black(),}
+        LinearColor { internal_color: FloatColor::new_black() }
     }
 
-    pub fn new(color : FloatColor) -> LinearColor {
+    pub fn new(color: FloatColor) -> LinearColor {
         LinearColor { internal_color: color }
     }
 
@@ -69,15 +70,80 @@ impl RGBColor {
 
 impl Serialize for RGBColor {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-            where S: Serializer {
-        unimplemented!()
+        where S: Serializer
+    {
+        let mut state = serializer.serialize_struct("RGBColor", 3)?;
+        state.serialize_field("r", &self.internal_color.r)?;
+        state.serialize_field("g", &self.internal_color.g)?;
+        state.serialize_field("b", &self.internal_color.b)?;
+        state.end()
     }
 }
 
-impl Deserialize for RGBColor {
-    fn deserialize<S>(serializer: S) -> Result<Self, S::Error>
-            where S: Deserializer {
-        unimplemented!()
+impl<'de> Deserialize<'de> for RGBColor {
+    fn deserialize<S>(deserializer: S) -> Result<Self, S::Error>
+        where S: Deserializer<'de>
+    {
+        #[derive(Deserialize)]
+        #[serde(field_identifier, rename_all = "lowercase")]
+        enum Field {
+            R,
+            G,
+            B,
+        }
+
+        struct RGBColorVisitor;
+
+        impl<'de> Visitor<'de> for RGBColorVisitor {
+            type Value = RGBColor;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("RGBColor from (u8, u8, u8)")
+            }
+
+            fn visit_map<V>(self, mut map: V) -> Result<RGBColor, V::Error>
+                where V: MapAccess<'de>
+            {
+                let mut r = None;
+                let mut g = None;
+                let mut b = None;
+
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        Field::R => {
+                            if r.is_some() {
+                                return Err(de::Error::duplicate_field("r"));
+                            }
+                            r = Some(map.next_value()?);
+                        }
+                        Field::G => {
+                            if g.is_some() {
+                                return Err(de::Error::duplicate_field("g"));
+                            }
+                            g = Some(map.next_value()?);
+                        }
+                        Field::B => {
+                            if b.is_some() {
+                                return Err(de::Error::duplicate_field("b"));
+                            }
+                            b = Some(map.next_value()?);
+                        }
+                    }
+                }
+                let r: u8 = r.ok_or_else(|| de::Error::missing_field("r"))?;
+                let g: u8 = g.ok_or_else(|| de::Error::missing_field("g"))?;
+                let b: u8 = b.ok_or_else(|| de::Error::missing_field("b"))?;
+
+                Ok(RGBColor {
+                       internal_color: FloatColor::new(0f32.max(1f32.min(r as f32 / 255f32)),
+                                                       0f32.max(1f32.min(g as f32 / 255f32)),
+                                                       0f32.max(1f32.min(b as f32 / 255f32))),
+                   })
+            }
+        }
+
+        const FIELDS: &'static [&'static str] = &["r", "g", "b"];
+        deserializer.deserialize_struct("RGBColor", FIELDS, RGBColorVisitor)
     }
 }
 
@@ -89,8 +155,8 @@ impl<'a, 'b> Add<&'a LinearColor> for &'b LinearColor {
     fn add(self, other: &LinearColor) -> Self::Output {
         LinearColor {
             internal_color: FloatColor::new(self.internal_color.r + other.internal_color.r,
-                                               self.internal_color.g + other.internal_color.g,
-                                               self.internal_color.b + other.internal_color.b),
+                                            self.internal_color.g + other.internal_color.g,
+                                            self.internal_color.b + other.internal_color.b),
         }
     }
 }
@@ -98,8 +164,8 @@ impl<'a, 'b> Add<&'a LinearColor> for &'b LinearColor {
 impl<'a> AddAssign<&'a LinearColor> for LinearColor {
     fn add_assign(&mut self, other: &LinearColor) {
         self.internal_color = FloatColor::new(self.internal_color.r + other.internal_color.r,
-                                               self.internal_color.g + other.internal_color.g,
-                                               self.internal_color.b + other.internal_color.b);
+                                              self.internal_color.g + other.internal_color.g,
+                                              self.internal_color.b + other.internal_color.b);
     }
 }
 
@@ -108,8 +174,8 @@ impl Mul<f32> for LinearColor {
     fn mul(self, other: f32) -> Self::Output {
         LinearColor {
             internal_color: FloatColor::new(self.internal_color.r * other,
-                                               self.internal_color.b * other,
-                                               self.internal_color.g * other),
+                                            self.internal_color.b * other,
+                                            self.internal_color.g * other),
         }
     }
 }
@@ -119,8 +185,8 @@ impl Mul<LinearColor> for LinearColor {
     fn mul(self, other: LinearColor) -> Self::Output {
         LinearColor {
             internal_color: FloatColor::new(self.internal_color.r * other.internal_color.r,
-            self.internal_color.g * other.internal_color.g,
-        self.internal_color.b * other.internal_color.b)
+                                            self.internal_color.g * other.internal_color.g,
+                                            self.internal_color.b * other.internal_color.b),
         }
     }
 }
@@ -130,8 +196,8 @@ impl Div<f32> for LinearColor {
     fn div(self, other: f32) -> Self::Output {
         LinearColor {
             internal_color: FloatColor::new(self.internal_color.r / other,
-                                               self.internal_color.b / other,
-                                               self.internal_color.g / other),
+                                            self.internal_color.b / other,
+                                            self.internal_color.g / other),
         }
     }
 }
@@ -144,8 +210,8 @@ impl Into<LinearColor> for RGBColor {
     fn into(self) -> LinearColor {
         LinearColor {
             internal_color: FloatColor::new(self.internal_color.r.powf(INV_GAMMA).min(1f32),
-                                               self.internal_color.g.powf(INV_GAMMA).min(1f32),
-                                               self.internal_color.b.powf(INV_GAMMA).min(1f32)),
+                                            self.internal_color.g.powf(INV_GAMMA).min(1f32),
+                                            self.internal_color.b.powf(INV_GAMMA).min(1f32)),
         }
     }
 }
@@ -155,8 +221,8 @@ impl Into<RGBColor> for LinearColor {
     fn into(self) -> RGBColor {
         RGBColor {
             internal_color: FloatColor::new(self.internal_color.r.powf(GAMMA).min(1f32),
-                                               self.internal_color.g.powf(GAMMA).min(1f32),
-                                               self.internal_color.b.powf(GAMMA).min(1f32)),
+                                            self.internal_color.g.powf(GAMMA).min(1f32),
+                                            self.internal_color.b.powf(GAMMA).min(1f32)),
         }
     }
 }
@@ -176,9 +242,7 @@ impl Into<(u8, u8, u8)> for RGBColor {
 
 impl Into<RGBColor> for (u8, u8, u8) {
     fn into(self) -> RGBColor {
-        RGBColor {
-            internal_color: self.into(),
-        }
+        RGBColor { internal_color: self.into() }
     }
 }
 
@@ -191,9 +255,7 @@ impl Into<(u8, u8, u8)> for LinearColor {
 
 impl Into<LinearColor> for (u8, u8, u8) {
     fn into(self) -> LinearColor {
-        LinearColor {
-            internal_color: self.into(),
-        }
+        LinearColor { internal_color: self.into() }
     }
 }
 
@@ -207,9 +269,7 @@ impl Into<(u8, u8, u8, u8)> for RGBColor {
 
 impl Into<RGBColor> for (u8, u8, u8, u8) {
     fn into(self) -> RGBColor {
-        RGBColor {
-            internal_color: self.into(),
-        }
+        RGBColor { internal_color: self.into() }
     }
 }
 
@@ -222,9 +282,7 @@ impl Into<(u8, u8, u8, u8)> for LinearColor {
 
 impl Into<LinearColor> for (u8, u8, u8, u8) {
     fn into(self) -> LinearColor {
-        LinearColor {
-            internal_color: self.into(),
-        }
+        LinearColor { internal_color: self.into() }
     }
 }
 
@@ -345,11 +403,7 @@ impl Color for FloatColor {
     }
 
     fn new(r: f32, g: f32, b: f32) -> FloatColor {
-        FloatColor {
-            r: r,
-            g: g,
-            b: b,
-        }
+        FloatColor { r: r, g: g, b: b }
     }
 
     fn new_black() -> FloatColor {
@@ -390,7 +444,7 @@ mod test {
 
     #[test]
     fn test_color_import_export_from_u8_u8_u8() {
-        let c = RGBColor {internal_color: (127u8, 127u8, 127u8).into()};
+        let c = RGBColor { internal_color: (127u8, 127u8, 127u8).into() };
         println!("{:?}", c);
         let k: (u8, u8, u8) = c.get_internal_color().into();
         println!("{:?}", k);

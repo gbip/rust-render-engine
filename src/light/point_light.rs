@@ -2,7 +2,7 @@ use math::Vector3f;
 use scene::World;
 use light::Light;
 use ray::Ray;
-use color_float::{RGBColor};
+use color_float::RGBColor;
 
 /** Represente une lumière ponctuelle */
 #[derive(Serialize,Deserialize, Debug)]

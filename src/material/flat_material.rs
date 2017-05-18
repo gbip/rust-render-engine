@@ -91,7 +91,8 @@ impl Material for FlatMaterial {
                 if !world.is_occluded(light_ray) {
                     let ray_vect = -light_ray.slope() / light_ray.slope().norm();
                     //let factor = cmp::max(&0.0, &ray_vect.dot_product(&frag.normal));
-                    let factor = ray_vect.dot_product(&(frag.normal / frag.normal.norm()))
+                    let factor = ray_vect
+                        .dot_product(&(frag.normal / frag.normal.norm()))
                         .abs();
                     intensity += factor * light.as_trait().intensity();
                 }
@@ -102,15 +103,6 @@ impl Material for FlatMaterial {
         }
 
         // Calcul de la couleur du matériau
-        let color = self.diffuse
-            .get_color(frag, u, v, tex_reg, world) * intensity;
-
-        /* Application
-        let diffuse = ...
-        println!("Je somme");
-        let result = diffuse; //;+ self.ambient.get_color(frag, None, None, None, world);
-        println!("J'ai finis de sommer");
-        */
-        color
+        self.diffuse.get_color(frag, u, v, tex_reg, world) * intensity
     }
 }

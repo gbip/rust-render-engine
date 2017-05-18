@@ -56,10 +56,12 @@ impl Texture for TextureMap {
                  _: &World)
                  -> LinearColor {
 
-        let texture = &texture_registry.unwrap()
-            .get(self.map_path.as_str())
-            .unwrap();
-        texture.get_pixel_at(((u.unwrap() * self.tiling_x * texture.width() as f32) as u32 %
+        let texture = &texture_registry
+                           .unwrap()
+                           .get(self.map_path.as_str())
+                           .unwrap();
+        texture
+            .get_pixel_at(((u.unwrap() * self.tiling_x * texture.width() as f32) as u32 %
                            texture.width()),
                           ((v.unwrap() * self.tiling_y * texture.height() as f32) as u32 %
                            texture.height()))
@@ -83,9 +85,9 @@ impl Texture for NormalMap {
                  -> LinearColor {
         let normal = frag.normal / frag.normal.norm();
 
-        LinearColor::new(
-            FloatColor::new(0.5 * (1f32 + normal.x), 0.5 * (1f32 + normal.y), 0.5 * (1f32 + normal.z))
-        )
+        LinearColor::new(FloatColor::new(0.5 * (1f32 + normal.x),
+                                         0.5 * (1f32 + normal.y),
+                                         0.5 * (1f32 + normal.z)))
     }
 }
 

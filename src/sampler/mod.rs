@@ -1,6 +1,6 @@
 pub mod samplers;
 
-use color_float::{LinearColor};
+use color_float::LinearColor;
 use math::Vector2f;
 use sampler::samplers::{DefaultSampler, HaltonSampler};
 
