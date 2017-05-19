@@ -699,6 +699,11 @@ Nous sommes donc parties sur des données dupliquées dans chaque points.
 
 ### Couleurs
 
+### Registre de texture
+
+Afin d'éviter de cahrger plusieurs fois la même image en mémoire, nous avons d'utiliser une structure de donnée qui centralise les images. Ainsi, il nous suffit d'utiliser des pointeurs pour manipuler les images.
+Nous utilisons une Hashmap.
+Ils s'agit d'un tableau avec pour clé une chaîne de caractère. En l'occurence, notre clé est le chemin de l'imgage, et la donnée stockée est l'image chargée en mémoire.
 
 ### Stockage des objets dans la scène 
 
@@ -814,6 +819,16 @@ Ci-contre, le temps de rendu d'une scène standard en fonction du nombre de coeu
 
 
 # Conclusion
+
+## Quelques statistiques
+
+Avant de conclure, il est intérressant de s'interresser aux quelques chiffres auxquels nous avons accès.
+Tout d'abord, le projet fait 4908 lignes de code, commentaires compris.
+Le repertoire Github cumulait 285 commits lors de l'écriture de ce rapport.
+
+
+
+
 
 # Annexes
 
