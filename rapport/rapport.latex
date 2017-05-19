@@ -4,6 +4,9 @@ $if(fontfamily)$
 $else$
 \usepackage{lmodern}
 $endif$
+
+\usepackage[a4paper, total={6in, 9.5in}]{geometry}
+
 $if(linestretch)$
 \usepackage{setspace}
 \setstretch{$linestretch$}

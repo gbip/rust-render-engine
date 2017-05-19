@@ -739,27 +739,27 @@ Par exemple, scoped-pool permet de garantir au compilateur qu'un thread aura ter
 
 * *rand* permet de générer des nombres aléatoires.
 
-## Séparation fichier binaire/libraire 
-
-Nous avons choisi une stratégie particulière pour la compilation :
-
- 1. D'abord le compilateur compile la librairie qui permet de faire le rendu. Il s'agit de tous le code que nous avons écrit, et nous y exposons une interface  qui d'importer notre librairie pour faire du rendu en lancer de rayon. Le point d'entrée de la librairie (là où sont exposés les fonctions utilisables depuis l'exterieur) est `src/lib.rs`.
- 
- 2. Ensuite, nous compilons le fichier binaire du logiciel qui utilise la librairie compilée précédement. Le point d'entrée du logiciel (là où se trouve la fonction `main()`) est `src/main.rs`
-
-
-```
- render-engine <= librender
- 			importe
-```
-
-
-
 ## Amélioration qualitatives
 
 ## Optimisations
 
 ### Boîtes englobantes
+
+Afin d'optimiser les calculs d'intersections, avant de lancer le calcul des intersections avec tous les triangles d'un objet, on commence par calculer si il existe une intersection avec la boîte englobante.
+
+Au moment de charger la scène nous calculons le boîtes englobantes de tous les objets.
+
+Les gains en temps sont assez conséquent. Ci-contre, les temps de rendu pour la même scène, mais avec les boîtes englobantes désactivées dans le deuxième rendu.
+
+
+|                        | Avec boîtes englobantes | Sans boîtes englobantes |
+|-----------------------:|:-----------------------:|:-----------------------:|
+| Temps de rendu  (en s) |         24.2267         |         1220.14         |
+
+En effet, dès qu'un objet présente beaucoup de triangles, grâces aux boîtes englobantes nous évitons de lancer les calculs d'intersections avec chacun des triangles dans la plupart des cas. 
+Sans boîtes englobantes nous sommes obligés de traverser tous les triangles de la scène.
+Enfin le gain de temps dépends de la place que prends l'objet sur l'image finale, moins l'objet prends de place, plus le gain est rapide.
+
 
 ### Multithreading
 
