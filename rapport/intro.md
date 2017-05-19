@@ -749,7 +749,7 @@ Afin d'optimiser les calculs d'intersections, avant de lancer le calcul des inte
 
 Au moment de charger la scène nous calculons le boîtes englobantes de tous les objets.
 
-Les gains en temps sont assez conséquent. Ci-contre, les temps de rendu pour la même scène, mais avec les boîtes englobantes désactivées dans le deuxième rendu.
+Les gains en temps sont assez conséquent. Ci-contre, les temps de rendu pour la même scène, mais avec les boîtes englobantes désactivées dans le deuxième rendu. Le calculs ont été effectué sur une machine ayant 8 coeurs logiques.
 
 
 |                        | Avec boîtes englobantes | Sans boîtes englobantes |
@@ -800,6 +800,18 @@ Cela permet d'éviter les courses de données.
 4. On demande au groupe de thread de calculer, pour chaque bloc dans le tableau, la zone de l'image qu'il represente. Cela lance la procédure de lancer de rayon décrite dans la partie [Rendu].
 
 5. Maintenant que tous les blocs ont été calculés, ont peut extraire l'image des structures qui permettait sa synchronisation entre les processus.
+
+Les gains en temps sont assez interressant, même si le surcoût ajouté par la création de processus rends cette optimisation moins interressante que les boîtes englobantes.
+Ci-contre, le temps de rendu d'une scène standard en fonction du nombre de coeur utilisé. Les calculs sont réalisés sur une machine avec 8 coeurs logiques.
+
+| Nombre de coeurs  | Temps de rendu (en secondes) |
+|:-----------------:|:----------------------------:|
+|         1         |             31.2             |
+|         2         |             15.3             |
+|         4         |              8.6             |
+|         8         |             6.09             |
+|         16        |             6.12             |
+
 
 # Conclusion
 
