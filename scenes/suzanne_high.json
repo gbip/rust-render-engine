@@ -195,14 +195,13 @@
           "position": {
             "x": 10.0,
             "y": 1.0,
-            "z": 8.0
+            "z": 7.0
           },
-          "intensity": 10.0,
+          "intensity": 1.0,
           "color" : {
             "r": 255,
             "g": 0,
-            "b": 255,
-            "a": 255
+            "b": 255
           }
         }
       },
@@ -211,14 +210,13 @@
           "position": {
             "x": 15.0,
             "y": 5.0,
-            "z": 8.0
+            "z": 7.0
           },
-          "intensity": 10.0,
+          "intensity": 1.0,
           "color": {
             "r": 255,
             "g": 0,
-            "b": 255,
-            "a": 255
+            "b": 255
           }
         }
       },
@@ -227,14 +225,13 @@
           "position": {
             "x": 15.0,
             "y": -5.0,
-            "z": 8.0
+            "z": 7.0
           },
-          "intensity": 10.0,
+          "intensity": 1.0,
           "color" : {
             "r": 255,
             "g": 0,
-            "b": 255,
-            "a": 255
+            "b": 255
           }
         }
       }
@@ -247,15 +244,14 @@
     "bucket_size":10,
     "sampler": {
       "HaltonSampler": {
-        "subdivision_sampling": 4
+        "subdivision_sampling": 16
       }
     },
     "filter": "BoxFilter",
     "background_color": {
       "r": 0,
       "g": 0,
-      "b": 0,
-      "a": 255
+      "b": 0
     }
   }
 }

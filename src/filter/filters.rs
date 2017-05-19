@@ -1,4 +1,4 @@
-use RGBA32;
+use color_float::{LinearColor, FloatColor, Color};
 use renderer::Pixel;
 use math::{Vector2, Vector2f};
 use filter::Filter;
@@ -55,8 +55,8 @@ impl Default for MitchellFilter {
 
 impl Filter for MitchellFilter {
     // TODO : Accélerer ce calcul ?
-    fn compute_color(&self, data: &Pixel, pixel_position: (u32, u32)) -> RGBA32 {
-        let mut result: RGBA32 = RGBA32::new_black();
+    fn compute_color(&self, data: &Pixel, pixel_position: (u32, u32)) -> LinearColor {
+        let mut result: LinearColor = LinearColor::new_black();
         let mut weight_sum: f32 = 0.0;
         // On calcule les contributions de chaque sample
         for sample in data.samples() {
@@ -80,9 +80,7 @@ impl Filter for MitchellFilter {
                               absolute_sample_pos.y - data.y() as f32 - pixel_position.1 as f32 -
                               0.5);
             let weight = self.weight_contribution(relative_sample_pixel_pos);
-            result.r += (weight / weight_sum * sample.color.r() as f32) as u32;
-            result.b += (weight / weight_sum * sample.color.b() as f32) as u32;
-            result.g += (weight / weight_sum * sample.color.g() as f32) as u32;
+            result += &(sample.color * (weight / weight_sum));
         }
         result
     }
@@ -94,14 +92,11 @@ pub struct BoxFilter {}
 
 
 impl Filter for BoxFilter {
-    fn compute_color(&self, data: &Pixel, _: (u32, u32)) -> RGBA32 {
-        let mut result: RGBA32 = RGBA32::new_black();
+    fn compute_color(&self, data: &Pixel, _: (u32, u32)) -> LinearColor {
+        let mut result: LinearColor = LinearColor::new_black();
         let sum: u32 = data.samples().fold(0, |acc, _| acc + 1);
         for sample in data.samples() {
-            result.r += sample.color.r() / sum;
-            result.g += sample.color.g() / sum;
-            result.b += sample.color.b() / sum;
-
+            result += &(sample.color / sum as f32);
         }
         result
 

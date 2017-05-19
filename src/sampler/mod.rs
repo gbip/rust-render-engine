@@ -1,6 +1,6 @@
 pub mod samplers;
 
-use color::RGBA32;
+use color_float::LinearColor;
 use math::Vector2f;
 use sampler::samplers::{DefaultSampler, HaltonSampler};
 
@@ -10,14 +10,14 @@ des samples est ensuite interpolé pour former l'image finale. */
 pub struct Sample {
     /** La position relative du rayon par rapport au centre de son pixel */
     position: Vector2f,
-    pub color: RGBA32,
+    pub color: LinearColor,
 }
 
 impl Sample {
     pub fn new(x: f32, y: f32) -> Self {
         Sample {
             position: Vector2f { x: x, y: y },
-            color: RGBA32::new_black(),
+            color: LinearColor::default(),
         }
     }
 

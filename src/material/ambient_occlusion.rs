@@ -3,7 +3,7 @@
 use tools::monte_carlo;
 use scene::World;
 use renderer::TextureRegister;
-use color::RGBA32;
+use color_float::{FloatColor, LinearColor, Color};
 use ray::{Ray, Fragment};
 use material::channel::Texture;
 use math::Vector3f;
@@ -24,7 +24,7 @@ impl Texture for AmbientOcclusionMap {
                  _: Option<f32>,
                  _: Option<&TextureRegister>,
                  world: &World)
-                 -> RGBA32 {
+                 -> LinearColor {
         // Pseudo code :
         let samples: Vec<Vector3f> = monte_carlo::sample_uniform_hemisphere(self.samples, frag);
         let mut rays: Vec<Ray> = vec![];
@@ -44,11 +44,8 @@ impl Texture for AmbientOcclusionMap {
                 contributions += 1;
             }
         }
-        let mut result = RGBA32::new_white();
+
         let greyness: f32 = 1.0 - contributions as f32 / self.samples as f32;
-        result.r = (result.r as f32 * greyness) as u32;
-        result.b = (result.b as f32 * greyness) as u32;
-        result.g = (result.g as f32 * greyness) as u32;
-        result
+        LinearColor::new_white() * greyness
     }
 }

@@ -2,13 +2,13 @@ use math::Vector3f;
 use scene::World;
 use light::Light;
 use ray::Ray;
-use color::RGBA32;
+use color_float::RGBColor;
 
 /** Represente une lumière ponctuelle */
 #[derive(Serialize,Deserialize, Debug)]
 pub struct PointLight {
     position: Vector3f,
-    color: RGBA32,
+    color: RGBColor,
     intensity: f32,
 }
 
@@ -28,5 +28,9 @@ impl Light for PointLight {
         ray.max_t = 0.999;
         result.push(ray);
         result
+    }
+
+    fn intensity(&self) -> f32 {
+        self.intensity
     }
 }

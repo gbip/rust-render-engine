@@ -1,5 +1,4 @@
-use Image;
-use color::RGBA8;
+use img::{Image, RGBAPixel};
 use std::slice::Iter;
 use std::collections::HashMap;
 use sampler::Sample;
@@ -8,7 +7,7 @@ pub mod render;
 pub mod block;
 
 /** Type representant un registre de texture */
-pub type TextureRegister = HashMap<String, Image<RGBA8>>;
+pub type TextureRegister = HashMap<String, Image<RGBAPixel>>;
 
 /** Structure utilisée par le sampler pour stocker les samples, et par le filter
 pour les lire et recomposer l'image finale

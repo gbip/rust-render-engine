@@ -45,9 +45,10 @@ pub fn open_obj(file: &str) -> Mesh {
     let mut tex: Option<Vec<Vector2f>> = None;
 
     // We clean the reader of all useless lines before iterating over it.
-    for line in &reader.lines()
-        .map(|l| l.expect("Error while reading line"))
-        .collect::<Vec<String>>() {
+    for line in &reader
+                     .lines()
+                     .map(|l| l.expect("Error while reading line"))
+                     .collect::<Vec<String>>() {
         let parsed_line = match parse_line(line) {
             Ok(t) => t,
             Err(e) => panic!(e),
