@@ -1,4 +1,4 @@
-use color_float::{LinearColor, FloatColor, Color};
+use color_float::LinearColor;
 use renderer::Pixel;
 use math::{Vector2, Vector2f};
 use filter::Filter;

@@ -3,7 +3,7 @@
 use tools::monte_carlo;
 use scene::World;
 use renderer::TextureRegister;
-use color_float::{FloatColor, LinearColor, Color};
+use color_float::LinearColor;
 use ray::{Ray, Fragment};
 use material::channel::Texture;
 use math::Vector3f;

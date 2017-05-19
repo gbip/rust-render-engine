@@ -1,4 +1,4 @@
-use color_float::{LinearColor, RGBColor, FloatColor};
+use color_float::LinearColor;
 use io_utils;
 use serde_json;
 use material::channel::Channel;
@@ -91,8 +91,7 @@ impl Material for FlatMaterial {
                 if !world.is_occluded(light_ray) {
                     let ray_vect = -light_ray.slope() / light_ray.slope().norm();
                     //let factor = cmp::max(&0.0, &ray_vect.dot_product(&frag.normal));
-                    let factor = ray_vect
-                        .dot_product(&(frag.normal / frag.normal.norm()))
+                    let factor = ray_vect.dot_product(&(frag.normal / frag.normal.norm()))
                         .abs();
                     intensity += factor * light.as_trait().intensity();
                 }
