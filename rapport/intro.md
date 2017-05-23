@@ -823,8 +823,36 @@ Ci-contre, le temps de rendu d'une scène standard en fonction du nombre de coeu
 ## Quelques statistiques
 
 Avant de conclure, il est intérressant de s'interresser aux quelques chiffres auxquels nous avons accès.
-Tout d'abord, le projet fait 4908 lignes de code, commentaires compris.
+Tout d'abord, le projet fait 4968 lignes de code réparties dans 30 fichiers, dont 399 lignes de commentaires et 710 lignes vides. Cela fait donc 3859 lignes de codes "utiles".
 Le repertoire Github cumulait 285 commits lors de l'écriture de ce rapport.
+
+## Analyse des performances
+
+Lorsque que l'on lance un outil comme [perf](https://perf.wiki.kernel.org/index.php/Main_Page) on peut visualiser le temps passé par le code dans chaque fonction.
+Il est possible de générer un graphique, comme la figure ci-contre qui represente en ordonnée la pile d'appel. La longueur de chaque bloc indique le temps relatif d'execution (en pourcentage).
+
+![Analyse des performances de notre moteur de rendu.](images/bench_1.png "Analyse des performances de notre moteur de rendu.")
+
+Il existe un adage en informatique qui dis que 90% du temps d'execution est effectué dans 10% du code. Dans notre moteur de rendu cet adage semble se verifier, puisque nous passons la plupart de notre temps dans les routines d'intersections rayons/objets.
+Ainsi, il peut être particulièrement d'analyser en détails ces routines.
+
+Toujours grâce à perf, nous pouvons voir le code désasemblé avec un indicateur relatif de performance. Il semblerait que les lignes dans le fichier suivant soient responsables d'une certaine lenteur :
+```rust
+// ray.rs
+fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment> {
+[...]
+    let p = -(self.d + self.a * origin.x + self.b * origin.y + self.c * origin.z);
+
+    if m == 0.0 {
+        None
+    } else {
+    	// La ligne suivante prends beaucoup de temps de calcul à cause de la division. 
+        let t = p / m;
+    }
+[...]
+}
+```
+
 
 
 
