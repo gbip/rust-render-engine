@@ -533,7 +533,7 @@ Dans cette partie, nous allons expliquer le fonctionnement du programme, d'appel
 
 ### Décodage des fichiers de scène
 
-La première partie consiste à déserializer les fichiers de scènes à partir du fichier fourni en argument. Si les arguments sont corrects, `main()` va effectivement appeler la fonction load_from_file :
+La première partie consiste à déserialiser les fichiers de scènes à partir du fichier fourni en argument. Si les arguments sont corrects, `main()` va effectivement appeler la fonction load_from_file :
 
 ```rust
 // scene.rs
@@ -548,9 +548,9 @@ pub fn load_from_file(file: &str) -> Self {
     }
 ```
 
-La déserialization se fait en quatre étapes, si une erreur surviens lors de ces étapes, l'execution s'arrête et l'erreur est transmise à l'utilisateur :
+La désérialisation se fait en quatre étapes, si une erreur surviens lors de ces étapes, l'exécution s'arrête et l'erreur est transmise à l'utilisateur :
 
-1. Serde deserialize les structures de données, la géométrie n'est pas chargée, à la place les objets possèdent le chemin vers le fichier .obj qu'ils doivent charger.
+1. Serde désérialise les structures de données, la géométrie n'est pas chargée, à la place les objets possèdent le chemin vers le fichier .obj qu'ils doivent charger.
 
 2. On charge la géométrie, et on applique les corrections nécessaires. Pour cela on appelle la méthode `initialize()` sur chaque objet.
 
@@ -570,11 +570,11 @@ pub fn initialize(&mut self) {
     }   
 ```
 
-Pour intialiser un objet, on commence par charger le mesh (la géométrie). Cette fonction est réalisée par le module *obj_parser*.
+Pour initialiser un objet, on commence par charger le mesh (la géométrie). Cette fonction est réalisée par le module *obj_parser*.
 
 Une fois la géométrie en mémoire, on peut calculer le barycentre, et si le barycentre de l'objet n'est pas (0,0,0), afficher un warning pour l'utilisateur et recentrer l'objet en (0,0,0).
 
-Ensuite, nous appliquons la mise à l'échelle (scale), la rotation, et le décallage de position.
+Ensuite, nous appliquons la mise à l'échelle (scale), la rotation, et le décalage de position.
 
 Enfin, nous calculons la boîte englobante de l'objet.
 
@@ -598,14 +598,14 @@ L'appel à `initialize()` va charger les textures dans le *registre de texture* 
 
 ### Rendu
 
-Une fois la scène chargée l'algorithme de rendu est assez basique, on peut le résumer ainsi :
+Une fois la scène chargée, l'algorithme de rendu est assez basique, on peut le résumer ainsi :
 
-* Echantilloner des points sur l'image 2D qui va être rendue. Pour cela on utilise un échantilloneur aléatoire à faible divergence. En pratique on utilise la méthode des points de Halton pour générer les échantilons
+* Echantilloner des points sur l'image 2D qui va être rendue. Pour cela on utilise un échantillonneur aléatoire à faible divergence. En pratique on utilise la méthode des points de Halton pour générer les échantilons
 [voir @matt_physically_2017 et @don_reconstruction_1988].
 
 * Convertir les coordonées de ces points en coordonnées 3D grâce à la caméra. Nous avons maintenant le vecteur d'un rayon en calculant `position_de_la_camera - point_de_l_echantillon`. A partir de ce vecteur, on en déduit une équation paramétrique.
 
-* On traverse toute la liste des objets, et pour chaque objet on regarde si il existe un point d'intersection avec le rayon. Pour ce faire, on analyse triangle par triangle si il y a un point d'intersection [voir @noauthor_ray_2015, @mark_roaming_1997 et @tomas_fast_2003].
+* On traverse toute la liste des objets, et pour chaque objet on regarde s'il existe un point d'intersection avec le rayon. Pour ce faire, on analyse triangle par triangle s'il y a un point d'intersection [voir @noauthor_ray_2015, @mark_roaming_1997 et @tomas_fast_2003].
 
 * Pour chaque pixel de l'image finale, nous avons maintenant tous les rayons qui ont été calculés. Nous reconstituons l'image à partir des échantillons grâce à un filtre de [Mitchell-Netravali [voir @chris_antialiasing_1994, @don_reconstruction_1988].
 
@@ -621,9 +621,9 @@ Le programme peut maintenant se terminer
 
 ### Géométrie
 
-Mathématiquement parlant, pour calculer l'intersection entre un rayon et une surface, la méthode la plus simple et la plus rapide consiste à utiliser des triangles (sauf pour des surfaces bien particulières comme les sphères qui peuvent être décrites par une équation). C'est donc naturellement que nous sommes venus à utiliser des triangles pour représenter notre géométrie. Nous avons passer beaucoup de temps à chercher les meilleurs structures car la géométrie est vraiment le coeur du programme, et si on veut pouvoir charger un objet très lourd, il est important d'avoir fait les bons choix.
+Mathématiquement parlant, pour calculer l'intersection entre un rayon et une surface, la méthode la plus simple et la plus rapide consiste à utiliser des triangles (sauf pour des surfaces bien particulières comme les sphères qui peuvent être décrites par une équation). C'est donc naturellement que nous sommes venus à utiliser des triangles pour représenter notre géométrie. Nous avons passé beaucoup de temps à chercher les meilleures structures car la géométrie est vraiment le coeur du programme, et si on veut pouvoir charger un objet très lourd, il est important d'avoir fait les bons choix.
 
-Tout d'abord nous avons defini des structures de données permettant de représenter des points et des vecteurs en 2D et en 3D. Les points et les vecteurs sont representé par la même structure :
+Tout d'abord nous avons défini des structures de données permettant de représenter des points et des vecteurs en 2D et en 3D. Les points et les vecteurs sont representés par la même structure :
 
 ```rust
 // math.rs
@@ -642,11 +642,11 @@ struct Vector3f {
 ```
 
 
-Les points qui constitue un triangle, sont constitués de trois champs. Les coordonnées de textures sont optionnelles, toute géométrie n'a pas forcémment de coordonnée de texture.
+Les points qui constitue un triangle, sont constitués de trois champs. Les coordonnées de textures sont optionnelles, toute géométrie n'a pas forcément de coordonnée de texture.
 ```rust
 // geometry/obj3d.rs
 struct GeoPoint {
-	// La normal en ce point.
+	// La normale en ce point.
     norm: Vector3f,
     // Les coordonnées de textures, si elles existent.
     tex: Option<Vector2f>,
@@ -667,7 +667,7 @@ struct Triangle {
 ```
 
 
-Enfin, un maillage complet representant un objet est juste un tableau de triangles alloué dynamiquement à l'execution.
+Enfin, un maillage complet représentant un objet est juste un tableau de triangles alloué dynamiquement à l'exécution.
 ```rust
 // geometry/obj3d.rs
 struct Mesh {
@@ -675,14 +675,14 @@ struct Mesh {
 }
 ```
 
-Au final cette organisation implique de la duplication de données, car en général, chaque point sers à trois triangle différents (en moyenne).
+Au final cette organisation implique de la duplication de données, car en général, chaque point sert à trois triangles différents (en moyenne).
 
 ![Exemple de maillage 2D avec des triangles.](images/maillage_1.png "http://60.251.192.207/online/Mesh/MM_Ch05_HTML/5-11-5.files/image005a.png")
 
 Comme certaines faces peuvent partager un même sommet, nous avons d'abord envisager d'avoir une liste de faces et une liste de sommets, chaque face
 faisant référence à ses trois sommets.
 
-Cette solution à un coût en mémoire, pour trois triangles ayant les trois points en communs et sur une machine avec une architecture de 64 bits :
+Cette solution à un coût en mémoire, pour trois triangles ayant les trois points en commun et sur une machine avec une architecture de 64 bits :
 
 
 $$
@@ -704,30 +704,31 @@ $$
 \end{aligned}
 $$
 
-Nous avons donc choisi de copier les données pour chaque points.
+Nous avons donc choisi de copier les données pour chaque point.
 
 ### Couleurs
 
-Lorsque nous faisons des calculs pour déterminer la couleur d'un pixel, on considère que l'espace de couleur est linéaire, c'est à dire qu'il suffit d'additionner les intensités de chaque composantes pour obtenir la perposition de deux rayons lumineux. Or l'espace de couleur d'un écran d'ordinateur n'est souvent pas linéaire. C'est pourquoi il faut différencier la couleur utilisée
+Lorsque nous faisons des calculs pour déterminer la couleur d'un pixel, on considère que l'espace de couleur est linéaire, c'est-à-dire qu'il suffit d'additionner les intensités de chaque composantes pour obtenir la perposition de deux rayons lumineux.
+Or l'espace de couleur d'un écran d'ordinateur n'est souvent pas linéaire. C'est pourquoi il faut différencier la couleur utilisée
 pour le calcul en interne, des valeurs données par l'utilisateur.
 
-D'autre part, si on veut faire du rendu physiquement réaliste, il est interessant d'utiliser des spectres de lumière plutôt que des couleurs classiques RGB, ce qui nécessite des fonctions pour passer d'un espace à un autre.
+D'autre part, si on veut faire du rendu physiquement réaliste, il est intéressant d'utiliser des spectres de lumière plutôt que des couleurs classiques RGB, ce qui nécessite des fonctions pour passer d'un espace à un autre.
 
-Pour ce faire nous avons implémenté deux types de couleurs : LinearColor et RGBColor. Les valeurs données par l'utilisateur sont des RGBColor, pour les calculs on les convertit en LinearColor [voir @larry_importance_2010].
+Pour ce faire nous avons implémenté deux types de couleurs : LinearColor et RGBColor. Les valeurs données par l'utilisateur sont des RGBColor, pour les calculs, on les convertit en LinearColor [voir @larry_importance_2010].
 Les couleurs spectrales ne sont pas encore implémentées, mais il est facile de rajouter un troisième type de couleur : il suffit d'implémenter les fonctions de conversion entre les types.
-Egalement, nous utilisons des flottants pour stocker les composantes de chaque couleurs. Ainsi on évite les problèmes d'overflow lorsqu'on additionne deux couleurs très claires : il
+Egalement, nous utilisons des flottants pour stocker les composantes de chaque couleur. Ainsi on évite les problèmes d'overflow lorsqu'on additionne deux couleurs très claires : il
 suffit de ramener les valeurs des composantes entre 0 et 1 par une troncature.
 
 ### Registre de texture
 
-Afin d'éviter de charger plusieurs fois la même image en mémoire, nous avons d'utiliser une structure de donnée qui centralise les images. Ainsi, il nous suffit d'utiliser des pointeurs pour manipuler les images.
+Afin d'éviter de charger plusieurs fois la même image en mémoire, nous avons d'utiliser une structure de données qui centralise les images. Ainsi, il nous suffit d'utiliser des pointeurs pour manipuler les images.
 Nous utilisons une Hashmap.
-Ils s'agit d'un tableau avec pour clé une chaîne de caractère. En l'occurence, notre clé est le chemin de l'imgage, et la donnée stockée est l'image chargée en mémoire.
+Ils s'agit d'un tableau avec pour clé une chaîne de caractère. En l'occurence, notre clé est le chemin de l'image, et la donnée stockée est l'image chargée en mémoire.
 
 ### Stockage des objets dans la scène
 
 Pour faire fonctionner notre moteur de rendu, il est nécessaire de mettre en place une structure de données qui contiendra la géometrie
-des objets à rendre et leurs différentes caractéristiques. Cette structure de données doit permettre un accès efficace pour accélerer les
+des objets à rendre et leurs différentes caractéristiques. Cette structure de données doit permettre un accès efficace pour accélérer les
 calculs, mais on doit aussi limiter son coût en mémoire. En effet, la scène à rendre peut contenir plusieurs millions de polygones.
 
 Nous avons considéré qu'une scène est constitué de plusieurs objets, possèdant chacun une géométrie et un matériau. Nos scènes contenant peu
@@ -735,7 +736,7 @@ d'objets, il n'était pas nécessaire d'adopter une structure complexe pour les 
 (type `Vec` en rust).
 
 Pour la géométrie, nous avions les contraintes suivantes :
-* les faces sont triangulaires, elles ont donc trois sommets
+* les faces sont triangulaires, elles ont donc trois sommets.
 * chaque sommet contient des informations de textures et de normales.
 
  Malheureusement, l'utilisation des références pose problème en Rust car le langage impose un contrôle
@@ -748,32 +749,30 @@ Nous avons 7 dépendances :
 
 * *serde* nous permet de facilement sérialiser et déserialiser des structures de données.
 
-* *image* nous permet de charger en mémoire des images, et d'écrire des images sur le disque.
+* *image* nous permet de charger en mémoire des images et d'écrire des images sur le disque.
 
-* *getopts* nous permet de réaliser facilement l'analyse des arguments fourni au programme en ligne de commande.
+* *getopts* nous permet de réaliser facilement l'analyse des arguments fournis au programme en ligne de commande.
 
 * *num* rajoute des traits utiles pour manipuler des nombres de manière générique (libraire très peu utilisée au final).
 
 * *colored* permet de facilement coloré les messages que l'on affiche sur la sortie standard.
 
-* *scoped-pool* permet de mettre en place un groupe de thread qui vont travailler collaborativement sur la même tâche, et rajoute des garanties sur les threads.
+* *scoped-pool* permet de mettre en place un groupe de thread qui vont travailler collaborativement sur la même tâche et rajoute des garanties sur les threads.
 Par exemple, scoped-pool permet de garantir au compilateur qu'un thread aura terminé de s'executer à la fin d'un bloc.
 
 * *pbr* permet d'afficher une barre de progression dans le terminal.
 
 * *rand* permet de générer des nombres aléatoires.
 
-## Améliorations qualitatives
-
 ## Optimisations
 
 ### Boîtes englobantes
 
-Afin d'optimiser les calculs d'intersections, avant de lancer le calcul des intersections avec tous les triangles d'un objet, on commence par calculer si il existe une intersection avec la boîte englobante.
+Afin d'optimiser les calculs d'intersections, avant de lancer le calcul des intersections avec tous les triangles d'un objet, on commence par calculer s'il existe une intersection avec la boîte englobante.
 
-Au moment de charger la scène nous calculons le boîtes englobantes de tous les objets.
+Au moment de charger la scène nous calculons les boîtes englobantes de tous les objets.
 
-Les gains en temps sont assez conséquent. Ci-contre, les temps de rendu pour la même scène, mais avec les boîtes englobantes désactivées dans le deuxième rendu. Le calculs ont été effectué sur une machine ayant 8 coeurs logiques.
+Les gains en temps sont assez conséquent. Ci-contre, les temps de rendu pour la même scène, mais avec les boîtes englobantes désactivées dans le deuxième rendu. Les calculs ont été effectués sur une machine ayant huit coeurs logiques.
 
 
 |                        | Avec boîtes englobantes | Sans boîtes englobantes |
@@ -781,8 +780,8 @@ Les gains en temps sont assez conséquent. Ci-contre, les temps de rendu pour la
 | Temps de rendu  (en s) |         24.2267         |         1220.14         |
 
 En effet, dès qu'un objet présente beaucoup de triangles, grâces aux boîtes englobantes nous évitons de lancer les calculs d'intersections avec chacun des triangles dans la plupart des cas.
-Sans boîtes englobantes nous sommes obligés de traverser tous les triangles de la scène.
-Enfin le gain de temps dépends de la place que prends l'objet sur l'image finale, moins l'objet prends de place, plus le gain est rapide.
+Sans boîtes englobantes, nous sommes obligés de traverser tous les triangles de la scène.
+Enfin le gain de temps dépends de la place que prend l'objet sur l'image finale, moins l'objet prend de place, plus le gain est rapide.
 
 
 ### Multithreading
@@ -817,16 +816,15 @@ pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA
 1. Nous commençons par créer une ressource partagée de type *Mutex*. Le *Mutex* permet de garantir qu'un seul processus à la fois possède la ressource en écriture.
 Cela permet d'éviter les courses de données.
 
-2. Nous initialisons le groupe de thread (pool), en lui donnant en entrée le nombre maximum de thread qui peuvent s'executer simultanément.
+2. Nous initialisons le groupe de thread (pool), en lui donnant en entrée le nombre maximum de thread qui peuvent s'exécuter simultanément.
 
 3. Nous découpons l'image en un tableau de *Blocks* pour pouvoir distribuer le travail.
 
-4. On demande au groupe de thread de calculer, pour chaque bloc dans le tableau, la zone de l'image qu'il represente. Cela lance la procédure de lancer de rayon décrite dans la partie [Rendu].
+4. On demande au groupe de thread de calculer, pour chaque bloc dans le tableau, la zone de l'image qu'il représente. Cela lance la procédure de lancer de rayon décrite dans la partie [Rendu].
 
-5. Maintenant que tous les blocs ont été calculés, ont peut extraire l'image des structures qui permettait sa synchronisation entre les processus.
+5. Maintenant que tous les blocs ont été calculés, on peut extraire l'image des structures qui permettent sa synchronisation entre les processus.
 
-Les gains en temps sont assez interressant, même si le surcoût ajouté par la création de processus rends cette optimisation moins interressante que les boîtes englobantes.
-Ci-contre, le temps de rendu d'une scène standard en fonction du nombre de coeur utilisé. Les calculs sont réalisés sur une machine avec 8 coeurs logiques.
+Les gains en temps sont assez intéressant, même si le surcoût ajouté par la création de processus rends cette optimisation moins intéressante que les boîtes englobantes. Ci-contre, le temps de rendu d'une scène standard en fonction du nombre de coeur utilisé. Les calculs sont réalisés sur une machine avec 8 coeurs logiques.
 
 | Nombre de coeurs  | Temps de rendu (en secondes) |
 |:-----------------:|:----------------------------:|
@@ -841,21 +839,17 @@ Ci-contre, le temps de rendu d'une scène standard en fonction du nombre de coeu
 
 ## Quelques statistiques
 
-Avant de conclure, il est intérressant de s'interresser aux quelques chiffres auxquels nous avons accès.
-Tout d'abord, le projet fait 4968 lignes de code réparties dans 30 fichiers, dont 399 lignes de commentaires et 710 lignes vides. Cela fait donc 3859 lignes de codes "utiles".
-Le repertoire Github cumulait 285 commits lors de l'écriture de ce rapport.
+Avant de conclure, il est intéressant de s'intéresser aux quelques chiffres auxquels nous avons accès. Tout d'abord, le projet fait 4968 lignes de code réparties dans 30 fichiers, dont 399 lignes de commentaires et 710 lignes vides. Cela fait donc 3859 lignes de codes "utiles". Le répertoire Github cumulait 285 commits lors de l'écriture de ce rapport.
 
 ## Analyse des performances
 
-Lorsque que l'on lance un outil comme [perf](https://perf.wiki.kernel.org/index.php/Main_Page) on peut visualiser le temps passé par le code dans chaque fonction.
-Il est possible de générer un graphique, comme la figure ci-contre qui represente en ordonnée la pile d'appel. La longueur de chaque bloc indique le temps relatif d'execution (en pourcentage).
+Lorsque que l'on lance un outil comme [perf](https://perf.wiki.kernel.org/index.php/Main_Page) on peut visualiser le temps passé par le code dans chaque fonction. Il est possible de générer un graphique, comme la figure ci-contre qui représente en ordonnée la pile d'appel. La longueur de chaque bloc indique le temps relatif d'exécution (en pourcentage).
 
 ![Analyse des performances de notre moteur de rendu.](images/bench_1.png "Analyse des performances de notre moteur de rendu.")
 
-Il existe un adage en informatique qui dis que 90% du temps d'execution est effectué dans 10% du code. Dans notre moteur de rendu cet adage semble se verifier, puisque nous passons la plupart de notre temps dans les routines d'intersections rayons/objets.
-Ainsi, il peut être particulièrement d'analyser en détails ces routines.
+Il existe un adage en informatique qui dit que 90 % du temps d'éxecution est effectué dans 10 % du code. Dans notre moteur de rendu cet adage semble se vérifier, puisque nous passons la plupart de notre temps dans les routines d'intersections rayons/objets.Ainsi, il peut être particulièrement d'analyser en détails ces routines.
 
-Toujours grâce à perf, nous pouvons voir le code désasemblé avec un indicateur relatif de performance. Il semblerait que les lignes dans le fichier suivant soient responsables d'une certaine lenteur :
+Toujours grâce à perf, nous pouvons voir le code désassemblé avec un indicateur relatif de performance. Il semblerait que les lignes dans le fichier suivant soient responsables d'une certaine lenteur :
 ```rust
 // ray.rs
 fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment> {
@@ -872,15 +866,15 @@ fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment> {
 }
 ```
 
-De plus, grâce au tableau de la partie [Multithreading] nous avons pu nous rendre compte qu'il faudrait améliorer la synchronisation entre les processus. En effet, la réduction du temps d'execution n'est pas linéaire en fonction du nombre de processus.
+De plus, grâce au tableau de la partie [Multithreading] nous avons pu nous rendre compte qu'il faudrait améliorer la synchronisation entre les processus.
+En effet, la réduction du temps d'exécution n'est pas linéaire en fonction du nombre de processus.
 
 ## Bilan
 
-Nous avons pris beaucoup de plaisir à réaliser ce projet.
-Celui-ci constitue une bonne occasion de s'exercer à la programmation en équipe, et nous a en outre apporté de nombreuses connaissances théoriques sur les moteurs de rendu ainsi que sur le fonctionnement du langage Rust.
-Sur ce dernier point, il a été interressant de mettre les nouveaux concepts apportés par Rust en relation avec les autres langages que nous connaissions.
+Nous avons pris beaucoup de plaisir à réaliser ce projet. Celui-ci constitue une bonne occasion de s'exercer à la programmation en équipe, et nous a en outre apporté de nombreuses connaissances théoriques sur les moteurs de rendu ainsi que sur le fonctionnement du langage Rust.
+Sur ce dernier point, il a été intéressant de mettre les nouveaux concepts apportés par Rust en relation avec les autres langages que nous connaissions.
 
-Néanmoins, le projet ne s'arrête pas là. Nous avons l'intention de continuer à implémenter de nouvelles fonctionnalités à notre moteur de rendu, afin d'améliorer le photoréalisme des images produites et d'améliorer les performances de notre moteur.
+Néanmoins, le projet ne s'arrête pas là. Nous avons l'intention de continuer à implémenter de nouvelles fonctionnalités à notre moteur de rendu, afin d'améliorer le photo-réalisme des images produites et d'améliorer les performances de notre moteur.
 
 
 
@@ -888,7 +882,7 @@ Néanmoins, le projet ne s'arrête pas là. Nous avons l'intention de continuer 
 
 ## Exemple de fichier .obj
 
-Le fichier suivant décris un plan avec des coordonées de textures :
+Le fichier suivant décris un plan avec des coordonnées de textures :
 ```obj
 o Plane
 v -0.500000 -0.500000 0.000000
@@ -904,18 +898,15 @@ s off
 f 2/1/1 4/2/1 3/3/1
 f 1/4/1 2/1/1 3/3/1
 ```
-
 ## Description de chaque module
 
-Cette section contiens une description module par module du logiciel.
-En Rust, un module est un dossier ou un fichier.
-Ne sont décris dans cette section que les modules majeurs afin de rester concis.
+Cette section contiens une description module par module du logiciel. En Rust, un module est un dossier ou un fichier. Ne sont décris dans cette section que les modules majeurs afin de rester concis.
 
 ### Filter
 
-Le filtre est ce qui permis de reconstruire l'image une fois que tous les rayons ont été calculés.
+Le filtre est ce qui permet de reconstruire l'image une fois que tous les rayons ont été calculés.
 
-Le fichier `src/filter/mod.rs` expose le trait implémenté par tous les filtres, ainsi que l'interface qui est exposé dans le fichier json.
+Le fichier `src/filter/mod.rs` expose le trait implémenté par tous les filtres, ainsi que l'interface qui est exposée dans le fichier json.
 
 Le fichier `src/filter/filter.rs`, lui contiens l'implémentation des deux filtres : `BoxFilter` et `MNFilter`.
 
@@ -931,13 +922,13 @@ Enfin, `src/geometry/obj_parser` contiens tout le code qui permet de lire un fic
 
 ### Renderer
 
-Le fichier `src/renderer/mod.rs` contiens tout ce qui traite des structures de données intermédiaires entre l'image 2D et la scène 3D. Il contiens aussi la definition du registre de texture.
+Le fichier `src/renderer/mod.rs` contiens tout ce qui traite des structures de données intermédiaires entre l'image 2D et la scène 3D. Il contient aussi la definition du registre de texture.
 
 `src/renderer/block.rs` contiens l'implémentation des blocs pour le multithreading.
 
-Le coeur du moteur de rendu est `src/renderer/render.rs` qui contiens vraiment toute la logique du rendu.
+Le coeur du moteur de rendu est `src/renderer/render.rs` qui contient vraiment toute la logique du rendu.
 
-### Sampler
+### Sampler
 
 Le fichier `src/sampler/mod.rs` défini les différents traits implémentés par les échantillonneurs et les zones échantillonables.
 
