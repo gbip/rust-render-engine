@@ -7,28 +7,31 @@
 
 # Introduction
 
-Par la suite, les commandes bash seront prefixés par un $.
+Par la suite, les commandes bash seront préfixées par un $.
 Tout code issu du projet sera précédé d'un commentaire indiquant le chemin où il se trouve.
 
 ## L'histoire du raytracing
 
-Le raytracing est une technique developpée dans les années 60 permettant la synthèse d'images par un ordinateur.
-Cette technique a connu un boom dans les années 90 pour permettre la réalisation d'effets spéciaux dans le cinéma.
-C'est une méthode désormais utilisée dans de nombreux domaines : prévisualisation architecturale, cinéma, dessin animé, publicité, etc.
+Le raytracing est une technique développée dans les années 60 permettant la synthèse d'images par un ordinateur. Cette technique a connu un boom dans les années 90 pour permettre la réalisation d'effets spéciaux dans le cinéma.
+
+C'est une méthode désormais utilisée dans de nombreux domaines : pré-visualisation architecturale, cinéma, dessin animé, publicité, etc.
 
 ## L'interêt de ce projet pour nous
 
-Les enjeux autour du raytracing sont très importants, il existe toute une industrie organisée autour de cette technique de rendu, avec plusieurs millions de personnes qui utilisent chaque jour des moteurs de rendu en lancer de rayon.
-De plus c'est un sujet qui nous interressait personellement, puisque nous avons déjà tous deux utilisé des moteurs de rendus (Cycle avec Blender, Vray avec 3DSMax).
-Enfin, le sujet se prêtait particulièrement bien au cadre de ce projet, puisque il est très motivant.
-En effet, nous avons directement un retour sur investissement à travers les images qui sortent directement de notre moteur de rendu.
+Les enjeux autour du raytracing sont très importants, il existe toute une industrie organisée autour de cette technique de rendu, avec plusieurs millions de personnes qui utilisent chaque jour des moteurs de rendu en lancer de rayon. 
+
+De plus c'est un sujet qui nous intéressait personnellement, puisque nous avons déjà tous deux utilisé des moteurs de rendus (Cycle avec Blender, Vray avec 3DSMax).
+
+Enfin, le sujet se prêtait particulièrement bien au cadre de ce projet, puisqu'il est très motivant. En effet, nous avons directement un retour sur investissement à travers les images qui sortent directement de notre moteur de rendu.
 
 # Notre méthode de travail
 
 ## Pourquoi Rust ?
 
 Dès le départ nous avons voulu partir sur un langage de programmation système, afin d'obtenir le maximum de performances.
-Le seul langage sur ce créneau est le C/C++, cependant nous avons déjà eu plusieurs experiences tous les deux avec C++, et le fait que la langage soit très permissif à la compilation, retardant les bugs à l'execution nous dérangeait.
+
+Le seul langage sur ce créneau est le C/C++, cependant nous avons déjà eu plusieurs expériences tous les deux avec C++, et le fait que le langage soit très permissif à la compilation, retardant les bugs à l'exécution nous dérangeait.
+
 Cependant, depuis 2015 il existe un nouveau langage, poussé par Mozilla, nommé Rust.
 
 > Rust est un langage de programmation compilé multi-paradigme conçu et développé par Mozilla Research. Il a été conçu pour être « un langage sécurisé, concurrent, pratique », supportant les styles de programmation purement fonctionnel, modèle d'acteur, procédural et orienté objet.
@@ -38,29 +41,29 @@ Les principaux points forts de Rust sont :
 
  * La sûreté de la mémoire est assurée à la compilation, il n'existe pas de `segfault` en Rust.
 
- * La concurrence est gerée de manière interne au langage: il n'existe pas de course au donnée en Rust. Ce point nous a été très utile pour paralléliser le moteur de rendu.
+ * La concurrence est gérée de manière interne au langage: il n'existe pas de course aux données en Rust. Ce point nous a été très utile pour paralléliser le moteur de rendu.
 
- * L'écosystème moderne (gestionnaire de paquet, compilateur, libraire standard, etc.). En effet, pour installer une libraire il suffit d'ajouter une ligne: toutes les dépendances sont gerées par `cargo` qui est le gestionnaire de projet de Rust. Un autre avantage de l'écosystème moderne est le compilateur, qui contrairement à g++/clang++ (deux compilateurs C++) offre des erreurs compréhensibles, et avec cette erreur, la méthode pour la résoudre.
+ * L'écosystème moderne (gestionnaire de paquet, compilateur, libraire standard, etc.). En effet, pour installer une libraire il suffit d'ajouter une ligne: toutes les dépendances sont gérées par `cargo` qui est le gestionnaire de projet de Rust. Un autre avantage de l'écosystème moderne est le compilateur, qui contrairement à g++/clang++ (deux compilateurs C++) offre des erreurs compréhensibles et avec cette erreur, la méthode pour la résoudre.
 
 
-Il existe aussi des points faibles vis à vis de ce langage, la plupart découlant de la jeunesse du langage :
+Il existe aussi des points faibles vis-à-vis de ce langage, la plupart découlant de la jeunesse du langage :
 
- * Les librairies sont généralement encore jeune et pas toujours stable.
+ * Les librairies sont généralement encore jeunes et pas toujours stables.
 
- * La compilation est lente, le compilateur ne parallèlise pas les tâches.
+ * La compilation est lente, le compilateur ne parallélise pas les tâches.
 
  * le langage est "verbeux"
 
-Ainsi avoir choisis Rust nous a permis de drastiquement résoudre notre temps passer à débugger le programme, puisque les seuls erreurs que nous pouvions commettre étaient dues à des erreurs d'algorithmies.
+Ainsi avoir choisis Rust nous a permis de drastiquement résoudre notre temps passer à débugger le programme, puisque les seules erreurs que nous pouvions commettre étaient dues à des erreurs d'algorithmie.
 
 ## Organisation et planification du projet
 
 ### Découpage du projet en tâches, versionnement
 
-Afin de découper le projet en tâches, nos avons choisi la liste des fonctionnalités qui devait être implémentées pour chaque nouvelle version du logiciel.
+Afin de découper le projet en tâches, nos avons choisi la liste des fonctionnalités qui devaient être implémentées pour chaque nouvelle version du logiciel.
 Ainsi, dès le début nous avions une visibilité assez claire sur le fonctionnement final du logiciel.
 
-Ainsi nous avions prévu assez grossiérement d'avoir un projet qui se déroule ainsi :
+Ainsi nous avions prévu assez grossièrement d'avoir un projet qui se déroule ainsi :
 
 * v0.1 :
 	* Support de la géométrie dans des fichiers .obj
@@ -77,18 +80,18 @@ Ainsi nous avions prévu assez grossiérement d'avoir un projet qui se déroule 
 	* Meilleur échantillonneur
 	* Meilleur filtre de reconstruction
 
-Les versions suivants n'ont pas été implémentée faute de temps :
+Les versions suivantes n'ont pas été implémentées faute de temps :
 
 * v0.4 :
 	* [Path-tracing](https://fr.wikipedia.org/wiki/Path_tracing)
 * v0.5 :
-	* Matériaux avances : reflexion, refraction, etc.
+	* Matériaux avancés : réflexion, réfraction, etc.
 
 ### Organisation du travail
 
-Pour travailler collaborativement de manière efficace nous avons décidé de chacun travailler sur des modules séparés, tout en se tenant au courant réguliérement de nos avancées.
+Pour travailler collaborativement de manière efficace nous avons décidé de chacun travailler sur des modules séparés, tout en se tenant au courant régulièrement de nos avancées.
 
-En général, nous avons plutôt bien réussi à faire en sorte que chacun travaille sur un module différent, même si il n'est pas rare que l'on ai a touché tous les deux en même temps un module déjà écrit. Heuresement, Git nous a permis de partager le code sans problème, nous n'avons jamais perdu une ligne de code.
+En général, nous avons plutôt bien réussi à faire en sorte que chacun travaille sur un module différent, même si il n'est pas rare que l'on ai a touché tous les deux en même temps un module déjà écrit. Heureusement, Git nous a permis de partager le code sans problème, nous n'avons jamais perdu une ligne de code.
 
 Nous nous tenons au courant des dernières modifications sur le répertoire distant Github au jour le jour, et on discute des modifications faîtes dans la section commentaire des commits  ([Exemple 1](hhttps://github.com/gbip/rust-render-engine/commit/6560550e0675f733d3add030f5daca220005c9b9) , [Exemple 2](https://github.com/gbip/rust-render-engine/commit/14bb527cb97e96f17ed9523136d8eb6259d800c6)).
 
@@ -104,41 +107,41 @@ De plus, cela a permis à chacun de faire ce qui lui plaisait le plus, quitte à
 
 En plus du compilateur, nous avons utilisé [Clippy](https://github.com/Manishearth/rust-clippy). Il s'agit d'un analyseur statique de code qui ajoute 197 warnings au compilateur, allant de l'erreur d'algorithmie au respect des conventions de code.
 Avoir un outil qui analyse notre code a été un gros avantage, puisque cela nous a permis d'avoir un code qui respecte à 100% la manière de penser du langage Rust.
-Nous avons aussi pu éviter quelques erreurs d'inattention avant l'execution.
+Nous avons aussi pu éviter quelques erreurs d'inattention avant l’exécution.
 
 ### Git
 
 Afin de pouvoir travailler collaborativement, nous avons utilisé le logiciel de gestionnaire de version `git`. Il s'agit d'un gestionnaire de version décentralisé.
-Avec git chaque programmeur regroupe ses modifications en commits. Lorsque une ligne a été modifiée par plusieurs programmeurs, il y a conflit, et il faut le résoudre à la main.
-Enfin le code se trouve sur un repertoire distant, ce qui permet d'assurer la synchronisation des versions à travers internet.
+Avec git chaque développeur regroupe ses modifications en commits. Lorsque une ligne a été modifiée par plusieurs développeur, il y a conflit, et il faut le résoudre à la main.
+Enfin le code se trouve sur un répertoire distant, ce qui permet d'assurer la synchronisation des versions via internet.
 
 
 Vous pouvez accéder au répertoire distant du projet sur [github](https://github.com/gbip/rust-render-engine).
 
 ### Test unitaires
 
-Afin de s'assurer du fonctionnement de chaque fonctionnalitée nous avons écris des tests unitaires au fur et à mesure du développement.
+Afin de s'assurer du fonctionnement de chaque fonctionnalité nous avons écris des tests unitaires au fur et à mesure du développement.
 Le projet final comporte 20 tests unitaires, ce qui est peu, mais chaque test réalise en réalité plusieurs vérifications.
 
 ### Travis
 
-A chaque fois que quelqu'un envoie des commits sur le repertoire distant, le service d'intégration continue Travis se met en route.
+A chaque fois que quelqu'un envoie des commits sur le répertoire distant, le service d'intégration continue **Travis** se met en route.
 Celui-ci récupère le code et lance plusieurs commandes :
 ```
 $ cargo fmt -- --write-mode=diff
 $ cargo build
 $ cargo test
 ```
-La première commande vérifie que le code est bien formatté, elle quitte avec un code d'erreur différent de 0 si il est nécessaire de formatter le code.
+La première commande vérifie que le code est bien formaté, elle quitte avec un code d'erreur différent de 0 si il est nécessaire de formater le code.
 La deuxième commande compile le code.
-La troisième commande compile et lance les test unitaires.
+La troisième commande compile et lance les tests unitaires.
 Si jamais une de ces étapes échoue, nous recevons un mail, et les commits sont marqués comme échouant les test d'intégrations continues.
 Il est possible de voir à tout moment le statut du projet [sur le site internet de Travis](https://travis-ci.org/gbip/rust-render-engine).
 
 ### Formatage du code
 
-Afin d'avoir une base de code avec un style constant, nous utilisons l'outil [rustfmt](https://github.com/rust-lang-nursery/rustfmt).
-Ce programme est lancé à travers cargo, et lors de son execution il va parcourir tous les fichiers sources et les formatter selon des règles de style définies dans un fichier.
+Afin d'avoir une base de code avec un style constant, nous utilisons l'outil [rustfmt](https://github.com/rust-lang-nursery/rustfmt) qui est l'outil standard pour formater du code source en Rust.
+Ce programme est lancé à travers cargo, et lors de son exécution il va parcourir tous les fichiers sources et les formater selon des règles de style définies dans un fichier.
 Nous utilisons les règles de style par défaut.
 
 Enfin, il est possible de mettre en place des script permettant de lancer cet outil automatiquement. Par exemple, sur Vim, rustfmt est lancé à chaque fois que l'on sauvegarde le buffer courant.
@@ -157,23 +160,23 @@ Pour installer le projet il faut commencer par installer [rustup](https://rustup
 $ curl https://sh.rustup.rs -sSf | sh
 ```
 
-Ensuite vous pouvez télécharger le repertoire avec git, et compiler le projet.
+Ensuite vous pouvez télécharger le répertoire avec git, et compiler le projet.
 ```
 $ sudo apt-get install git
 $ git clone https://github.com/gbip/rust-render-engine
-$ rustup override set nightly
+$ rustup override set nightly-2017-05-18
 $ cargo build --release
 ```
 
-Pour lancer les test unitaires, il faut executer `cargo test` dans le repertoire du projet.
-Pour compiler la documentation, il faut executer `cargo doc` dans le repertoire du projet.
+Pour lancer les test unitaires, il faut exécuter `cargo test` dans le répertoire du projet.
+Pour compiler la documentation, il faut exécuter `cargo doc` dans le répertoire du projet.
 
 ### Langue des variables, du code et de l'interface
 
 Nous sommes partis du principe que le standard, en informatique est l'anglais. Ainsi tous les noms de variables, de fonctions, de modules et de structure de données
 sont en anglais.
 De plus, l'interface en ligne de commande est elle aussi en anglais.
-Cependant, afin de faciliter leur rédaction, leur lecture et leur éventuelle compréhension, les commentaires sont en français.
+Cependant, afin de faciliter leur rédaction, leur lecture et leur compréhension, les commentaires sont en français.
 
 # Scénario de fonctionnement
 
@@ -181,7 +184,7 @@ Nous avons choisi, pour des raisons de simplicité, de nous contenter d'une inte
 
 ## Interface de commande avec l'utilisateur
 
-Lorsque l'on lance le logiciel sans argumment, un message d'aide s'affiche indiquant à l'utilisateur comment utiliser le logiciel.
+Lorsque l'on lance le logiciel sans argument, un message d'aide s'affiche indiquant à l'utilisateur comment utiliser le logiciel.
 C'est une pratique standard dans l'environnement UNIX:
 ```
 $ ./render_engine
@@ -207,14 +210,14 @@ Détaillons les différents arguments :
  * > -r FILE or --read FILE : Read FILE to load the scene before rendering. Needed for rendering, without a scene specified, the program will not render.
 
 Cette option précise au logiciel quel fichier il doit lire pour créer la scène. Si cette option n'est pas spécifiée, le programme ne pourra pas lancer le rendu d'une scène.
-Cette option est suffisante pour lancer la procédure de rendu, le logiciel sauvegardera alors l'image sous le nom 'untitled.png'
+Cette option est suffisante pour lancer la procédure de rendu, le logiciel sauvegardera alors l'image sous le nom 'untitled.png'.
 
 * > -w FILE or --write FILE : Write the output to FILE. The default is 'untitled.png'
 
 Cette option indique au logiciel où doit être enregistrée l'image de sortie. Si cette option n'est pas présente, l'image sera enregistrée dans le fichier 'untitled.png'
 
 ## Formats de fichiers d'objets, de matériaux et de scènes
-La principale interaction avec l'utilisateur se fait au travers des fichiers décrivant respectivement, la scène, les matériau et les objets. Nous avons choisi d'utiliser le format [JSON](https://fr.wikipedia.org/wiki/JavaScript_Object_Notation) car il est plus simple à modifier que du XML, et est lui aussi lisible très facilement par un humain.
+La principale interaction avec l'utilisateur se fait au travers des fichiers décrivant respectivement, la scène, les matériaux et les objets. Nous avons choisi d'utiliser le format [JSON](https://fr.wikipedia.org/wiki/JavaScript_Object_Notation) car il est plus simple à modifier que du XML, et est lui aussi lisible très facilement par un humain.
 Enfin, il existe deux structures qui se retrouvent régulièrement dans les fichiers de scènes :
 
 * Les coordonnées cartésiennes d'un point dans l'espace :
@@ -226,13 +229,12 @@ Enfin, il existe deux structures qui se retrouvent régulièrement dans les fich
 }
 ```
 
-* les différents composantes d'une couleur : il s'agit de quatres entiers compris entre 0 et 255 pour chaque composante Red Green Blue Alpha (transparence) RGBA :
+* les différents composantes d'une couleur : il s'agit de quatre entiers compris entre 0 et 255 pour chaque composante Red Green Blue (transparence) RGB :
 ```json
 "background_color": {
 	"r": 0,
     "g": 127,
     "b": 254,
-    "a": 255
 }
 ```
 
@@ -240,35 +242,35 @@ Enfin, il existe deux structures qui se retrouvent régulièrement dans les fich
 
 Le fichier de scène correspond au fichier principal qui décris :
 
-* la géométrie présente dans la scène, et le matériau qui y est affecté
+* la géométrie présente dans la scène, et le matériau qui y est affecté.
 
-* la ou les caméras présentent dans la scène
+* la ou les caméras présentent dans la scène.
 
-* la ou les lumières qui éclairent la scène
+* la ou les lumières qui éclairent la scène.
 
-* les paramètres de rendu
+* les paramètres de rendu.
 
 
 Voici la description des différents champs qui composent ce fichier :
 
-* *base_vector* : ce champ indique quels sont les trois vecteurs formant la base orthonormée pour représenter la géomètrie dans l'espace
+* *base_vector* : ce champ indique quels sont les trois vecteurs formant la base orthonormée pour représenter la géométrie dans l'espace
 
-* *cameras* : il s'agit d'une tableau de [Caméra]
+* *cameras* : il s'agit d'un tableau de [Caméra]
 
-* *objects*  : les différents objets  composant la scènne (géomètrie et matériau)
+* *objects*  : les différents objets composants la scène (géométrie et matériau)
 
 * *lights* : il s'agit d'un tableau de [Lumières]
 
-* *renderer *  : les différents paramètres du rendu :
+* *renderer*  : les différents paramètres du rendu :
 	* *res_x*,*res_y* : la résolution de l'image a calculer
-	* *threads* : le nombre de coeurs à utiliser pour le calcul
-	* *bucket_size* : taille des blocs subdivisant l'image pour la répartition du travail entre les coeurs
+	* *threads* : le nombre de cœurs à utiliser pour le calcul
+	* *bucket_size* : taille des blocs subdivisant l'image pour la répartition du travail entre les cœurs
 	* *sampler* : les paramètres de la génération des échantillons :
 		* *HaltonSampler* ou *UniformSampler* permettent de choisir la méthode de génération des échantillons sur l'image 2D. *Haltonsampler* offre la meilleur qualité.
-		* *subdivision_sampling* : le paramètre crucial qui va énormèment jouer sur la qualité de l'image finale. Il s'agit du nombre de rayons qui vont être lancés par pixel.
+		* *subdivision_sampling* : le paramètre crucial qui va énormément jouer sur la qualité de l'image finale. Il s'agit du nombre de rayons qui vont être lancés par pixel.
 	* *filter* : les paramètres pour la reconstruction des pixels à partir des rayons :
 		* *BoxFilter* ou *MitchellFilter* permettent de choisir quelle méthode utiliser lors du rendu. MichellFilter offre en théorie la meilleur qualité.
-	* *background_color* : la color de fond lorsqu'aucun n'objet ne viens obstruer le rayon.
+	* *background_color* : la couleur de fond lorsque aucun objet ne viens obstruer le rayon.
 
 
 ```json
@@ -300,18 +302,22 @@ Voici la description des différents champs qui composent ce fichier :
 }
 ```
 
-Le nombre de paramètre exposé est relativement important, et avec du recul certains n'ont pas leur place ici.
+Le nombre de paramètres exposés est relativement important, et avec du recul certains n'ont pas leur place ici.
 Par exemple *base_vector* ne devrait même pas être exposé à l'utilisateur, c'est une convention que nous utilisons en interne.
-De plus certains arguments pourrait être donnés en ligne de commande, comme le nombre de coeur à utiliser pour le calcul.
-
+De plus certains arguments pourraient être donnés en ligne de commande, comme le nombre de cœur à utiliser pour le calcul.
 
 ### Caméra
 
 La caméra est composé des champs suivants :
+
 * *world_position* : la position de la caméra dans le monde. C'est le point à partir duquel on voit la scène.
+
 * *target_position* : un point de l'espace vers lequel on regarde. Celui-ci est au centre de l'écran. Il permet d'orienter la caméra.
+
 * *up* : un vecteur qui indique le 'haut' de l'image, utiliser pour faire tourner la caméra.
+
 * *fov* : de l'acronyme 'Field of View', indique le champ de vision en degré de la caméra. Une valeur plus petite correspond à un effet de zoom.
+
 * *clip* : la distance à partir de laquelle les rayons sont arrêtés par les objets. Dans notre exemple, si un objet se trouve à moins de 0.001 de la caméra, il ne sera pas visible.
 
 ```json
@@ -342,11 +348,11 @@ La caméra est composé des champs suivants :
 
 L'utilisation d'un objet fait appel à plusieurs fichiers :
 
-* le fichier qui contiens les informations de géométrie
+* le fichier qui contiens les informations de géométrie.
 
-* la section dans le fichier de scène qui indique la position de l'objet
+* la section dans le fichier de scène qui indique la position de l'objet.
 
-* un matériau
+* un matériau.
 
 
 #### Dans la scène
@@ -396,11 +402,11 @@ Un fichier .obj est un fichier texte, qui décris point par point, face par face
 Nous ne supportons que les fonctionnalités 'de base' du standard Wavefront.
 Notamment, il est impossible :
 
-* de spécifier le matériau d'un objet dans le .obj
+* de spécifier le matériau d'un objet dans le .obj .
 
-* de grouper plusieurs objets dans un .obj
+* de grouper plusieurs objets dans un .obj.
 
-Concrétement, il existe trois types de ligne que nous supportons :
+Concrètement, il existe 5 types de ligne que nous supportons :
 
 * `o Plane` définit un nouvel objet.
 
@@ -408,15 +414,15 @@ Concrétement, il existe trois types de ligne que nous supportons :
 
 * `vt 0.999900 0.000100` définit des nouvelles coordonnées de textures dans le plan 2D.
 
-* `vn 0.000000 0.000000 1.000000` définit un nouveau vecteur normal
+* `vn 0.000000 0.000000 1.000000` définit un nouveau vecteur normal.
 
 * `f 2/1/1 4/2/1 3/3/1` définit un nouveau triangle composée des 3 points suivants :
 
 	* le premier point a pour coordonnée spatiale le deuxième vertex *v* défini dans le fichier. Il a pour coordonnée de textures le premier point *vt* défini dans le fichier. Il a pour normale le premier vecteur de normal *vn* défini dans le fichier.
 
-	* le deuxième point va chercher le 4éme *v* pour les coordonées spatiales, le deuxième *vt* pour les textures et le premier *vn* pour les normales.
+	* le deuxième point va chercher le 4éme *v* pour les coordonnées spatiales, le deuxième *vt* pour les textures et le premier *vn* pour les normales.
 
-	* le troisième point a pour coordonée spatiale le troisième *v*, comme coordonée de texture le troisième *vt* et comme vecteur normal le premier *v*
+	* le troisième point a pour coordonnée spatiale le troisième *v*, comme coordonnée de texture le troisième *vt* et comme vecteur normal le premier *v*.
 
 Un exemple de fichier de géométrie est présent dans la partie [Exemple de fichier .obj].
 
@@ -426,9 +432,9 @@ A l'utilisation, la géométrie est générée par [Blender](https://www.blender
 
 Pour décrire une lumière il suffit de spécifier les trois champs suivants :
 
-* *point* la position de la lumière
+* *point* la position de la lumière.
 
-* *intensity* l'intensité de la lumière. Plus la valeur est grande, plus la source est lumineuse
+* *intensity* l'intensité de la lumière. Plus la valeur est grande, plus la source est lumineuse.
 
 * *color* la couleur de la lumière. Permet de créer des lumières de toutes les couleurs, même noires.
 
@@ -454,7 +460,7 @@ Pour décrire une lumière il suffit de spécifier les trois champs suivants :
 ### Matériaux
 
 Le seul type de matériau implémenté actuellement dans le programme est un matériau qui se rapproche beaucoup du [matériau de Phong](https://fr.wikipedia.org/wiki/Ombrage_de_Phong).
-Il est composé de trois couleurs ou textures qui represente chacune une composante spécifique du matériau : *ambient* , *diffuse* et *specular*.
+Il est composé de trois couleurs ou textures qui représentent chacune une composante spécifique du matériau : *ambient* , *diffuse* et *specular*.
 
 Le fichier JSON d'un matériau se découpe aussi ainsi.A chaque champ est assignable au choix, une couleur unie, une texture ou une texture spéciale :
 ```json
@@ -762,8 +768,6 @@ Par exemple, scoped-pool permet de garantir au compilateur qu'un thread aura ter
 * *pbr* permet d'afficher une barre de progression dans le terminal.
 
 * *rand* permet de générer des nombres aléatoires.
-
-## Améliorations qualitatives
 
 ## Optimisations
 
