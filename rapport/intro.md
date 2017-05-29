@@ -12,7 +12,7 @@ Tout code issu du projet sera précédé d'un commentaire indiquant le chemin o�
 
 ## L'histoire du raytracing
 
-Le raytracing est une technique devellopée dans les anénes 60 permettant la synthèse d'images par un ordinateur.
+Le raytracing est une technique developpée dans les années 60 permettant la synthèse d'images par un ordinateur.
 Cette technique a connu un boom dans les années 90 pour permettre la réalisation d'effets spéciaux dans le cinéma.
 C'est une méthode désormais utilisée dans de nombreux domaines : prévisualisation architecturale, cinéma, dessin animé, publicité, etc.
 
@@ -57,7 +57,7 @@ Ainsi avoir choisis Rust nous a permis de drastiquement résoudre notre temps pa
 
 ### Découpage du projet en tâches, versionnement
 
-Afin de découper le projet en tâches, nos avons choisi la liste des fonctionnalités qui devait être implémenté pour chaque nouvelle version du logiciel.
+Afin de découper le projet en tâches, nos avons choisi la liste des fonctionnalités qui devait être implémentées pour chaque nouvelle version du logiciel.
 Ainsi, dès le début nous avions une visibilité assez claire sur le fonctionnement final du logiciel.
 
 Ainsi nous avions prévu assez grossiérement d'avoir un projet qui se déroule ainsi :
@@ -104,11 +104,11 @@ De plus, cela a permis à chacun de faire ce qui lui plaisait le plus, quitte à
 
 En plus du compilateur, nous avons utilisé [Clippy](https://github.com/Manishearth/rust-clippy). Il s'agit d'un analyseur statique de code qui ajoute 197 warnings au compilateur, allant de l'erreur d'algorithmie au respect des conventions de code.
 Avoir un outil qui analyse notre code a été un gros avantage, puisque cela nous a permis d'avoir un code qui respecte à 100% la manière de penser du langage Rust.
-Nous avons aussi pu éviter quelques erreurs d'innatentions avant l'execution.
+Nous avons aussi pu éviter quelques erreurs d'inattention avant l'execution.
 
 ### Git
 
-Afin de pouvoir travailler collaborativement, nous avons utiliser le logiciel de gestionnaire de version `git`. Il s'agit d'un gestionnaire de version décentralisé.
+Afin de pouvoir travailler collaborativement, nous avons utilisé le logiciel de gestionnaire de version `git`. Il s'agit d'un gestionnaire de version décentralisé.
 Avec git chaque programmeur regroupe ses modifications en commits. Lorsque une ligne a été modifiée par plusieurs programmeurs, il y a conflit, et il faut le résoudre à la main.
 Enfin le code se trouve sur un repertoire distant, ce qui permet d'assurer la synchronisation des versions à travers internet.
 
@@ -146,7 +146,7 @@ Sur Intellij IDEA il est possible de lancer le formattage du code avant toute co
 
 ### Documentation
 
-Nous avons essayé de documenter au maximum le projet. Malheuresement, la documentation est quand même très éparse.
+Nous avons essayé de documenter au maximum le projet. Malheureusement, la documentation est quand même très éparse.
 En effet, nous avons beaucoup documenté le fonctionnement des fonctions via des commentaires décrivant les différentes lignes composant une fonction,
 cependant il y a peu de documentation décrivant le fonctionnement du code en général.
 
@@ -177,7 +177,7 @@ Cependant, afin de faciliter leur rédaction, leur lecture et leur éventuelle c
 
 # Scénario de fonctionnement
 
-Nous avons choisi, pour des raisons de simplicité, de nous contacter d'une interface en ligne de commande pour l'interaction avec l'utilisateur.
+Nous avons choisi, pour des raisons de simplicité, de nous contenter d'une interface en ligne de commande pour l'interaction avec l'utilisateur.
 
 ## Interface de commande avec l'utilisateur
 
@@ -756,7 +756,7 @@ Par exemple, scoped-pool permet de garantir au compilateur qu'un thread aura ter
 
 * *rand* permet de générer des nombres aléatoires.
 
-## Amélioration qualitatives
+## Améliorations qualitatives
 
 ## Optimisations
 
@@ -858,15 +858,20 @@ fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment> {
     if m == 0.0 {
         None
     } else {
-    	// La ligne suivante prends beaucoup de temps de calcul à cause de la division.
+    	// La ligne suivante prend beaucoup de temps de calcul à cause de la division.
         let t = p / m;
     }
 [...]
 }
 ```
 
+## Conclusion de la conclusion
 
+Nous avons pris beaucoup de plaisir à réaliser ce projet.
+Celui-ci constitue une bonne occasion de s'exercer à la programmation en équipe, et nous a en outre apporté de nombreuses connaissances théoriques sur les moteurs de rendu ainsi que sur le fonctionnement du langage Rust.
+Sur ce dernier point, il a été interressant de mettre les nouveaux concepts apportés par Rust en relation avec les autres langages que nous connaissions.
 
+Néanmoins, le projet ne s'arrête pas là. Nous avons l'intention de continuer à implémenter de nouvelles fonctionnalités à notre moteur de rendu, afin d'améliorer le photoréalisme des images produites et d'améliorer les performances de notre moteur.
 
 
 
