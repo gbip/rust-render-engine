@@ -18,9 +18,9 @@ C'est une méthode désormais utilisée dans de nombreux domaines : pré-visuali
 
 ## L'interêt de ce projet pour nous
 
-Les enjeux autour du raytracing sont très importants, il existe toute une industrie organisée autour de cette technique de rendu, avec plusieurs millions de personnes qui utilisent chaque jour des moteurs de rendu en lancer de rayon. 
+Les enjeux autour du raytracing sont très importants, il existe toute une industrie organisée autour de cette technique de rendu, avec plusieurs millions de personnes qui utilisent chaque jour des moteurs de rendu en lancer de rayon.
 
-De plus c'est un sujet qui nous intéressait personnellement, puisque nous avons déjà tous deux utilisé des moteurs de rendus (Cycle avec Blender, Vray avec 3DSMax).
+De plus c'est un sujet qui nous intéressait personnellement, puisque nous avons déjà tous deux utilisé des moteurs de rendu (Cycle avec Blender, Vray avec 3DSMax).
 
 Enfin, le sujet se prêtait particulièrement bien au cadre de ce projet, puisqu'il est très motivant. En effet, nous avons directement un retour sur investissement à travers les images qui sortent directement de notre moteur de rendu.
 
@@ -43,7 +43,7 @@ Les principaux points forts de Rust sont :
 
  * La concurrence est gérée de manière interne au langage: il n'existe pas de course aux données en Rust. Ce point nous a été très utile pour paralléliser le moteur de rendu.
 
- * L'écosystème moderne (gestionnaire de paquet, compilateur, libraire standard, etc.). En effet, pour installer une libraire il suffit d'ajouter une ligne: toutes les dépendances sont gérées par `cargo` qui est le gestionnaire de projet de Rust. Un autre avantage de l'écosystème moderne est le compilateur, qui contrairement à g++/clang++ (deux compilateurs C++) offre des erreurs compréhensibles et avec cette erreur, la méthode pour la résoudre.
+ * L'écosystème moderne (gestionnaire de paquet, compilateur, libraire standard, etc.). En effet, pour installer une libraire il suffit d'ajouter une ligne: toutes les dépendances sont gérées par `cargo` qui est le gestionnaire de projet de Rust. Un autre avantage de l'écosystème moderne est le compilateur, qui contrairement à g++/clang++ (deux compilateurs C++) offre des erreurs compréhensibles ainsi que des méthode pour les résoudre.
 
 
 Il existe aussi des points faibles vis-à-vis de ce langage, la plupart découlant de la jeunesse du langage :
@@ -91,7 +91,7 @@ Les versions suivantes n'ont pas été implémentées faute de temps :
 
 Pour travailler collaborativement de manière efficace nous avons décidé de chacun travailler sur des modules séparés, tout en se tenant au courant régulièrement de nos avancées.
 
-En général, nous avons plutôt bien réussi à faire en sorte que chacun travaille sur un module différent, même si il n'est pas rare que l'on ai a touché tous les deux en même temps un module déjà écrit. Heureusement, Git nous a permis de partager le code sans problème, nous n'avons jamais perdu une ligne de code.
+En général, nous avons plutôt bien réussi à faire en sorte que chacun travaille sur un module différent, même s'il n'était pas rare que l'on ait à toucher tous les deux en même temps un module déjà écrit. Heureusement, Git nous a permis de partager le code sans problème, nous n'avons jamais perdu une ligne de code.
 
 Nous nous tenons au courant des dernières modifications sur le répertoire distant Github au jour le jour, et on discute des modifications faîtes dans la section commentaire des commits  ([Exemple 1](hhttps://github.com/gbip/rust-render-engine/commit/6560550e0675f733d3add030f5daca220005c9b9) , [Exemple 2](https://github.com/gbip/rust-render-engine/commit/14bb527cb97e96f17ed9523136d8eb6259d800c6)).
 
@@ -112,7 +112,7 @@ Nous avons aussi pu éviter quelques erreurs d'inattention avant l’exécution.
 ### Git
 
 Afin de pouvoir travailler collaborativement, nous avons utilisé le logiciel de gestionnaire de version `git`. Il s'agit d'un gestionnaire de version décentralisé.
-Avec git chaque développeur regroupe ses modifications en commits. Lorsque une ligne a été modifiée par plusieurs développeur, il y a conflit, et il faut le résoudre à la main.
+Avec git chaque développeur regroupe ses modifications en commits. Lorsque une ligne a été modifiée par plusieurs développeurs, il y a conflit, et il faut le résoudre à la main.
 Enfin le code se trouve sur un répertoire distant, ce qui permet d'assurer la synchronisation des versions via internet.
 
 
@@ -120,7 +120,7 @@ Vous pouvez accéder au répertoire distant du projet sur [github](https://githu
 
 ### Test unitaires
 
-Afin de s'assurer du fonctionnement de chaque fonctionnalité nous avons écris des tests unitaires au fur et à mesure du développement.
+Afin de s'assurer du fonctionnement de chaque fonctionnalité nous avons écrit des tests unitaires au fur et à mesure du développement.
 Le projet final comporte 20 tests unitaires, ce qui est peu, mais chaque test réalise en réalité plusieurs vérifications.
 
 ### Travis
@@ -135,7 +135,7 @@ $ cargo test
 La première commande vérifie que le code est bien formaté, elle quitte avec un code d'erreur différent de 0 si il est nécessaire de formater le code.
 La deuxième commande compile le code.
 La troisième commande compile et lance les tests unitaires.
-Si jamais une de ces étapes échoue, nous recevons un mail, et les commits sont marqués comme échouant les test d'intégrations continues.
+Si jamais une de ces étapes échoue, nous recevons un mail, et les commits sont marqués comme échouant les test d'intégration continue.
 Il est possible de voir à tout moment le statut du projet [sur le site internet de Travis](https://travis-ci.org/gbip/rust-render-engine).
 
 ### Formatage du code
@@ -145,7 +145,7 @@ Ce programme est lancé à travers cargo, et lors de son exécution il va parcou
 Nous utilisons les règles de style par défaut.
 
 Enfin, il est possible de mettre en place des script permettant de lancer cet outil automatiquement. Par exemple, sur Vim, rustfmt est lancé à chaque fois que l'on sauvegarde le buffer courant.
-Sur Intellij IDEA il est possible de lancer le formattage du code avant toute compilation.
+Sur Intellij IDEA il est possible de lancer le formatage du code avant toute compilation.
 
 ### Documentation
 
@@ -173,14 +173,14 @@ Pour compiler la documentation, il faut exécuter `cargo doc` dans le répertoir
 
 ### Langue des variables, du code et de l'interface
 
-Nous sommes partis du principe que le standard, en informatique est l'anglais. Ainsi tous les noms de variables, de fonctions, de modules et de structure de données
+Nous sommes partis du principe que le standard, en informatique est l'anglais. Ainsi tous les noms de variables, de fonctions, de modules et de structures de données
 sont en anglais.
 De plus, l'interface en ligne de commande est elle aussi en anglais.
 Cependant, afin de faciliter leur rédaction, leur lecture et leur compréhension, les commentaires sont en français.
 
 # Scénario de fonctionnement
 
-Nous avons choisi, pour des raisons de simplicité, de nous contenter d'une interface en ligne de commande pour l'interaction avec l'utilisateur.
+Nous avons choisi, pour des raisons de simplicité, de nous contenter d'une interface en lignes de commandes pour l'interaction avec l'utilisateur.
 
 ## Interface de commande avec l'utilisateur
 
