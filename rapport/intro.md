@@ -539,7 +539,7 @@ Dans cette partie, nous allons expliquer le fonctionnement du programme, d'appel
 
 ### Décodage des fichiers de scène
 
-La première partie consiste à déserialiser les fichiers de scènes à partir du fichier fourni en argument. Si les arguments sont corrects, `main()` va effectivement appeler la fonction load_from_file :
+La première partie consiste à désérialiser les fichiers de scènes à partir du fichier fourni en argument. Si les arguments sont corrects, `main()` va effectivement appeler la fonction load_from_file :
 
 ```rust
 // scene.rs
@@ -606,20 +606,20 @@ L'appel à `initialize()` va charger les textures dans le *registre de texture* 
 
 Une fois la scène chargée, l'algorithme de rendu est assez basique, on peut le résumer ainsi :
 
-* Echantilloner des points sur l'image 2D qui va être rendue. Pour cela on utilise un échantillonneur aléatoire à faible divergence. En pratique on utilise la méthode des points de Halton pour générer les échantilons
+* Échantillonner des points sur l'image 2D qui va être rendue. Pour cela on utilise un échantillonneur aléatoire à faible divergence. En pratique on utilise la méthode des points de Halton pour générer les échantillons
 [voir @matt_physically_2017 et @don_reconstruction_1988].
 
-* Convertir les coordonées de ces points en coordonnées 3D grâce à la caméra. Nous avons maintenant le vecteur d'un rayon en calculant `position_de_la_camera - point_de_l_echantillon`. A partir de ce vecteur, on en déduit une équation paramétrique.
+* Convertir les coordonnées de ces points en coordonnées 3D grâce à la caméra. Nous avons maintenant le vecteur d'un rayon en calculant `position_de_la_camera - point_de_l_echantillon`. A partir de ce vecteur, on en déduit une équation paramétrique.
 
 * On traverse toute la liste des objets, et pour chaque objet on regarde s'il existe un point d'intersection avec le rayon. Pour ce faire, on analyse triangle par triangle s'il y a un point d'intersection [voir @noauthor_ray_2015, @mark_roaming_1997 et @tomas_fast_2003].
 
 * Pour chaque pixel de l'image finale, nous avons maintenant tous les rayons qui ont été calculés. Nous reconstituons l'image à partir des échantillons grâce à un filtre de [Mitchell-Netravali [voir @chris_antialiasing_1994, @don_reconstruction_1988].
 
-### Ecriture de l'image
+### Écriture de l'image
 
 L'image finale étant maintenant en mémoire, il suffit de l'écrire sur le disque. Pour cela on utilise la librairie *image* (voir dans la partie [Dépendances]).
 
-Le programme peut maintenant se terminer
+Le programme peut maintenant se terminer.
 
 # Implémentation
 
@@ -627,9 +627,9 @@ Le programme peut maintenant se terminer
 
 ### Géométrie
 
-Mathématiquement parlant, pour calculer l'intersection entre un rayon et une surface, la méthode la plus simple et la plus rapide consiste à utiliser des triangles (sauf pour des surfaces bien particulières comme les sphères qui peuvent être décrites par une équation). C'est donc naturellement que nous sommes venus à utiliser des triangles pour représenter notre géométrie. Nous avons passé beaucoup de temps à chercher les meilleures structures car la géométrie est vraiment le coeur du programme, et si on veut pouvoir charger un objet très lourd, il est important d'avoir fait les bons choix.
+Mathématiquement parlant, pour calculer l'intersection entre un rayon et une surface, la méthode la plus simple et la plus rapide consiste à utiliser des triangles (sauf pour des surfaces bien particulières comme les sphères qui peuvent être décrites par une équation). C'est donc naturellement que nous sommes venus à utiliser des triangles pour représenter notre géométrie. Nous avons passé beaucoup de temps à chercher les meilleures structures car la géométrie est vraiment le cœur du programme, et si on veut pouvoir charger un objet très lourd, il est important d'avoir fait les bons choix.
 
-Tout d'abord nous avons défini des structures de données permettant de représenter des points et des vecteurs en 2D et en 3D. Les points et les vecteurs sont representés par la même structure :
+Tout d'abord nous avons défini des structures de données permettant de représenter des points et des vecteurs en 2D et en 3D. Les points et les vecteurs sont représentés par la même structure :
 
 ```rust
 // math.rs
@@ -648,7 +648,7 @@ struct Vector3f {
 ```
 
 
-Les points qui constitue un triangle, sont constitués de trois champs. Les coordonnées de textures sont optionnelles, toute géométrie n'a pas forcément de coordonnée de texture.
+Les points qui constituent un triangle, sont constitués de trois champs. Les coordonnées de textures sont optionnelles, toute géométrie n'a pas forcément de coordonnées de texture.
 ```rust
 // geometry/obj3d.rs
 struct GeoPoint {
@@ -714,7 +714,7 @@ Nous avons donc choisi de copier les données pour chaque point.
 
 ### Couleurs
 
-Lorsque nous faisons des calculs pour déterminer la couleur d'un pixel, on considère que l'espace de couleur est linéaire, c'est-à-dire qu'il suffit d'additionner les intensités de chaque composantes pour obtenir la perposition de deux rayons lumineux.
+Lorsque nous faisons des calculs pour déterminer la couleur d'un pixel, on considère que l'espace de couleur est linéaire, c'est-à-dire qu'il suffit d'additionner les intensités de chaque composantes pour obtenir la superposition de deux rayons lumineux.
 Or l'espace de couleur d'un écran d'ordinateur n'est souvent pas linéaire. C'est pourquoi il faut différencier la couleur utilisée
 pour le calcul en interne, des valeurs données par l'utilisateur.
 
@@ -722,38 +722,40 @@ D'autre part, si on veut faire du rendu physiquement réaliste, il est intéress
 
 Pour ce faire nous avons implémenté deux types de couleurs : LinearColor et RGBColor. Les valeurs données par l'utilisateur sont des RGBColor, pour les calculs, on les convertit en LinearColor [voir @larry_importance_2010].
 Les couleurs spectrales ne sont pas encore implémentées, mais il est facile de rajouter un troisième type de couleur : il suffit d'implémenter les fonctions de conversion entre les types.
-Egalement, nous utilisons des flottants pour stocker les composantes de chaque couleur. Ainsi on évite les problèmes d'overflow lorsqu'on additionne deux couleurs très claires : il
+Également, nous utilisons des flottants pour stocker les composantes de chaque couleur. Ainsi on évite les problèmes d'overflow lorsqu'on additionne deux couleurs très claires : il
 suffit de ramener les valeurs des composantes entre 0 et 1 par une troncature.
 
 ### Registre de texture
 
-Afin d'éviter de charger plusieurs fois la même image en mémoire, nous avons d'utiliser une structure de données qui centralise les images. Ainsi, il nous suffit d'utiliser des pointeurs pour manipuler les images.
+Afin d'éviter de charger plusieurs fois la même image en mémoire, nous avons choisi d'utiliser une structure de données qui centralise les images. Ainsi, il nous suffit d'utiliser des pointeurs pour manipuler les images.
 Nous utilisons une Hashmap.
-Ils s'agit d'un tableau avec pour clé une chaîne de caractère. En l'occurence, notre clé est le chemin de l'image, et la donnée stockée est l'image chargée en mémoire.
+Il s'agit d'un tableau avec pour clé une chaîne de caractère. En l’occurrence, notre clé est le chemin de l'image, et la donnée stockée est l'image chargée en mémoire.
 
 ### Stockage des objets dans la scène
 
-Pour faire fonctionner notre moteur de rendu, il est nécessaire de mettre en place une structure de données qui contiendra la géometrie
+Pour faire fonctionner notre moteur de rendu, il est nécessaire de mettre en place une structure de données qui contiendra la géométrie
 des objets à rendre et leurs différentes caractéristiques. Cette structure de données doit permettre un accès efficace pour accélérer les
 calculs, mais on doit aussi limiter son coût en mémoire. En effet, la scène à rendre peut contenir plusieurs millions de polygones.
 
-Nous avons considéré qu'une scène est constitué de plusieurs objets, possèdant chacun une géométrie et un matériau. Nos scènes contenant peu
+Nous avons considéré qu'une scène est constitué de plusieurs objets, possédant chacun une géométrie et un matériau. Nos scènes contenant peu
 d'objets, il n'était pas nécessaire d'adopter une structure complexe pour les stocker. Nous avons donc utilisé une simple liste à accès direct
 (type `Vec` en rust).
 
 Pour la géométrie, nous avions les contraintes suivantes :
+
 * les faces sont triangulaires, elles ont donc trois sommets.
+
 * chaque sommet contient des informations de textures et de normales.
 
- Malheureusement, l'utilisation des références pose problème en Rust car le langage impose un contrôle
+Malheureusement, l'utilisation des références pose problème en Rust car le langage impose un contrôle
 explicite de la mémoire. Plus particulièrement, dans ce cas le fait que la structure `Mesh` contienne des références vers certains de ses champs,
-la rendait impossible à passer en paramètres.
+la rendait impossible à déplacer en mémoire.
 
 ## Dépendances
 
 Nous avons 7 dépendances :
 
-* *serde* nous permet de facilement sérialiser et déserialiser des structures de données.
+* *serde* nous permet de facilement sérialiser et désérialiser des structures de données.
 
 * *image* nous permet de charger en mémoire des images et d'écrire des images sur le disque.
 
@@ -764,7 +766,7 @@ Nous avons 7 dépendances :
 * *colored* permet de facilement coloré les messages que l'on affiche sur la sortie standard.
 
 * *scoped-pool* permet de mettre en place un groupe de thread qui vont travailler collaborativement sur la même tâche et rajoute des garanties sur les threads.
-Par exemple, scoped-pool permet de garantir au compilateur qu'un thread aura terminé de s'executer à la fin d'un bloc.
+Par exemple, scoped-pool permet de garantir au compilateur qu'un thread aura terminé de s’exécuter à la fin d'un bloc.
 
 * *pbr* permet d'afficher une barre de progression dans le terminal.
 
@@ -778,7 +780,7 @@ Afin d'optimiser les calculs d'intersections, avant de lancer le calcul des inte
 
 Au moment de charger la scène nous calculons les boîtes englobantes de tous les objets.
 
-Les gains en temps sont assez conséquent. Ci-contre, les temps de rendu pour la même scène, mais avec les boîtes englobantes désactivées dans le deuxième rendu. Les calculs ont été effectués sur une machine ayant huit coeurs logiques.
+Les gains en temps sont assez conséquent. Ci-contre, les temps de rendu pour la même scène, mais avec les boîtes englobantes désactivées dans le deuxième rendu. Les calculs ont été effectués sur une machine ayant huit cœurs logiques.
 
 
 |                        | Avec boîtes englobantes | Sans boîtes englobantes |
@@ -828,9 +830,9 @@ Cela permet d'éviter les courses de données.
 
 4. On demande au groupe de thread de calculer, pour chaque bloc dans le tableau, la zone de l'image qu'il représente. Cela lance la procédure de lancer de rayon décrite dans la partie [Rendu].
 
-5. Maintenant que tous les blocs ont été calculés, on peut extraire l'image des structures qui permettent sa synchronisation entre les processus.
+5. Maintenant que tous les blocs ont été calculés, on peut extraire l'image des structures de données qui permettent sa synchronisation entre les processus.
 
-Les gains en temps sont assez intéressant, même si le surcoût ajouté par la création de processus rends cette optimisation moins intéressante que les boîtes englobantes. Ci-contre, le temps de rendu d'une scène standard en fonction du nombre de coeur utilisé. Les calculs sont réalisés sur une machine avec 8 coeurs logiques.
+Les gains en temps sont assez intéressant, même si le surcoût ajouté par la création de processus rends cette optimisation moins intéressante que les boîtes englobantes. Ci-contre, le temps de rendu d'une scène standard en fonction du nombre de coeur utilisé. Les calculs sont réalisés sur une machine avec 8 cœurs logiques.
 
 | Nombre de coeurs  | Temps de rendu (en secondes) |
 |:-----------------:|:----------------------------:|
@@ -881,8 +883,6 @@ Nous avons pris beaucoup de plaisir à réaliser ce projet. Celui-ci constitue u
 Sur ce dernier point, il a été intéressant de mettre les nouveaux concepts apportés par Rust en relation avec les autres langages que nous connaissions.
 
 Néanmoins, le projet ne s'arrête pas là. Nous avons l'intention de continuer à implémenter de nouvelles fonctionnalités à notre moteur de rendu, afin d'améliorer le photo-réalisme des images produites et d'améliorer les performances de notre moteur.
-
-
 
 # Annexes
 
