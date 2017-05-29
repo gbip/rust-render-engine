@@ -601,13 +601,13 @@ L'appel à `initialize()` va charger les textures dans le *registre de texture* 
 Une fois la scène chargée l'algorithme de rendu est assez basique, on peut le résumer ainsi :
 
 * Echantilloner des points sur l'image 2D qui va être rendue. Pour cela on utilise un échantilloneur aléatoire à faible divergence. En pratique on utilise la méthode des points de Halton pour générer les échantilons
-[voir @matt_physically_nodate et @don_reconstruction_nodate].
+[voir @matt_physically_2017 et @don_reconstruction_1988].
 
 * Convertir les coordonées de ces points en coordonnées 3D grâce à la caméra. Nous avons maintenant le vecteur d'un rayon en calculant `position_de_la_camera - point_de_l_echantillon`. A partir de ce vecteur, on en déduit une équation paramétrique.
 
-* On traverse toute la liste des objets, et pour chaque objet on regarde si il existe un point d'intersection avec le rayon. Pour ce faire, on analyse triangle par triangle si il y a un point d'intersection [voir @noauthor_ray_nodate, @{mark_roaming_nodate et @tomas_fast_nodate].
+* On traverse toute la liste des objets, et pour chaque objet on regarde si il existe un point d'intersection avec le rayon. Pour ce faire, on analyse triangle par triangle si il y a un point d'intersection [voir @noauthor_ray_2015, @mark_roaming_1997 et @tomas_fast_2003].
 
-* Pour chaque pixel de l'image finale, nous avons maintenant tous les rayons qui ont été calculés. Nous reconstituons l'image à partir des échantillons grâce à un filtre de [Mitchell-Netravali [voir @chris_antialiasing_nodate, @don_reconstruction_nodate].
+* Pour chaque pixel de l'image finale, nous avons maintenant tous les rayons qui ont été calculés. Nous reconstituons l'image à partir des échantillons grâce à un filtre de [Mitchell-Netravali [voir @chris_antialiasing_1994, @don_reconstruction_1988].
 
 ### Ecriture de l'image
 
@@ -708,14 +708,12 @@ Nous avons donc choisi de copier les données pour chaque points.
 
 ### Couleurs
 
-Lorsque nous faisons des calculs pour déterminer la couleur d'un pixel, on considère que l'espace de couleur est linéaire, c'est à dire qu'il suffit d'additionner les intensités de chaque
-composantes pour obtenir la superposition de deux rayons lumineux. Or l'espace de couleur d'un écran d'ordinateur n'est souvent pas linéaire. C'est pourquoi il faut différencier la couleur utilisée
+Lorsque nous faisons des calculs pour déterminer la couleur d'un pixel, on considère que l'espace de couleur est linéaire, c'est à dire qu'il suffit d'additionner les intensités de chaque composantes pour obtenir la perposition de deux rayons lumineux. Or l'espace de couleur d'un écran d'ordinateur n'est souvent pas linéaire. C'est pourquoi il faut différencier la couleur utilisée
 pour le calcul en interne, des valeurs données par l'utilisateur.
 
-D'autre part, si on veut faire du rendu physiquement réaliste, il est interessant d'utiliser des spectres de lumière plutôt que des couleurs classiques RGB, ce qui nécessite des fonctions pour passer
-d'un espace à un autre.
+D'autre part, si on veut faire du rendu physiquement réaliste, il est interessant d'utiliser des spectres de lumière plutôt que des couleurs classiques RGB, ce qui nécessite des fonctions pour passer d'un espace à un autre.
 
-Pour ce faire nous avons implémenté deux types de couleurs : LinearColor et RGBColor. Les valeurs données par l'utilisateur sont des RGBColor, pour les calculs on les convertit en LinearColor.
+Pour ce faire nous avons implémenté deux types de couleurs : LinearColor et RGBColor. Les valeurs données par l'utilisateur sont des RGBColor, pour les calculs on les convertit en LinearColor [voir @larry_importance_2010].
 Les couleurs spectrales ne sont pas encore implémentées, mais il est facile de rajouter un troisième type de couleur : il suffit d'implémenter les fonctions de conversion entre les types.
 Egalement, nous utilisons des flottants pour stocker les composantes de chaque couleurs. Ainsi on évite les problèmes d'overflow lorsqu'on additionne deux couleurs très claires : il
 suffit de ramener les valeurs des composantes entre 0 et 1 par une troncature.
