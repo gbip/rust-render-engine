@@ -195,7 +195,7 @@ Détaillons les différents arguments :
 
  * > -g FILE or --generate FILE : Generate a template file in the location FILE for creating a scene
 
- Il s'agit là d'une option qui doit être utilisée toute seule : le logiciel est en mode "génération de structure" et ne cherchera même pas à charger le fichier de scène si il est spécifié.
+ Il s'agit là d'une option qui doit être utilisée toute seule : le logiciel est en mode "génération de structure" et ne cherchera même pas à charger le fichier de scène s'il est spécifié.
  Les fichiers générés montrent comment créer une scène:
 
   * *template.json* : la description de la scène
@@ -232,7 +232,7 @@ Enfin, il existe deux structures qui se retrouvent régulièrement dans les fich
 * les différents composantes d'une couleur : il s'agit de quatre entiers compris entre 0 et 255 pour chaque composante Red Green Blue (transparence) RGB :
 ```json
 "background_color": {
-	"r": 0,
+	  "r": 0,
     "g": 127,
     "b": 254,
 }
@@ -240,11 +240,11 @@ Enfin, il existe deux structures qui se retrouvent régulièrement dans les fich
 
 ### La scène
 
-Le fichier de scène correspond au fichier principal qui décris :
+Le fichier de scène est le fichier principal, il décrit :
 
 * la géométrie présente dans la scène, et le matériau qui y est affecté.
 
-* la ou les caméras présentent dans la scène.
+* la ou les caméras présentes dans la scène.
 
 * la ou les lumières qui éclairent la scène.
 
@@ -308,7 +308,7 @@ De plus certains arguments pourraient être donnés en ligne de commande, comme 
 
 ### Caméra
 
-La caméra est composé des champs suivants :
+La caméra est composée des champs suivants :
 
 * *world_position* : la position de la caméra dans le monde. C'est le point à partir duquel on voit la scène.
 
@@ -365,7 +365,7 @@ Ajouter un objet dans une scène consiste à spécifier les champs suivants :
 
 * *rotation* : la rotation de l'objet autour de chacun des axes.
 
-* *obj_path* : le chemin vers un fichier .obj qui contiens les informations sur la géométrie.
+* *obj_path* : le chemin vers un fichier .obj qui contient les informations sur la géométrie.
 
 * *visible* : ce booléen indique si l'objet est visible ou non. Si le booléen est à false, alors l'objet ne sera pas affiché.
 
@@ -398,7 +398,7 @@ Ajouter un objet dans une scène consiste à spécifier les champs suivants :
 #### Format de stockage de la géométrie
 
 La géométrie est stockée sous le format [Wavefront Obj](https://fr.wikipedia.org/wiki/Objet_3D_(format_de_fichier)) qui est un format libre.
-Un fichier .obj est un fichier texte, qui décris point par point, face par face, la géométrie d'un objet.
+Un fichier .obj est un fichier texte, qui décrit point par point, face par face, la géométrie d'un objet.
 Nous ne supportons que les fonctionnalités 'de base' du standard Wavefront.
 Notamment, il est impossible :
 
@@ -426,7 +426,7 @@ Concrètement, il existe 5 types de ligne que nous supportons :
 
 Un exemple de fichier de géométrie est présent dans la partie [Exemple de fichier .obj].
 
-A l'utilisation, la géométrie est générée par [Blender](https://www.blender.org/) car il est impensable d'écrire un fichier .obj à la main.
+A l'utilisation, la géométrie est générée par [Blender](https://www.blender.org/) car il est impensable d'écrire un long fichier .obj à la main.
 
 ### Lumières
 
@@ -450,8 +450,7 @@ Pour décrire une lumière il suffit de spécifier les trois champs suivants :
         "color" : {
             "r": 255,
             "g": 0,
-            "b": 255,
-        	"a": 255
+            "b": 255
     	}
 	}
 }
@@ -469,8 +468,7 @@ Le fichier JSON d'un matériau se découpe aussi ainsi.A chaque champ est assign
     "color": {
       "r": 204,
       "g": 29,
-      "b": 20,
-      "a": 255
+      "b": 20
     }
   },
   "specular": {
@@ -526,7 +524,7 @@ Ainsi, nous rappelons le fichier de scène qui est chargé avant de lancer le re
 Nous affichons aussi des warnings si jamais le barycentre d'un objet chargé depuis un .obj n'est pas (0,0,0).
 
 
-Au moment de lancer le rendu, nous rappelons les paramètres essentiels de celui ci : la résolution de l'image finale et le nombre de coeur qui vont être utilisé.
+Au moment de lancer le rendu, nous rappelons les paramètres essentiels de celui-ci : la résolution de l'image finale et le nombre de coeur qui vont être utilisé.
 
 Lors du rendu, nous affichons une barre de progression avec le temps restant estimé et le pourcentage de complétion. Cela permet d'être un peu plus patient lors d'un long rendu, surtout quand celui ci peut durer plusieurs minutes !
 Il faut cependant faire attention au temps estimé qui n'est pas toujours très fiable, notamment quand la scène contiens des zones très difficiles à calculer et des zones plus simples.
@@ -883,6 +881,12 @@ Nous avons pris beaucoup de plaisir à réaliser ce projet. Celui-ci constitue u
 Sur ce dernier point, il a été intéressant de mettre les nouveaux concepts apportés par Rust en relation avec les autres langages que nous connaissions.
 
 Néanmoins, le projet ne s'arrête pas là. Nous avons l'intention de continuer à implémenter de nouvelles fonctionnalités à notre moteur de rendu, afin d'améliorer le photo-réalisme des images produites et d'améliorer les performances de notre moteur.
+
+Voici quelques images créées grâce à notre moteur de rendu :
+
+![Notre scène de test](images/suzanne.png "Scene de test")
+![Le dragon de Stanford](images/dragon.png "Dragon de Stanford")
+![Textures et lumières multiples](images/suzannes.png "Textures + Lumières")
 
 # Annexes
 
