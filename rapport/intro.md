@@ -395,19 +395,27 @@ La géométrie est stockée sous le format [Wavefront Obj](https://fr.wikipedia.
 Un fichier .obj est un fichier texte, qui décris point par point, face par face, la géométrie d'un objet.
 Nous ne supportons que les fonctionnalités 'de base' du standard Wavefront.
 Notamment, il est impossible :
+
 * de spécifier le matériau d'un objet dans le .obj
+
 * de grouper plusieurs objets dans un .obj
 
 Concrétement, il existe trois types de ligne que nous supportons :
 
 * `o Plane` définit un nouvel objet.
+
 * `v -0.500000 -0.500000 0.000000` définit un nouveau point de coordonnée (0.5,-0.5,0).
+
 * `vt 0.999900 0.000100` définit des nouvelles coordonnées de textures dans le plan 2D.
+
 * `vn 0.000000 0.000000 1.000000` définit un nouveau vecteur normal
 
 * `f 2/1/1 4/2/1 3/3/1` définit un nouveau triangle composée des 3 points suivants :
+
 	* le premier point a pour coordonnée spatiale le deuxième vertex *v* défini dans le fichier. Il a pour coordonnée de textures le premier point *vt* défini dans le fichier. Il a pour normale le premier vecteur de normal *vn* défini dans le fichier.
-	* le deuxième point va chercher le 4éme *v* pour les coordonées spatiales, le deuxième *vt* pour les textures et le premier *vn* pour les normales
+
+	* le deuxième point va chercher le 4éme *v* pour les coordonées spatiales, le deuxième *vt* pour les textures et le premier *vn* pour les normales.
+
 	* le troisième point a pour coordonée spatiale le troisième *v*, comme coordonée de texture le troisième *vt* et comme vecteur normal le premier *v*
 
 Un exemple de fichier de géométrie est présent dans la partie [Exemple de fichier .obj].
@@ -592,13 +600,14 @@ L'appel à `initialize()` va charger les textures dans le *registre de texture* 
 
 Une fois la scène chargée l'algorithme de rendu est assez basique, on peut le résumer ainsi :
 
-* Echantilloner des points sur l'image 2D qui va être rendue. Pour cela on utilise un échantilloneur aléatoire à faible divergence. En pratique on utilise la méthode des points de Halton pour générer les échantilons. **ICI IL FAUT METTRE LA SOURCE : Raytracing from theory to implémentation**  
+* Echantilloner des points sur l'image 2D qui va être rendue. Pour cela on utilise un échantilloneur aléatoire à faible divergence. En pratique on utilise la méthode des points de Halton pour générer les échantilons
+[voir @matt_physically_nodate et @don_reconstruction_nodate].
 
 * Convertir les coordonées de ces points en coordonnées 3D grâce à la caméra. Nous avons maintenant le vecteur d'un rayon en calculant `position_de_la_camera - point_de_l_echantillon`. A partir de ce vecteur, on en déduit une équation paramétrique.
 
-* On traverse toute la liste des objets, et pour chaque objet on regarde si il existe un point d'intersection avec le rayon. Pour ce faire, on analyse triangle par triangle si il y a un point d'intersection.
+* On traverse toute la liste des objets, et pour chaque objet on regarde si il existe un point d'intersection avec le rayon. Pour ce faire, on analyse triangle par triangle si il y a un point d'intersection [voir @noauthor_ray_nodate, @{mark_roaming_nodate et @tomas_fast_nodate].
 
-* Pour chaque pixel de l'image finale, nous avons maintenant tous les rayons qui ont été calculés. Nous reconstituons l'image à partir des échantillons grâce à un filtre de [Mitchell-Netravali](https://www.cs.utexas.edu/~fussell/courses/cs384g-fall2013/lectures/mitchell/Mitchell.pdf).
+* Pour chaque pixel de l'image finale, nous avons maintenant tous les rayons qui ont été calculés. Nous reconstituons l'image à partir des échantillons grâce à un filtre de [Mitchell-Netravali [voir @chris_antialiasing_nodate, @don_reconstruction_nodate].
 
 ### Ecriture de l'image
 
@@ -853,7 +862,12 @@ fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment> {
 }
 ```
 
+De plus, grâce au tableau de la partie [Multithreading] nous avons pu nous rendre compte qu'il faudrait améliorer la synchronisation entre les processus. En effet, la réduction du temps d'execution n'est pas linéaire en fonction du nombre de processus.
 
+
+## Bilan 
+
+Ce projet nous a beaucoup plu.
 
 
 
@@ -916,3 +930,5 @@ Le coeur du moteur de rendu est `src/renderer/render.rs` qui contiens vraiment t
 Le fichier `src/sampler/mod.rs` défini les différents traits implémentés par les échantillonneurs et les zones échantillonables.
 
 Le fichier `src/sampler/sampler.rs` contiens l'implémentation des deux échantilloneurs : `DefaultSampler` et `HaltonSampler`.
+
+# Bibliographie
