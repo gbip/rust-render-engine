@@ -16,7 +16,7 @@ Le raytracing est une technique devellopée dans les anénes 60 permettant la sy
 Cette technique a connu un boom dans les années 90 pour permettre la réalisation d'effets spéciaux dans le cinéma.
 C'est une méthode désormais utilisée dans de nombreux domaines : prévisualisation architecturale, cinéma, dessin animé, publicité, etc.
 
-## L'interêt de ce projet pour nous 
+## L'interêt de ce projet pour nous
 
 Les enjeux autour du raytracing sont très importants, il existe toute une industrie organisée autour de cette technique de rendu, avec plusieurs millions de personnes qui utilisent chaque jour des moteurs de rendu en lancer de rayon.
 De plus c'est un sujet qui nous interressait personellement, puisque nous avons déjà tous deux utilisé des moteurs de rendus (Cycle avec Blender, Vray avec 3DSMax).
@@ -62,7 +62,7 @@ Ainsi, dès le début nous avions une visibilité assez claire sur le fonctionne
 
 Ainsi nous avions prévu assez grossiérement d'avoir un projet qui se déroule ainsi :
 
-* v0.1 : 
+* v0.1 :
 	* Support de la géométrie dans des fichiers .obj
 	* Benchmarking du code
 	* Choix de la résolution
@@ -117,7 +117,7 @@ Vous pouvez accéder au répertoire distant du projet sur [github](https://githu
 
 ### Test unitaires
 
-Afin de s'assurer du fonctionnement de chaque fonctionnalitée nous avons écris des tests unitaires au fur et à mesure du devellopement.
+Afin de s'assurer du fonctionnement de chaque fonctionnalitée nous avons écris des tests unitaires au fur et à mesure du développement.
 Le projet final comporte 20 tests unitaires, ce qui est peu, mais chaque test réalise en réalité plusieurs vérifications.
 
 ### Travis
@@ -170,7 +170,7 @@ Pour compiler la documentation, il faut executer `cargo doc` dans le repertoire 
 
 ### Langue des variables, du code et de l'interface
 
-Nous sommes partis du principe que le standard, en informatique est l'anglais. Ainsi tous les noms de variables, de fonctions, de modules et de structure de données 
+Nous sommes partis du principe que le standard, en informatique est l'anglais. Ainsi tous les noms de variables, de fonctions, de modules et de structure de données
 sont en anglais.
 De plus, l'interface en ligne de commande est elle aussi en anglais.
 Cependant, afin de faciliter leur rédaction, leur lecture et leur éventuelle compréhension, les commentaires sont en français.
@@ -235,7 +235,7 @@ Enfin, il existe deux structures qui se retrouvent régulièrement dans les fich
     "a": 255
 }
 ```
-        
+
 ### La scène
 
 Le fichier de scène correspond au fichier principal qui décris :
@@ -300,7 +300,7 @@ Voici la description des différents champs qui composent ce fichier :
 }
 ```
 
-Le nombre de paramètre exposé est relativement important, et avec du recul certains n'ont pas leur place ici. 
+Le nombre de paramètre exposé est relativement important, et avec du recul certains n'ont pas leur place ici.
 Par exemple *base_vector* ne devrait même pas être exposé à l'utilisateur, c'est une convention que nous utilisons en interne.
 De plus certains arguments pourrait être donnés en ligne de commande, comme le nombre de coeur à utiliser pour le calcul.
 
@@ -340,7 +340,7 @@ La caméra est composé des champs suivants :
 ### Objets
 
 
-L'utilisation d'un objet fait appel à plusieurs fichiers : 
+L'utilisation d'un objet fait appel à plusieurs fichiers :
 
 * le fichier qui contiens les informations de géométrie
 
@@ -365,7 +365,7 @@ Ajouter un objet dans une scène consiste à spécifier les champs suivants :
 
 * *material* : le chemin vers un fichier JSON indiquant les propriétés du matériau dont est fait l'objet. La description d'un matériau se trouve dans [Matériau]
 
-```json 
+```json
 {
 	"position": {
         "x": 15.0,
@@ -504,9 +504,9 @@ Le champ *ambient* se voit assigner la texture spéciale *normal* (la seule text
 let mut white = RGBA8::new(&128, &128, &128, &128);
 
 // normal est le vecteur normal au point d'intersection normé. Ses coordonnées sont comprises entre 0 et 1.
-white.r = (white.r as f32 * normal.x) as u8; 
-white.g = (white.g as f32 * normal.y) as u8; 
-white.b = (white.b as f32 * normal.z) as u8; 
+white.r = (white.r as f32 * normal.x) as u8;
+white.g = (white.g as f32 * normal.y) as u8;
+white.b = (white.b as f32 * normal.z) as u8;
 white.to_rgba32()
 ```
 
@@ -548,7 +548,7 @@ pub fn load_from_file(file: &str) -> Self {
     }
 ```
 
-La déserialization se fait en quatre étapes, si une erreur surviens lors de ces étapes, l'execution s'arrête et l'erreur est transmise à l'utilisateur : 
+La déserialization se fait en quatre étapes, si une erreur surviens lors de ces étapes, l'execution s'arrête et l'erreur est transmise à l'utilisateur :
 
 1. Serde deserialize les structures de données, la géométrie n'est pas chargée, à la place les objets possèdent le chemin vers le fichier .obj qu'ils doivent charger.
 
@@ -592,7 +592,7 @@ pub fn initialize(&mut self, world: &scene::World) {
 }
 ```
 
-L'appel à `initialize()` va charger les textures dans le *registre de texture* (voir la partie [Choix des structures de données]), et calculer le ratio de l'image qui est nécessaire pour générer les échantillons. 
+L'appel à `initialize()` va charger les textures dans le *registre de texture* (voir la partie [Choix des structures de données]), et calculer le ratio de l'image qui est nécessaire pour générer les échantillons.
 
 4. La scène est prête au calcul et peut être retournée pour lancer le rendu.
 
@@ -621,9 +621,9 @@ Le programme peut maintenant se terminer
 
 ### Géométrie
 
-Mathématiquement parlant, pour calculer l'intersection entre un rayon et une surface, la méthode la plus simple et la plus rapide consiste à utiliser des triangles (sauf pour des surfaces bien particulières comme les sphères qui peuvent être décrites par une équation). C'est donc naturellement que nous sommes venus à utiliser des triangles pour représenter notre géométrie. Nous avons passer beaucoup de temps à chercher les meilleurs structures car la géométrie est vraiment le coeur du programme, et si on veut pouvoir charger un objet très lourd, il est important d'avoir fait les bons choix. 
+Mathématiquement parlant, pour calculer l'intersection entre un rayon et une surface, la méthode la plus simple et la plus rapide consiste à utiliser des triangles (sauf pour des surfaces bien particulières comme les sphères qui peuvent être décrites par une équation). C'est donc naturellement que nous sommes venus à utiliser des triangles pour représenter notre géométrie. Nous avons passer beaucoup de temps à chercher les meilleurs structures car la géométrie est vraiment le coeur du programme, et si on veut pouvoir charger un objet très lourd, il est important d'avoir fait les bons choix.
 
-Tout d'abord nous avons defini des structures de données permettant de représenter des points et des vecteurs en 2D et en 3D. Les points et les vecteurs sont representé par la même structure : 
+Tout d'abord nous avons defini des structures de données permettant de représenter des points et des vecteurs en 2D et en 3D. Les points et les vecteurs sont representé par la même structure :
 
 ```rust
 // math.rs
@@ -686,11 +686,11 @@ Cette solution à un coût en mémoire, pour trois triangles ayant les trois poi
 
 
 $$
-\begin{aligned} 
+\begin{aligned}
 \frac{
 (3 triangles \times 3 points \times 3 champs \times 3 coordonnées \times 64 bits}{3} \\
 +
-\frac{ 
+\frac{
 3 points \times 3 champs \times 3 coordonnées \times 32 bits par coordonnée)}{3} \\
  = 2016bits/triangle
 \end{aligned}
@@ -700,23 +700,35 @@ Avec notre solution actuelle le coût est de :
 $$
 \begin{aligned}
 \frac{
-3 triangles * 3 points \times 3 champs \times 3 coordonnées \times 32 bits}{3} = 864bits/triangle  
+3 triangles \times 3 points \times 3 champs \times 3 coordonnées \times 32 bits}{3} = 864bits/triangle  
 \end{aligned}
 $$
 
-Nous sommes donc parties sur des données dupliquées dans chaque points.
+Nous avons donc choisi de copier les données pour chaque points.
 
 ### Couleurs
 
+Lorsque nous faisons des calculs pour déterminer la couleur d'un pixel, on considère que l'espace de couleur est linéaire, c'est à dire qu'il suffit d'additionner les intensités de chaque
+composantes pour obtenir la superposition de deux rayons lumineux. Or l'espace de couleur d'un écran d'ordinateur n'est souvent pas linéaire. C'est pourquoi il faut différencier la couleur utilisée
+pour le calcul en interne, des valeurs données par l'utilisateur.
+
+D'autre part, si on veut faire du rendu physiquement réaliste, il est interessant d'utiliser des spectres de lumière plutôt que des couleurs classiques RGB, ce qui nécessite des fonctions pour passer
+d'un espace à un autre.
+
+Pour ce faire nous avons implémenté deux types de couleurs : LinearColor et RGBColor. Les valeurs données par l'utilisateur sont des RGBColor, pour les calculs on les convertit en LinearColor.
+Les couleurs spectrales ne sont pas encore implémentées, mais il est facile de rajouter un troisième type de couleur : il suffit d'implémenter les fonctions de conversion entre les types.
+Egalement, nous utilisons des flottants pour stocker les composantes de chaque couleurs. Ainsi on évite les problèmes d'overflow lorsqu'on additionne deux couleurs très claires : il
+suffit de ramener les valeurs des composantes entre 0 et 1 par une troncature.
+
 ### Registre de texture
 
-Afin d'éviter de cahrger plusieurs fois la même image en mémoire, nous avons d'utiliser une structure de donnée qui centralise les images. Ainsi, il nous suffit d'utiliser des pointeurs pour manipuler les images.
+Afin d'éviter de charger plusieurs fois la même image en mémoire, nous avons d'utiliser une structure de donnée qui centralise les images. Ainsi, il nous suffit d'utiliser des pointeurs pour manipuler les images.
 Nous utilisons une Hashmap.
 Ils s'agit d'un tableau avec pour clé une chaîne de caractère. En l'occurence, notre clé est le chemin de l'imgage, et la donnée stockée est l'image chargée en mémoire.
 
-### Stockage des objets dans la scène 
+### Stockage des objets dans la scène
 
-Pour faire fonctionner notre moteur de rendu, il est nécessaire de mettre en place une structure de données qui contiendra la géometrie 
+Pour faire fonctionner notre moteur de rendu, il est nécessaire de mettre en place une structure de données qui contiendra la géometrie
 des objets à rendre et leurs différentes caractéristiques. Cette structure de données doit permettre un accès efficace pour accélerer les
 calculs, mais on doit aussi limiter son coût en mémoire. En effet, la scène à rendre peut contenir plusieurs millions de polygones.
 
@@ -770,7 +782,7 @@ Les gains en temps sont assez conséquent. Ci-contre, les temps de rendu pour la
 |-----------------------:|:-----------------------:|:-----------------------:|
 | Temps de rendu  (en s) |         24.2267         |         1220.14         |
 
-En effet, dès qu'un objet présente beaucoup de triangles, grâces aux boîtes englobantes nous évitons de lancer les calculs d'intersections avec chacun des triangles dans la plupart des cas. 
+En effet, dès qu'un objet présente beaucoup de triangles, grâces aux boîtes englobantes nous évitons de lancer les calculs d'intersections avec chacun des triangles dans la plupart des cas.
 Sans boîtes englobantes nous sommes obligés de traverser tous les triangles de la scène.
 Enfin le gain de temps dépends de la place que prends l'objet sur l'image finale, moins l'objet prends de place, plus le gain est rapide.
 
@@ -795,8 +807,8 @@ pub fn render(&self, world: &scene::World, camera: &scene::Camera) -> Image<RGBA
     	let block = blocks.pop().unwrap();
         scope.execute(|| {
         	self.render_block(block, world, camera, &shared_image);
-        }); 
-	}); 
+        });
+	});
 
     // 5
     let result = shared_image.lock().unwrap().deref_mut().clone();
@@ -855,7 +867,7 @@ fn get_intersection_fragment(&self, ray: &mut Ray) -> Option<Fragment> {
     if m == 0.0 {
         None
     } else {
-    	// La ligne suivante prends beaucoup de temps de calcul à cause de la division. 
+    	// La ligne suivante prends beaucoup de temps de calcul à cause de la division.
         let t = p / m;
     }
 [...]
@@ -915,7 +927,7 @@ Le fichier `src/geometry/bounding_box.rs` contiens l'implémentation de tout ce 
 
 Le fichier `src/geometry/obj3d.rs` contiens tout ce qui concerne la géométrie: `Triangle`, `Mesh`, et `Object` (principalement). Il contiens aussi le code d'intersection rayon/géométrie.
 
-Enfin, `src/geometry/obj_parser` contiens tout le code qui permet de lire un fichier obj. 
+Enfin, `src/geometry/obj_parser` contiens tout le code qui permet de lire un fichier obj.
 
 ### Renderer
 
